@@ -1,6 +1,10 @@
 package com.mycollege.schedule.presentation.screens.settings
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,9 +12,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -22,6 +29,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -30,6 +41,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -97,19 +111,44 @@ fun Settings(
                 val changeWeekMode by viewModel.shared.changeWeekCount.collectAsState()
                 val navInvisibilityState by viewModel.shared.navigationInvisibility.collectAsState()
 
-                CardSettings(title = "Показать неделю", checkedState = fullWeekState) {
-                    viewModel.handleEvent(SettingsEvent.MakeScheduleWeekFull(it))
-                    viewModel.handleEvent(SettingsEvent.SaveSettings)
-                }
-
-                CardSettings(title = "Переключить неделю", checkedState = changeWeekMode) {
+                AnimatedSegmentedButton(changeWeekMode) {
                     viewModel.handleEvent(SettingsEvent.MakeWeekCountDifferent(it))
                     viewModel.handleEvent(SettingsEvent.SaveSettings)
                 }
 
-                CardSettings(title = "Скрыть навигацию", checkedState = navInvisibilityState) {
-                    viewModel.handleEvent(SettingsEvent.MakeNavigationInvisible(it))
-                    viewModel.handleEvent(SettingsEvent.SaveSettings)
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp, 0.dp, 20.dp, 0.dp)
+                        .size(width = 0.dp, height = 140.dp),
+                    elevation = CardDefaults.cardElevation(2.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                ) {
+                    Column(modifier = Modifier.padding(20.dp, 0.dp)) {
+
+                        CardSettings(title = "Показать неделю", checkedState = fullWeekState) {
+                            viewModel.handleEvent(SettingsEvent.MakeScheduleWeekFull(it))
+                            viewModel.handleEvent(SettingsEvent.SaveSettings)
+                        }
+
+                        Spacer(modifier = Modifier.height(5.dp))
+
+                        Box(modifier = Modifier
+                            .background(Color.LightGray)
+                            .fillMaxWidth()
+                            .padding(start = 20.dp, end = 20.dp)
+                            .height(0.5.dp))
+
+                        Spacer(modifier = Modifier.height(5.dp))
+
+                        CardSettings(title = "Скрыть навигацию", checkedState = navInvisibilityState) {
+                            viewModel.handleEvent(SettingsEvent.MakeNavigationInvisible(it))
+                            viewModel.handleEvent(SettingsEvent.SaveSettings)
+                        }
+
+                    }
                 }
 
             }
@@ -122,10 +161,8 @@ fun CardSettings(title: String, checkedState: Boolean, onChanged: (Boolean) -> U
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(20.dp, 10.dp, 20.dp, 10.dp)
             .size(width = 0.dp, height = 65.dp),
-        elevation = CardDefaults.cardElevation(2.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
     ) {
         Row(
             modifier = Modifier
@@ -152,6 +189,60 @@ fun CardSettings(title: String, checkedState: Boolean, onChanged: (Boolean) -> U
                 )
             )
         }
+    }
+}
+
+@Composable
+fun AnimatedSegmentedButton(checkedState: Boolean, onChanged: (Boolean) -> Unit) {
+    var selectedIndex by remember { mutableIntStateOf(if (checkedState) 1 else 0) }
+    val options = listOf("Неделя 1", "Неделя 2")
+
+    Surface(
+        modifier = Modifier.wrapContentSize()
+            .padding(horizontal = 20.dp),
+        color = Color.White,
+        shape = RoundedCornerShape(10.dp),
+        shadowElevation = 2.dp
+    ) {
+
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
+
+            options.forEachIndexed { index, option ->
+
+                val isSelected = selectedIndex == index
+                val backgroundColor by animateColorAsState(
+                    targetValue = if (isSelected) buttons else Color.White,
+                    animationSpec = tween(durationMillis = 300), label = ""
+                )
+                val contentColor by animateColorAsState(
+                    targetValue = if (isSelected) Color.White else Color.Black,
+                    animationSpec = tween(durationMillis = 300), label = ""
+                )
+
+                SegmentedButton(
+                    selected = isSelected,
+                    modifier = Modifier
+                        .weight(1f),
+                    onClick = {
+                        selectedIndex = index
+                        if (!isSelected) onChanged(!checkedState)
+                    },
+                    shape = if (index == 0)
+                        RoundedCornerShape(topStart = 10.dp, bottomStart = 10.dp)
+                    else RoundedCornerShape(topEnd = 10.dp, bottomEnd = 10.dp),
+                    colors = SegmentedButtonDefaults.colors(
+                        activeContainerColor = backgroundColor,
+                        activeBorderColor = Color.Transparent,
+                        inactiveBorderColor = Color.Transparent,
+                        inactiveContainerColor = Color.White,
+                        activeContentColor = contentColor
+                    )
+                ) {
+                    Text(text = option, fontSize = 18.sp, fontWeight = FontWeight.Normal)
+                }
+            }
+        }
+
     }
 }
 
@@ -190,7 +281,7 @@ fun Label() {
                     appendInlineContent("inlineImage", "telegram: ")
                     append(" ${LocalContext.current.getString(R.string.tg)}")
                 },
-                modifier =Modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 60.dp),
                 color = Color.Gray,

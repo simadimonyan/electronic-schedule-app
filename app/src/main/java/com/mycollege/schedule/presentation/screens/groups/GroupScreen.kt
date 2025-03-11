@@ -116,7 +116,7 @@ fun MainFrame(viewModel: GroupsViewModel, pagerState: PagerState) {
                 )
 
                 if (showAds) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                    Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp), horizontalArrangement = Arrangement.Center) {
                         AndroidView(factory = { context ->
                             BannerAdView(context).apply {
                                 setAdUnitId(BuildConfig.ADVERTISEMENT_BANNER_ID)

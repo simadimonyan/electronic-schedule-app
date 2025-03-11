@@ -69,9 +69,10 @@ class MainActivity : ComponentActivity() {
 
                             // IP address
                             val server = rc.getString("PushServer")
+                            val pushApproval = rc.getBoolean("PushApproval")
                             val accessToken = BuildConfig.ACCESS_TOKEN
 
-                            if (server.isNotEmpty()) {
+                            if (server.isNotEmpty() && pushApproval) {
 
                                 scope.launch {
                                     try {

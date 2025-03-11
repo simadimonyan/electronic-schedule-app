@@ -46,7 +46,7 @@ fun BottomSheetContent(
     val animatedProgress = animateFloatAsState(targetValue = progress / 100f, label = "progress")
 
     ModalBottomSheet(
-        modifier = Modifier.wrapContentHeight(),
+        modifier = Modifier.wrapContentHeight().padding(10.dp, 30.dp, 10.dp, 15.dp),
         sheetState = rememberModalBottomSheetState(),
         shape = RoundedCornerShape(17.dp),
         contentColor = Color.White,
@@ -86,7 +86,9 @@ fun BottomSheetContent(
             }
 
         }
+        Spacer(modifier = Modifier.height(10.dp))
     }
+
 }
 
 @Composable
