@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
     <application
-        android:name="com.mycollege.schedule.App"
+        android:name="com.mycollege.schedule.app.App"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -20,7 +20,7 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="34">
         <activity
-            android:name="com.mycollege.schedule.presentation.screens.start.MainActivity"
+            android:name="com.mycollege.schedule.app.activity.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Schedule"
             android:screenOrientation="sensorPortrait"
@@ -32,7 +32,7 @@
             </intent-filter>
         </activity>
         <service
-            android:name=".domain.notifications.RuStoreMessagingService"
+            android:name=".core.notifications.RuStoreMessagingService"
             android:exported="true"
             tools:ignore="ExportedService">
             <intent-filter>
@@ -42,7 +42,7 @@
         <meta-data
             android:name="ru.rustore.sdk.pushclient.default_notification_icon"
             android:resource="@drawable/notification" />
-        <receiver android:name="com.mycollege.schedule.domain.notifications.NotificationReceiver" android:enabled="true" android:exported="false"/>
+        <receiver android:name="com.mycollege.schedule.core.notifications.NotificationReceiver" android:enabled="true" android:exported="false"/>
     </application>
 
 </manifest>

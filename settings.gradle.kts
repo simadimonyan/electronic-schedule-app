@@ -26,6 +26,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Мой Колледж"
+rootProject.name = "Мой ИМСИТ"
 include(":app")
 include(":baselineprofile")
