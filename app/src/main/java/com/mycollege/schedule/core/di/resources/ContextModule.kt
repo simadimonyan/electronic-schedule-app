@@ -1,4 +1,4 @@
-package com.mycollege.schedule.core.di
+package com.mycollege.schedule.core.di.resources
 
 import android.content.Context
 import com.mycollege.schedule.shared.resources.ResourceManager
