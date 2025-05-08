@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import androidx.compose.runtime.Stable
 import androidx.preference.PreferenceManager
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -28,15 +29,14 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.collections.iterator
 
+@Stable
 @Singleton
 class CacheUpdater @Inject constructor(
     private var cacheManager: CacheManager
@@ -63,7 +63,7 @@ class CacheUpdater @Inject constructor(
         val currentTime = System.currentTimeMillis()
         val currentDate = LocalDate.now()
 
-        val midnight = currentDate.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()
+        val midnight = currentDate.plusDays(1).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
         return midnight - currentTime
     }
@@ -129,6 +129,7 @@ class CacheUpdater @Inject constructor(
 
 }
 
+@Stable
 class WeekChangeWorker(
     context: Context,
     workerParams: WorkerParameters,
@@ -151,6 +152,7 @@ class WeekChangeWorker(
     }
 }
 
+@Stable
 @Suppress("SameParameterValue")
 class GroupSyncWorker(
     context: Context,
@@ -189,6 +191,7 @@ class GroupSyncWorker(
 
 }
 
+@Stable
 class ScheduleWorker(
     context: Context,
     workerParams: WorkerParameters,
@@ -201,7 +204,9 @@ class ScheduleWorker(
             Log.e("ScheduleWorker", "Starting")
             val appContext = applicationContext
 
-            val todayLessons = getTodayLessons()
+            val currentDate = LocalDate.now(ZoneId.systemDefault())
+
+            val todayLessons = getTodayLessons(currentDate)
 
             updateCache(todayLessons, appContext)
 
@@ -228,7 +233,7 @@ class ScheduleWorker(
             val intents = ArrayList<CacheManager.IntentConf>()
             for ((i, lesson) in todayLessons.withIndex()) {
                 Log.e("ScheduleWorker", "setting alarms...")
-                val intent = setNotificationForLesson(applicationContext, lesson, i)
+                val intent = setNotificationForLesson(applicationContext, lesson, i, currentDate)
                 intents.add(CacheManager.IntentConf(i, intent))
             }
             cacheManager.saveAlarms(intents)
@@ -241,7 +246,7 @@ class ScheduleWorker(
         }
     }
 
-    private fun setNotificationForLesson(context: Context, lesson: DataClasses.Lesson, id: Int): Intent {
+    private fun setNotificationForLesson(context: Context, lesson: DataClasses.Lesson, id: Int, currentDate: LocalDate): Intent {
         val lessonName = lesson.name
         val lessonCount = lesson.count
         val lessonLocation = lesson.location
@@ -250,12 +255,21 @@ class ScheduleWorker(
         val lessonStartTimeString = lessonTime.split("-")[0]
         val formatter = DateTimeFormatter.ofPattern("HH:mm")
         val lessonStartTime = LocalTime.parse(lessonStartTimeString, formatter)
-        val currentDate = LocalDate.now()
+        // val currentDate = LocalDate.now(ZoneId.systemDefault()) // replaced by parameter
+
         val lessonTimeInMillis = currentDate.atTime(lessonStartTime).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
         Log.d("ScheduleWorker", "scheduling lesson...")
 
         val notificationTime = lessonTimeInMillis - 5 * 60 * 1000
+
+        if (notificationTime < System.currentTimeMillis()) {
+            Log.w("ScheduleWorker", "Уведомление пропущено: $lessonName, время уже прошло")
+            val intent = Intent(context, NotificationReceiver::class.java).apply {
+                putExtra("lesson", "Пара $lessonCount: $lessonName в $lessonLocation")
+            }
+            return intent
+        }
 
         val intent = Intent(context, NotificationReceiver::class.java).apply {
             putExtra("lesson", "Пара $lessonCount: $lessonName в $lessonLocation")
@@ -268,7 +282,7 @@ class ScheduleWorker(
         )
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmManager.setExact(
+        alarmManager.setExactAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP,
             notificationTime,
             pendingIntent
@@ -276,7 +290,7 @@ class ScheduleWorker(
         return intent
     }
 
-    private suspend fun getWeekLessonsByGroup(): HashMap<Int, ArrayList<DataClasses.Lesson>> {
+    private suspend fun getWeekLessonsByGroup(currentDate: LocalDate): HashMap<Int, ArrayList<DataClasses.Lesson>> {
         return withContext(Dispatchers.IO) {
 
             val groupsConfiguration = cacheManager.loadLastConfiguration()
@@ -313,11 +327,11 @@ class ScheduleWorker(
         }
     }
 
-    private suspend fun getTodayLessons(): ArrayList<DataClasses.Lesson> {
+    private suspend fun getTodayLessons(currentDate: LocalDate): ArrayList<DataClasses.Lesson> {
         return withContext(Dispatchers.IO) {
-            val week: HashMap<Int, ArrayList<DataClasses.Lesson>> = getWeekLessonsByGroup()
+            val week: HashMap<Int, ArrayList<DataClasses.Lesson>> = getWeekLessonsByGroup(currentDate)
 
-            val currentDate = LocalDate.now()
+            // val currentDate = LocalDate.now(ZoneId.systemDefault()) // replaced by parameter
             val formatter = DateTimeFormatter.ofPattern("EEEE", Locale.ENGLISH)
             val dayWeek = currentDate.format(formatter).uppercase()
 

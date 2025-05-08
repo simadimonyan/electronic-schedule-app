@@ -1,8 +1,11 @@
 package com.mycollege.schedule.feature.groups.ui.state
 
+import androidx.compose.runtime.Immutable
+
 /**
  * Data class for managing state of Group Screen
  */
+@Immutable
 data class GroupState(
 
     // choose configuration

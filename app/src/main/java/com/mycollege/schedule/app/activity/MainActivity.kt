@@ -13,6 +13,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
@@ -34,6 +35,7 @@ import kotlinx.coroutines.launch
 import ru.ok.tracer.crash.report.TracerCrashReport
 import ru.rustore.sdk.remoteconfig.RemoteConfigClient
 
+@Stable
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 

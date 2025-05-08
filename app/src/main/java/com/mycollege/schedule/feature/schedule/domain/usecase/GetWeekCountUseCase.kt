@@ -1,8 +1,10 @@
 package com.mycollege.schedule.feature.schedule.domain.usecase
 
+import androidx.compose.runtime.Immutable
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
+@Immutable
 class GetWeekCountUseCase {
 
     companion object {

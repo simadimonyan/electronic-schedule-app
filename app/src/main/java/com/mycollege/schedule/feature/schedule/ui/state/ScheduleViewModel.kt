@@ -4,6 +4,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mycollege.schedule.core.cache.CacheManager
@@ -29,6 +30,7 @@ import java.util.Locale
 import javax.inject.Inject
 import kotlin.collections.iterator
 
+@Stable
 @HiltViewModel
 class ScheduleViewModel @Inject constructor(
     private val cacheManager: CacheManager,

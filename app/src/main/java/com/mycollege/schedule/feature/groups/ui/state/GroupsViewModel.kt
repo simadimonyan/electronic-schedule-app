@@ -1,5 +1,6 @@
 package com.mycollege.schedule.feature.groups.ui.state
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mycollege.schedule.R
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@Stable
 @HiltViewModel
 class GroupsViewModel @Inject constructor(
     private val resources: ResourceManager,

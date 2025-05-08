@@ -2,11 +2,14 @@ package com.mycollege.schedule.core.cache
 
 import android.content.Intent
 import android.content.SharedPreferences
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.mycollege.schedule.feature.schedule.data.models.DataClasses
 import javax.inject.Inject
 
+@Stable
 class CacheManager @Inject constructor(
     private val preferences: SharedPreferences
 ) {
@@ -20,12 +23,16 @@ class CacheManager @Inject constructor(
     private val alarmsKey = "alarms"
     private val rustoreConfigKey = "rustore_config"
 
+    @Immutable
     data class Configuration(val course: String, val speciality: String, val group: String)
 
+    @Immutable
     data class IntentConf(val id: Int, val intent: Intent)
 
+    @Immutable
     data class Settings(val fullWeek: Boolean, val isNavInvisible: Boolean, val changeWeekCount: Boolean = false)
 
+    @Immutable
     data class RuStoreConfig(val pushToken: String, val sentToServer: Boolean)
 
     fun loadLastRuStoreConfig(): RuStoreConfig? {

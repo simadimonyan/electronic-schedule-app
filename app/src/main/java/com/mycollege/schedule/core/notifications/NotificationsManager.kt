@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.util.Log
+import androidx.compose.runtime.Immutable
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -26,6 +27,7 @@ import ru.rustore.sdk.pushclient.messaging.service.RuStoreMessagingService
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
+@Immutable
 class NotificationsManager {
 
     fun createNotificationChannel(context: Context) {
@@ -116,6 +118,7 @@ class NotificationReceiver : BroadcastReceiver() {
 
 }
 
+@Immutable
 @AndroidEntryPoint
 class RuStoreMessagingService : RuStoreMessagingService(), CoroutineScope {
 

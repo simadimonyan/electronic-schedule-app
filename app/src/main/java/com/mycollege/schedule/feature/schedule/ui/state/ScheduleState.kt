@@ -1,10 +1,12 @@
 package com.mycollege.schedule.feature.schedule.ui.state
 
+import androidx.compose.runtime.Immutable
 import com.mycollege.schedule.feature.schedule.data.models.DataClasses
 
 /**
  * Data class for managing state of Schedule Screen
  */
+@Immutable
 data class ScheduleState(
 
     // system local dates

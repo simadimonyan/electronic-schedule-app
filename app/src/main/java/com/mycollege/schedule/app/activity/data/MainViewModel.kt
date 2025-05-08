@@ -2,6 +2,7 @@ package com.mycollege.schedule.app.activity.data
 
 import android.app.NotificationManager
 import android.content.Context
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mycollege.schedule.R
@@ -19,6 +20,7 @@ import kotlinx.coroutines.withContext
 import ru.ok.tracer.crash.report.TracerCrashReport
 import javax.inject.Inject
 
+@Stable
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val resources: ResourceManager,

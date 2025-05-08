@@ -68,6 +68,7 @@ fun GroupScreen(
     MainFrame(viewModel = viewModel, pagerState)
 }
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun MainFrame(viewModel: GroupsViewModel, pagerState: PagerState) {
     val context = LocalContext.current

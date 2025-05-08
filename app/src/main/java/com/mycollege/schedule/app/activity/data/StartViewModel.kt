@@ -1,11 +1,13 @@
 package com.mycollege.schedule.app.activity.data
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.shared.state.SharedStateRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
+@Stable
 @HiltViewModel
 class StartViewModel @Inject constructor(
     private val cacheManager: CacheManager,

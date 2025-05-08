@@ -1,5 +1,6 @@
 package com.mycollege.schedule.shared.state
 
+import androidx.compose.runtime.Stable
 import com.mycollege.schedule.feature.schedule.data.models.DataClasses
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,6 +13,7 @@ import javax.inject.Singleton
 /**
  * Shared repository for managing common settings and states of the application
  */
+@Stable
 @Singleton
 class SharedStateRepository @Inject constructor() {
 

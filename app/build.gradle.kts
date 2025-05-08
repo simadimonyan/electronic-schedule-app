@@ -9,6 +9,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     alias(libs.plugins.baselineprofile)
     id("ru.ok.tracer").version("1.0.1")
+    id("com.google.devtools.ksp")
 }
 
 val properties = Properties().apply { load(File(rootProject.rootDir, "gradle.properties").inputStream()) }
@@ -93,6 +94,8 @@ android {
     }
     composeCompiler {
         enableStrongSkippingMode = true
+        reportsDestination = layout.buildDirectory.dir("compose_compiler")
+        metricsDestination = layout.buildDirectory.dir("compose_compiler")
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.15"
@@ -108,6 +111,12 @@ android {
 }
 
 dependencies {
+    implementation(libs.dagger.compiler)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    annotationProcessor(libs.androidx.room.room.compiler)
+    ksp(libs.androidx.room.room.compiler)
+
     implementation(libs.mobileads)
 
     implementation(libs.logging.interceptor)

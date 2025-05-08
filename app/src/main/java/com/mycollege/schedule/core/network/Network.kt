@@ -1,5 +1,6 @@
 package com.mycollege.schedule.core.network
 
+import androidx.compose.runtime.Immutable
 import com.google.gson.GsonBuilder
 import com.mycollege.schedule.core.network.api.LedgerAPI
 import org.jsoup.Jsoup
@@ -7,7 +8,7 @@ import org.jsoup.nodes.Document
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-
+@Immutable
 class Network {
 
     companion object {
@@ -23,6 +24,7 @@ class Network {
 
 }
 
+@Immutable
 class RetrofitClient(private val urlString: String) {
 
 //    private val logging = HttpLoggingInterceptor().apply {

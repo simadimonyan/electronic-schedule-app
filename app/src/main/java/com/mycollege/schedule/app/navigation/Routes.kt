@@ -56,16 +56,8 @@ fun AddNavGraph(
     // restore cache event
     startViewModel.init()
     
-    NavHost(navController = navController, startDestination = Start) { //if (firstStartup) Onboarding else Start
+    NavHost(navController = navController, startDestination = if (firstStartup) Onboarding else Start) {
         composable<Onboarding>(
-            exitTransition = {
-                slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Right,
-                    animationSpec = tween(
-                        durationMillis = 350
-                    )
-                )
-            }
         ) {
             OnboardingScreen(hiltViewModel())
         }
