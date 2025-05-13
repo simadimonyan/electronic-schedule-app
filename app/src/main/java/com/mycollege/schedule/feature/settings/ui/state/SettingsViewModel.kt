@@ -24,6 +24,7 @@ class SettingsViewModel @Inject constructor(
 
     private fun changeWeekCountMode(toChange: Boolean) {
         settingsStateHolder.updateWeekChangeMode(toChange)
+        saveSettings()
     }
 
     private fun saveSettings() {
@@ -34,10 +35,12 @@ class SettingsViewModel @Inject constructor(
 
     private fun makeScheduleFullWeek(isFull: Boolean) {
         settingsStateHolder.updateFullWeek(isFull)
+        saveSettings()
     }
 
     private fun makeNavInvisible(isVisible: Boolean) {
         settingsStateHolder.updateNavInvisibility(isVisible)
+        saveSettings()
     }
 
 }

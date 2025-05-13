@@ -23,8 +23,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.mycollege.schedule.R
 import com.mycollege.schedule.shared.ui.theme.background
 import com.mycollege.schedule.shared.ui.theme.buttons
-import com.mycollege.schedule.feature.schedule.ui.Loader
 import com.mycollege.schedule.feature.onboarding.ui.state.OnboardingViewModel
+import com.mycollege.schedule.feature.schedule.ui.components.utils.Loader
 
 @Composable
 fun OnboardingScreen(

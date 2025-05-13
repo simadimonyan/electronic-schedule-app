@@ -193,7 +193,7 @@ fun CardSettings(title: String, checkedState: Boolean, onChanged: (Boolean) -> U
 
 @Composable
 fun AnimatedSegmentedButton(checkedState: Boolean, onChanged: (Boolean) -> Unit) {
-    var selectedIndex by remember { mutableIntStateOf(if (checkedState) 1 else 0) }
+    var selectedIndex by remember { mutableIntStateOf(if (checkedState) 0 else 1) }
     val options = listOf("Неделя 1", "Неделя 2")
 
     Surface(

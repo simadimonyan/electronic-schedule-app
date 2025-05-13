@@ -1,6 +1,5 @@
 package com.mycollege.schedule.feature.schedule.data.repository
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import com.mycollege.schedule.app.activity.data.models.Schedule

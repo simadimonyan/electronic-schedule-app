@@ -15,7 +15,6 @@ import com.mycollege.schedule.feature.groups.ui.state.GroupStateHolder
 import com.mycollege.schedule.feature.schedule.data.models.DataClasses
 import com.mycollege.schedule.feature.schedule.data.models.DataClasses.DayWeek
 import com.mycollege.schedule.feature.schedule.domain.usecase.GetChosenGroupUseCase
-import com.mycollege.schedule.feature.schedule.domain.usecase.GetTeacherUseCase
 import com.mycollege.schedule.feature.schedule.domain.usecase.GetTodayScheduleUseCase
 import com.mycollege.schedule.feature.schedule.domain.usecase.GetWeekScheduleUseCase
 import com.mycollege.schedule.feature.settings.ui.state.SettingsStateHolder
@@ -52,46 +51,35 @@ class ScheduleViewModel @Inject constructor(
     private val getChosenGroupUseCase: GetChosenGroupUseCase,
     private val getWeekScheduleUseCase: GetWeekScheduleUseCase,
     private val getTodayScheduleUseCase: GetTodayScheduleUseCase,
-    val getTeacherUseCase: GetTeacherUseCase,
 
     // database
     private val database: Database
 
 ) : ViewModel() {
 
-    fun init() {
-
-        // restore cache and init dates
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                scheduleStateHolder.showDateToday(getTodayDate())
-                scheduleStateHolder.showTodayLessons(getTodayLessons())
-            }
+    fun handleEvent(event: ScheduleEvent) {
+        when(event) {
+            is ScheduleEvent.WeekCountChanged -> changedWeekCountEvent()
+            is ScheduleEvent.ShowTodaySchedule -> getTodayLessons()
+            is ScheduleEvent.ShowWeekSchedule -> getWeekLessons()
         }
-
-        // schedule creation listener
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                groupStateHolder.scheduleCreateSignal.collect { value ->
-                    if (value) {
-                        scheduleStateHolder.showTodayLessons(getTodayLessons())
-                    }
-                }
-            }
-        }
-
-    }
-
-    fun changeWeekCountEvent() {
-        viewModelScope.launch { scheduleStateHolder.showTodayLessons(getTodayLessons()) }
     }
 
     /**
-     * Получить расписание за неделю
+     * Обновить расписание по четности недели
      */
-    private suspend fun getWeekLessonsByGroup(): HashMap<Int, ArrayList<DataClasses.Lesson>> {
-        return withContext(Dispatchers.IO) {
+    private fun changedWeekCountEvent() {
+        viewModelScope.launch {
+            getTodayLessons()
+            if (settingsStateHolder.settingsState.value.fullWeekVisibility) getWeekLessons()
+        }
+    }
 
+    /**
+     * Обновить расписание за неделю
+     */
+    private fun getWeekLessons() {
+        viewModelScope.launch {
             var chosenGroup = getChosenGroupUseCase.getByName(groupStateHolder.groupState.value.group)
             var count = calculateCount()
 
@@ -99,58 +87,53 @@ class ScheduleViewModel @Inject constructor(
                 count = if (count == 1) 0 else 1 // if change week event is executed
 
             if (chosenGroup != null) {
-                return@withContext getWeekScheduleUseCase.getWeekSchedule(chosenGroup, count)
+                scheduleStateHolder.showWeekLessons(getWeekScheduleUseCase.getWeekSchedule(chosenGroup, count))
+                scheduleStateHolder.updateWeekDates(getCurrentWeekDate())
             }
-            return@withContext HashMap()
         }
     }
 
-    private suspend fun getTodayLessons(): ArrayList<DataClasses.Lesson> {
-        return withContext(Dispatchers.IO) {
-            val week: HashMap<Int, ArrayList<DataClasses.Lesson>> = getWeekLessonsByGroup()
+    /**
+     * Обновить расписание на день
+     */
+    private fun getTodayLessons() {
+        viewModelScope.launch {
 
-            // update week
-            scheduleStateHolder.showWeekLessons(week)
-            scheduleStateHolder.updateWeekDates(getCurrentWeekDate())
+            val today = getTodayScheduleUseCase.getTodaySchedule(
+                getChosenGroupUseCase.getByName(groupStateHolder.groupState.value.group)!!,
+                DayWeek.findById(LocalDate.now().dayOfWeek.value)?.long ?: "Понедельник",
+                calculateCount()
+            )
 
-            val currentDate = LocalDate.now()
-            val formatter = DateTimeFormatter.ofPattern("EEEE", Locale.ENGLISH)
-            val dayWeek = currentDate.format(formatter).uppercase()
+            // clear all of the alarms
+            val alarmManager = resources.getContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-            for (day in week.keys) {
-                if (DayWeek.findById(day)?.name == dayWeek) {
+            val alarms = cacheManager.loadAlarms()
 
-                    // clear all of the alarms
-                    val alarmManager = resources.getContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            if (alarms != null && alarms.isNotEmpty()) {
+                for (alarm in alarms) {
 
-                    val alarms = cacheManager.loadAlarms()
+                    val pendingIntent = PendingIntent.getBroadcast(
+                        resources.getContext(),
+                        alarm.id,
+                        alarm.intent,
+                        PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
 
-                    if (alarms != null && alarms.isNotEmpty()) {
-                        for (alarm in alarms) {
-
-                            val pendingIntent = PendingIntent.getBroadcast(
-                                resources.getContext(),
-                                alarm.id,
-                                alarm.intent,
-                                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                            )
-
-                            alarmManager.cancel(pendingIntent)
-                        }
-                    }
-
-                    // set new alarms
-                    val intents = ArrayList<CacheManager.IntentConf>()
-                    for ((i, lesson) in (week[day] as ArrayList<DataClasses.Lesson>).withIndex()) {
-                        val intent = setNotificationForLesson(resources.getContext(), lesson, i)
-                        if (intent != null) intents.add(CacheManager.IntentConf(i, intent))
-                    }
-                    cacheManager.saveAlarms(intents)
-
-                    return@withContext week[day] as ArrayList<DataClasses.Lesson>
+                    alarmManager.cancel(pendingIntent)
                 }
             }
-            return@withContext ArrayList()
+
+            // set new alarms
+            val intents = ArrayList<CacheManager.IntentConf>()
+            for ((i, lesson) in (today as ArrayList<DataClasses.Lesson>).withIndex()) {
+                val intent = setNotificationForLesson(resources.getContext(), lesson, i)
+                if (intent != null) intents.add(CacheManager.IntentConf(i, intent))
+            }
+            cacheManager.saveAlarms(intents)
+
+            scheduleStateHolder.showDateToday(getTodayDate())
+            scheduleStateHolder.showTodayLessons(today)
         }
     }
 

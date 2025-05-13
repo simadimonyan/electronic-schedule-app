@@ -49,7 +49,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         groupViewModel.init()
-        scheduleViewModel.init()
 
         enableEdgeToEdge()
         setContent {
