@@ -6,8 +6,9 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.mycollege.schedule.feature.schedule.data.models.DataClasses
 import javax.inject.Inject
+import androidx.core.content.edit
+import com.mycollege.schedule.feature.settings.ui.state.SettingsState
 
 @Stable
 class CacheManager @Inject constructor(
@@ -15,10 +16,8 @@ class CacheManager @Inject constructor(
 ) {
     private val gson = Gson()
     private val lastUpdatedKey = "last_updated_time"
-    private val groupsCacheKey = "groups_cache"
     private val chosenConfigurationKey = "chosen_configuration"
     private val settingsConfKey = "settings_configuration"
-    private val todayScheduleKey = "today_schedule_key"
     private val firstStartUp = "first_startup"
     private val alarmsKey = "alarms"
     private val rustoreConfigKey = "rustore_config"
@@ -28,9 +27,6 @@ class CacheManager @Inject constructor(
 
     @Immutable
     data class IntentConf(val id: Int, val intent: Intent)
-
-    @Immutable
-    data class Settings(val fullWeek: Boolean, val isNavInvisible: Boolean, val changeWeekCount: Boolean = false)
 
     @Immutable
     data class RuStoreConfig(val pushToken: String, val sentToServer: Boolean)
@@ -52,7 +48,7 @@ class CacheManager @Inject constructor(
 
     fun saveActualRuStoreConfig(configuration: RuStoreConfig) {
         val json = gson.toJson(configuration)
-        preferences.edit().putString(rustoreConfigKey, json).apply()
+        preferences.edit() { putString(rustoreConfigKey, json) }
     }
 
     fun loadAlarms(): ArrayList<IntentConf> {
@@ -72,7 +68,7 @@ class CacheManager @Inject constructor(
 
     fun saveAlarms(configuration: ArrayList<IntentConf>) {
         val json = gson.toJson(configuration)
-        preferences.edit().putString(alarmsKey, json).apply()
+        preferences.edit() { putString(alarmsKey, json) }
     }
 
     fun isFirstStartup(): Boolean {
@@ -80,47 +76,27 @@ class CacheManager @Inject constructor(
     }
 
     fun setFirstStartup(isFirst: Boolean) {
-        preferences.edit().putBoolean(firstStartUp, isFirst).apply()
+        preferences.edit() { putBoolean(firstStartUp, isFirst) }
     }
 
-    fun loadTodaySchedule(): ArrayList<DataClasses.Lesson> {
-        val json = preferences.getString(todayScheduleKey, null)
-
-        val type = object : TypeToken<ArrayList<DataClasses.Lesson>>() {}.type
-
-        val value = try {
-            gson.fromJson(json, type)
-        }
-        catch (e: Exception) {
-            ArrayList<DataClasses.Lesson>()
-        }
-
-        return value
-    }
-
-    fun saveTodaySchedule(configuration: ArrayList<DataClasses.Lesson>) {
-        val json = gson.toJson(configuration)
-        preferences.edit().putString(todayScheduleKey, json).apply()
-    }
-
-    fun loadLastSettings(): Settings {
+    fun loadLastSettings(): SettingsState {
         val json = preferences.getString(settingsConfKey, null)
 
-        val type = object : TypeToken<Settings>() {}.type
+        val type = object : TypeToken<SettingsState>() {}.type
 
         val value = try {
             gson.fromJson(json, type)
         }
         catch (e: Exception) {
-            Settings(fullWeek = false, isNavInvisible = false, changeWeekCount = false)
+            SettingsState(false, false, false)
         }
 
         return value
     }
 
-    fun saveActualSettings(configuration: Settings) {
+    fun saveActualSettings(configuration: SettingsState) {
         val json = gson.toJson(configuration)
-        preferences.edit().putString(settingsConfKey, json).apply()
+        preferences.edit() { putString(settingsConfKey, json) }
     }
 
     fun loadLastConfiguration(): Configuration {
@@ -140,7 +116,7 @@ class CacheManager @Inject constructor(
 
     fun saveActualConfiguration(configuration: Configuration) {
         val json = gson.toJson(configuration)
-        preferences.edit().putString(chosenConfigurationKey, json).apply()
+        preferences.edit() { putString(chosenConfigurationKey, json) }
     }
 
     fun getLastUpdatedTime(): Long {
@@ -148,39 +124,12 @@ class CacheManager @Inject constructor(
     }
 
     fun saveLastUpdatedTime(time: Long) {
-        preferences.edit().putLong(lastUpdatedKey, time).apply()
+        preferences.edit() { putLong(lastUpdatedKey, time) }
     }
 
     fun shouldUpdateCache(): Boolean {
         val last = getLastUpdatedTime()
         return last == 0L
-    }
-
-    fun saveGroupsToCache(groups: HashMap<String, HashMap<String, ArrayList<DataClasses.Group>>>) {
-        val json = gson.toJson(groups)
-        preferences.edit().putString(groupsCacheKey, json).apply()
-    }
-
-    fun loadGroupsFromCache(): HashMap<String, HashMap<String, ArrayList<DataClasses.Group>>> {
-        val json = preferences.getString(groupsCacheKey, null) ?: return HashMap()
-
-        val type = object : TypeToken<HashMap<String, HashMap<String, ArrayList<DataClasses.Group>>>>() {}.type
-        val groups: HashMap<String, HashMap<String, ArrayList<DataClasses.Group>>> = try {
-            gson.fromJson(json, type)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return HashMap()
-        }
-
-        return if (groups.isNotEmpty()) {
-            val sorted = groups.toSortedMap(Comparator.comparingInt {
-                it.split(" ")[0].toInt()
-            }).toMutableMap() as HashMap<String, HashMap<String, ArrayList<DataClasses.Group>>>
-
-            sorted
-        } else {
-            HashMap()
-        }
     }
 
 }

@@ -7,17 +7,21 @@ import android.content.Intent
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mycollege.schedule.app.activity.domain.models.GroupParserStateHolder
+import com.mycollege.schedule.app.notifications.NotificationReceiver
 import com.mycollege.schedule.core.cache.CacheManager
+import com.mycollege.schedule.core.db.Database
+import com.mycollege.schedule.feature.groups.ui.state.GroupStateHolder
 import com.mycollege.schedule.feature.schedule.data.models.DataClasses
-import com.mycollege.schedule.core.notifications.NotificationReceiver
-import com.mycollege.schedule.feature.schedule.domain.usecase.GetWeekCountUseCase
+import com.mycollege.schedule.feature.schedule.data.models.DataClasses.DayWeek
+import com.mycollege.schedule.feature.schedule.domain.usecase.GetChosenGroupUseCase
+import com.mycollege.schedule.feature.schedule.domain.usecase.GetTeacherUseCase
+import com.mycollege.schedule.feature.schedule.domain.usecase.GetTodayScheduleUseCase
+import com.mycollege.schedule.feature.schedule.domain.usecase.GetWeekScheduleUseCase
+import com.mycollege.schedule.feature.settings.ui.state.SettingsStateHolder
 import com.mycollege.schedule.shared.resources.ResourceManager
-import com.mycollege.schedule.shared.state.SharedStateRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.DayOfWeek
@@ -25,38 +29,52 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 import javax.inject.Inject
-import kotlin.collections.iterator
 
 @Stable
 @HiltViewModel
 class ScheduleViewModel @Inject constructor(
+
+    // cache & resources
     private val cacheManager: CacheManager,
     private val resources: ResourceManager,
-    val shared: SharedStateRepository
-) : ViewModel() {
 
-    private var _scheduleState = MutableStateFlow(ScheduleState())
-    val scheduleState: StateFlow<ScheduleState> = _scheduleState
+    // state
+    val groupStateHolder: GroupStateHolder,
+    val scheduleStateHolder: ScheduleStateHolder,
+    val settingsStateHolder: SettingsStateHolder,
+    val parserStateHolder: GroupParserStateHolder,
+
+    // use cases
+    private val getChosenGroupUseCase: GetChosenGroupUseCase,
+    private val getWeekScheduleUseCase: GetWeekScheduleUseCase,
+    private val getTodayScheduleUseCase: GetTodayScheduleUseCase,
+    val getTeacherUseCase: GetTeacherUseCase,
+
+    // database
+    private val database: Database
+
+) : ViewModel() {
 
     fun init() {
 
         // restore cache and init dates
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                showDateToday()
-                showTodayLessons()
+                scheduleStateHolder.showDateToday(getTodayDate())
+                scheduleStateHolder.showTodayLessons(getTodayLessons())
             }
         }
 
         // schedule creation listener
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                shared.scheduleCreateSignal.collect { value ->
+                groupStateHolder.scheduleCreateSignal.collect { value ->
                     if (value) {
-                        showTodayLessons()
+                        scheduleStateHolder.showTodayLessons(getTodayLessons())
                     }
                 }
             }
@@ -65,64 +83,23 @@ class ScheduleViewModel @Inject constructor(
     }
 
     fun changeWeekCountEvent() {
-        viewModelScope.launch { showTodayLessons() }
+        viewModelScope.launch { scheduleStateHolder.showTodayLessons(getTodayLessons()) }
     }
 
-    private fun updateWeekDates() {
-        viewModelScope.launch {
-            _scheduleState.update { it.copy(weekDates = getCurrentWeekDate()) }
-        }
-    }
-
-    private fun showTodayLessons() {
-        viewModelScope.launch {
-            _scheduleState.update { it.copy(todayLessons = getTodayLessons()) }
-        }
-    }
-
-    private fun showDateToday() {
-        viewModelScope.launch {
-            _scheduleState.update { it.copy(todayDate = getTodayDate()) }
-        }
-    }
-
-    private fun showWeekLessons(week: HashMap<Int, ArrayList<DataClasses.Lesson>>) {
-        _scheduleState.update { it.copy(weekLessons = week) }
-    }
-
+    /**
+     * Получить расписание за неделю
+     */
     private suspend fun getWeekLessonsByGroup(): HashMap<Int, ArrayList<DataClasses.Lesson>> {
         return withContext(Dispatchers.IO) {
 
-            val groups: ArrayList<DataClasses.Group>? =
-                cacheManager.loadGroupsFromCache()[shared.course.value]?.get(
-                    when {
-                        shared.group.value.contains("СПО") -> "СПО"
-                        shared.group.value.contains("Мг") -> "Магистратура"
-                        else -> "Бакалавриат"
-                    }
-                )
+            var chosenGroup = getChosenGroupUseCase.getByName(groupStateHolder.groupState.value.group)
+            var count = calculateCount()
 
-            var chosenGroup: DataClasses.Group? = null
-            var count = GetWeekCountUseCase.Companion.calculateCount()
+            if (settingsStateHolder.settingsState.value.weekCount)
+                count = if (count == 1) 0 else 1 // if change week event is executed
 
-            if (shared.changeWeekCount.value) count =
-                if (count == 1) 0 else 1 // if change week event is executed
-
-            if (groups != null) {
-                for (group in groups.iterator()) {
-                    if (group.group == shared.group.value) {
-                        chosenGroup = group
-                        break
-                    }
-                }
-            }
-
-            try {
-                if (chosenGroup != null) {
-                    return@withContext if (count == 0) chosenGroup.lessons?.weekEven!! else chosenGroup.lessons?.weekOdd!!
-                }
-            } catch (e: NullPointerException) {
-                return@withContext HashMap()
+            if (chosenGroup != null) {
+                return@withContext getWeekScheduleUseCase.getWeekSchedule(chosenGroup, count)
             }
             return@withContext HashMap()
         }
@@ -133,20 +110,18 @@ class ScheduleViewModel @Inject constructor(
             val week: HashMap<Int, ArrayList<DataClasses.Lesson>> = getWeekLessonsByGroup()
 
             // update week
-            showWeekLessons(week)
-            updateWeekDates()
+            scheduleStateHolder.showWeekLessons(week)
+            scheduleStateHolder.updateWeekDates(getCurrentWeekDate())
 
             val currentDate = LocalDate.now()
             val formatter = DateTimeFormatter.ofPattern("EEEE", Locale.ENGLISH)
             val dayWeek = currentDate.format(formatter).uppercase()
 
             for (day in week.keys) {
-                if (DataClasses.DayWeek.findById(day)?.name == dayWeek) {
-                    cacheManager.saveTodaySchedule(week[day] as ArrayList<DataClasses.Lesson>)
+                if (DayWeek.findById(day)?.name == dayWeek) {
 
                     // clear all of the alarms
-                    val alarmManager = resources.getContext()
-                        .getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                    val alarmManager = resources.getContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
                     val alarms = cacheManager.loadAlarms()
 
@@ -179,6 +154,9 @@ class ScheduleViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Определение дат по неделе отдельным массивом
+     */
     private suspend fun getCurrentWeekDate(): HashMap<Int, String> {
         return withContext(Dispatchers.IO) {
             val week = HashMap<Int, String>()
@@ -196,6 +174,9 @@ class ScheduleViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Установка отложенного уведомления для одной пары
+     */
     private suspend fun setNotificationForLesson(context: Context, lesson: DataClasses.Lesson, id: Int): Intent? {
         return withContext(Dispatchers.IO) {
             val lessonName = lesson.name
@@ -237,12 +218,35 @@ class ScheduleViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Получить дату на сегодня - Пятница, 09 мая
+     */
     private suspend fun getTodayDate(): String {
         return withContext(Dispatchers.IO) {
             val currentDate = LocalDate.now()
             val formatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM", Locale("RU"))
             return@withContext currentDate.format(formatter).replaceFirstChar { it.uppercase() }
         }
+    }
+
+    /**
+     * Посчитать номер недели
+     */
+    private fun calculateCount(): Int {
+        val currentDate = LocalDate.now()
+
+        val firstSeptember = LocalDate.of(currentDate.year, 9, 1)
+
+        val startDate = if (currentDate.isBefore(firstSeptember)) {
+            LocalDate.of(currentDate.year - 1, 9, 1)
+        } else {
+            firstSeptember
+        }
+
+        val weeksBetween = ChronoUnit.WEEKS.between(startDate, currentDate).toInt()
+
+        // Count: 0 - even, 1 - odd
+        return weeksBetween % 2
     }
 
 }

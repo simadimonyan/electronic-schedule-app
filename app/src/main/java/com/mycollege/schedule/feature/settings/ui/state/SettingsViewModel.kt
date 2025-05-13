@@ -3,7 +3,6 @@ package com.mycollege.schedule.feature.settings.ui.state
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import com.mycollege.schedule.core.cache.CacheManager
-import com.mycollege.schedule.shared.state.SharedStateRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -11,7 +10,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val cacheManager: CacheManager,
-    val shared: SharedStateRepository
+    val settingsStateHolder: SettingsStateHolder
 ) : ViewModel() {
 
     fun handleEvent(event: SettingsEvent) {
@@ -24,24 +23,21 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun changeWeekCountMode(toChange: Boolean) {
-        shared.updateWeekChangeMode(toChange)
+        settingsStateHolder.updateWeekChangeMode(toChange)
     }
 
     private fun saveSettings() {
         cacheManager.saveActualSettings(
-            CacheManager.Settings(
-            shared.scheduleFullWeek.value,
-            shared.navigationInvisibility.value,
-            shared.changeWeekCount.value)
+            settingsStateHolder.settingsState.value
         )
     }
 
     private fun makeScheduleFullWeek(isFull: Boolean) {
-        shared.updateFullWeek(isFull)
+        settingsStateHolder.updateFullWeek(isFull)
     }
 
     private fun makeNavInvisible(isVisible: Boolean) {
-        shared.updateNavInvisibility(isVisible)
+        settingsStateHolder.updateNavInvisibility(isVisible)
     }
 
 }

@@ -1,4 +1,4 @@
-package com.mycollege.schedule.core.notifications
+package com.mycollege.schedule.app.notifications
 
 import android.Manifest
 import android.annotation.SuppressLint

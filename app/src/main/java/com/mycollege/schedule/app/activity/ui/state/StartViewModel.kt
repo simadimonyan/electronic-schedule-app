@@ -1,9 +1,9 @@
-package com.mycollege.schedule.app.activity.data
+package com.mycollege.schedule.app.activity.ui.state
 
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import com.mycollege.schedule.core.cache.CacheManager
-import com.mycollege.schedule.shared.state.SharedStateRepository
+import com.mycollege.schedule.feature.settings.ui.state.SettingsStateHolder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -11,7 +11,8 @@ import javax.inject.Inject
 @HiltViewModel
 class StartViewModel @Inject constructor(
     private val cacheManager: CacheManager,
-    val shared: SharedStateRepository
+    val settingsStateHolder: SettingsStateHolder,
+    val appStateHolder: AppStateHolder
 ) : ViewModel() {
 
     fun init() {
@@ -19,14 +20,14 @@ class StartViewModel @Inject constructor(
             val settings = cacheManager.loadLastSettings()
 
             // UI Screen Index
-            if (settings.isNavInvisible) {
-                shared.updateIndex(1)
+            if (settings.navigationVisibility) {
+                appStateHolder.updateIndex(1)
             }
 
             // Settings
-            shared.updateFullWeek(settings.fullWeek)
-            shared.updateNavInvisibility(settings.isNavInvisible)
-            shared.updateWeekChangeMode(settings.changeWeekCount)
+            settingsStateHolder.updateFullWeek(settings.fullWeekVisibility)
+            settingsStateHolder.updateNavInvisibility(settings.navigationVisibility)
+            settingsStateHolder.updateWeekChangeMode(settings.weekCount)
         }
         catch (_: Exception) {}
     }

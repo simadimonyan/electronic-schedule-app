@@ -1,4 +1,4 @@
-package com.mycollege.schedule.app.activity.components
+package com.mycollege.schedule.app.activity.ui
 
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
@@ -8,32 +8,32 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.mycollege.schedule.app.navigation.AppPager
 import com.mycollege.schedule.shared.ui.components.CustomAppBar
-import com.mycollege.schedule.feature.groups.ui.state.GroupsViewModel
+import com.mycollege.schedule.feature.groups.ui.state.GroupViewModel
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleViewModel
-import com.mycollege.schedule.app.activity.data.StartViewModel
+import com.mycollege.schedule.app.activity.ui.state.StartViewModel
 
 @Composable
 fun StartScreen(
     viewModel: StartViewModel = hiltViewModel(),
     globalGraph: NavHostController,
-    groupsViewModel: GroupsViewModel,
+    groupsViewModel: GroupViewModel,
     scheduleViewModel: ScheduleViewModel
 ) {
-    val barVisibility by viewModel.shared.navigationInvisibility.collectAsState()
-    val screenIndex by viewModel.shared.screenIndex.collectAsState()
+    val settingsState by viewModel.settingsStateHolder.settingsState.collectAsState()
+    val appState by viewModel.appStateHolder.appState.collectAsState()
 
     val pagerState = rememberPagerState(
-        initialPage = if (screenIndex == 1) 1 else 0
+        initialPage = if (appState.pagerIndex == 1) 1 else 0
     ) { 2 }
 
     AppPager(
         pagerState,
-        groupsViewModel = groupsViewModel,
+        groupViewModel = groupsViewModel,
         scheduleViewModel = scheduleViewModel,
         globalNavHostController = globalGraph
     )
 
-    if (!barVisibility) {
+    if (!settingsState.navigationVisibility) {
         CustomAppBar(groupsViewModel, pagerState)
     }
 

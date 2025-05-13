@@ -1,4 +1,4 @@
-package com.mycollege.schedule.app.activity.data
+package com.mycollege.schedule.app.activity.ui.state
 
 /**
  * Sealed class for managing global App events

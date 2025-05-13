@@ -36,20 +36,20 @@ import androidx.compose.ui.unit.dp
 import com.mycollege.schedule.R
 
 import com.mycollege.schedule.shared.ui.theme.buttons
-import com.mycollege.schedule.feature.groups.ui.state.GroupsViewModel
+import com.mycollege.schedule.feature.groups.ui.state.GroupViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun CustomAppBar(
-    viewModel: GroupsViewModel,
+    viewModel: GroupViewModel,
     pagerState: PagerState
 ) {
-    val selectedIndex by viewModel.shared.screenIndex.collectAsState()
+    val appState by viewModel.appStateHolder.appState.collectAsState()
 
     val imageSize = 62.dp
 
     val indicatorOffset by animateDpAsState(
-        targetValue = if (selectedIndex == 1) imageSize else -imageSize,
+        targetValue = if (appState.pagerIndex == 1) imageSize else -imageSize,
         animationSpec = tween(durationMillis = 200),
         label = "indicatorOffset"
     )
@@ -136,7 +136,7 @@ fun CustomAppBar(
                     Image(
                         painter = painterResource(id = R.drawable.list),
                         contentDescription = "study",
-                        colorFilter = ColorFilter.tint(if (selectedIndex == 0) buttons else Color.Gray),
+                        colorFilter = ColorFilter.tint(if (appState.pagerIndex == 0) buttons else Color.Gray),
                         modifier = Modifier
                             .size(55.dp)
                             .padding(0.dp, 15.dp, 0.dp, 0.dp)
@@ -145,7 +145,7 @@ fun CustomAppBar(
                                 indication = null,
                                 onClick = {
                                     scope.launch {
-                                        viewModel.shared.updateIndex(0)
+                                        viewModel.appStateHolder.updateIndex(0)
                                         pagerState.animateScrollToPage(0)
                                     }
                                 }
@@ -158,7 +158,7 @@ fun CustomAppBar(
                     Image(
                         painter = painterResource(id = R.drawable.calendar),
                         contentDescription = "study",
-                        colorFilter = ColorFilter.tint(if (selectedIndex == 1) buttons else Color.Gray),
+                        colorFilter = ColorFilter.tint(if (appState.pagerIndex == 1) buttons else Color.Gray),
                         modifier = Modifier
                             .size(55.dp)
                             .padding(0.dp, 15.dp, 0.dp, 0.dp)
@@ -167,7 +167,7 @@ fun CustomAppBar(
                                 indication = null,
                                 onClick = {
                                     scope.launch {
-                                        viewModel.shared.updateIndex(1)
+                                        viewModel.appStateHolder.updateIndex(1)
                                         pagerState.animateScrollToPage(1)
                                     }
                                 }

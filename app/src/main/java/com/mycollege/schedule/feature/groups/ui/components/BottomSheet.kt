@@ -28,8 +28,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mycollege.schedule.R
+import com.mycollege.schedule.app.activity.data.models.Group
 import com.mycollege.schedule.feature.groups.ui.state.GroupEvent
-import com.mycollege.schedule.feature.groups.ui.state.GroupsViewModel
+import com.mycollege.schedule.feature.groups.ui.state.GroupViewModel
 import com.mycollege.schedule.shared.ui.theme.background
 import com.mycollege.schedule.shared.ui.theme.buttons
 
@@ -38,7 +39,7 @@ import com.mycollege.schedule.shared.ui.theme.buttons
 fun BottomSheetContent(
     loading: Boolean,
     progress: Int,
-    viewModel: GroupsViewModel,
+    viewModel: GroupViewModel,
     selectedIndex: Int,
     onDismiss: () -> Unit
 ) {
@@ -93,14 +94,14 @@ fun BottomSheetContent(
 
 @Composable
 fun BottomSheet(
-    viewModel: GroupsViewModel,
+    viewModel: GroupViewModel,
     updateValue: (String) -> Unit,
 ) {
-    val groupState by viewModel.groupState.collectAsState()
+    val groupState by viewModel.groupStateHolder.groupState.collectAsState()
 
     when (groupState.selectedIndex) {
         0 -> CourseKeys(groupState.coursesToDisplay, updateValue)
-        1 -> SpecialityKeys(groupState.specialitiesToDisplay, updateValue)
+        1 -> SpecialityKeys(groupState.levelsToDisplay, updateValue)
         else -> GroupListContent(groupState.groupsToDisplay, updateValue)
     }
 }

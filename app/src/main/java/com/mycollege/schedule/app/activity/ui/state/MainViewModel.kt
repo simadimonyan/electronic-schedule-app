@@ -1,4 +1,4 @@
-package com.mycollege.schedule.app.activity.data
+package com.mycollege.schedule.app.activity.ui.state
 
 import android.app.NotificationManager
 import android.content.Context
@@ -6,12 +6,13 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mycollege.schedule.R
+import com.mycollege.schedule.app.activity.domain.models.GroupParserStateHolder
+import com.mycollege.schedule.app.activity.domain.usecases.GetScheduleUseCase
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.core.cache.CacheUpdater
-import com.mycollege.schedule.core.notifications.NotificationsManager
-import com.mycollege.schedule.feature.schedule.domain.usecase.GetScheduleUseCase.Companion.getSchedule
+import com.mycollege.schedule.app.notifications.NotificationsManager
+import com.mycollege.schedule.feature.groups.ui.state.GroupStateHolder
 import com.mycollege.schedule.shared.resources.ResourceManager
-import com.mycollege.schedule.shared.state.SharedStateRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -25,8 +26,11 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val resources: ResourceManager,
     private val cacheUpdater: CacheUpdater,
+    private val getScheduleUseCase: GetScheduleUseCase,
     val cacheManager: CacheManager,
-    val shared: SharedStateRepository
+    val appStateHolder: AppStateHolder,
+    val groupParserStateHolder: GroupParserStateHolder,
+    val groupStateHolder: GroupStateHolder
 ) : ViewModel() {
 
     private var fetchDataJob: Job? = null
@@ -47,7 +51,7 @@ class MainViewModel @Inject constructor(
     }
 
     init {
-        shared.updatingFirstStartup(cacheManager.isFirstStartup())
+        appStateHolder.updatingFirstStartup(cacheManager.isFirstStartup())
     }
 
     private fun fetchData() {
@@ -59,33 +63,30 @@ class MainViewModel @Inject constructor(
             try {
                 notificationsManager.createNotificationChannel(context)
                 if (cacheManager.shouldUpdateCache()) {
-                    shared.updateLoading(true)
+                    groupParserStateHolder.updateLoading(true)
 
                     val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                    val notification = notificationsManager.createNotification(context, context.getString(R.string.get_data))
+                    val notification = notificationsManager.createNotification(context, context.getString(
+                        R.string.get_data))
                     notificationManager.notify(2, notification)
 
-                    val loadedGroups = withContext(Dispatchers.IO) {
-                        getSchedule { newProgress ->
-                            shared.updateProgress(newProgress)
-                            notificationsManager.updateProgressNotification(2, context,
+                    withContext(Dispatchers.IO) {
+                        getScheduleUseCase.getSchedule { newProgress ->
+                            groupParserStateHolder.updateProgress(newProgress)
+                            notificationsManager.updateProgressNotification(
+                                2, context,
                                 newProgress
                             )
                         }
                     }
-
-                    cacheManager.saveGroupsToCache(loadedGroups)
                     cacheManager.saveLastUpdatedTime(System.currentTimeMillis())
-                    shared.loadGroups(loadedGroups)
 
                     notificationsManager.cancelNotification(2, context)
-                    shared.updateLoading(false)
+                    groupParserStateHolder.updateLoading(false)
                 }
-                else {
-                    shared.loadGroups(cacheManager.loadGroupsFromCache())
-                }
+
             } catch (e: Exception) {
-                shared.updateLoading(true)
+                groupParserStateHolder.updateLoading(true)
                 e.printStackTrace()
                 TracerCrashReport.report(e, issueKey = "NETWORK")
             }
@@ -108,9 +109,9 @@ class MainViewModel @Inject constructor(
             val configuration = cacheManager.loadLastConfiguration()
 
             if (configuration.group.isNotEmpty()) {
-                shared.updateCourse(configuration.course)
-                shared.updateSpeciality(configuration.speciality)
-                shared.updateGroup(configuration.group)
+                groupStateHolder.updateCourse(configuration.course)
+                groupStateHolder.updateLevel(configuration.speciality)
+                groupStateHolder.updateGroup(configuration.group)
             }
 
         } catch (e: Exception) {

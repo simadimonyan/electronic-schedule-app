@@ -48,8 +48,8 @@ android {
     defaultConfig {
         applicationId = "com.mycollege.schedule"
         minSdk = 29
-        versionCode = 8
-        versionName = "1.2"
+        versionCode = 9
+        versionName = "1.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -144,6 +144,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.animation)
 
+    implementation(libs.androidx.hilt.work)
     implementation(libs.hilt.android)
     implementation(libs.androidx.profileinstaller)
     implementation(libs.androidx.ui.tooling.preview.android)

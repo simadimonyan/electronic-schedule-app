@@ -6,12 +6,6 @@ import androidx.compose.runtime.Immutable
 class DataClasses {
 
     @Immutable
-    data class Weeks(
-        var weekOdd: HashMap<Int, ArrayList<Lesson>>?,
-        var weekEven: HashMap<Int, ArrayList<Lesson>>?
-    )
-
-    @Immutable
     data class Lesson(
         val count: Int,
         val time: String,
@@ -19,13 +13,6 @@ class DataClasses {
         val name: String?,
         val teacher: String?,
         val location: String?
-    )
-
-    @Immutable
-    data class Group(
-        val group: String,
-        val link: String,
-        val lessons: Weeks?
     )
 
     @Immutable

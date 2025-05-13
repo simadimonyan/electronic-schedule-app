@@ -14,19 +14,19 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.mycollege.schedule.feature.groups.ui.GroupScreen
-import com.mycollege.schedule.feature.groups.ui.state.GroupsViewModel
+import com.mycollege.schedule.feature.groups.ui.state.GroupViewModel
 import com.mycollege.schedule.feature.onboarding.ui.OnboardingScreen
-import com.mycollege.schedule.app.activity.components.StartScreen
+import com.mycollege.schedule.app.activity.ui.StartScreen
 import com.mycollege.schedule.feature.schedule.ui.ScheduleScreen
 import com.mycollege.schedule.feature.settings.ui.Settings
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleViewModel
-import com.mycollege.schedule.app.activity.data.MainViewModel
-import com.mycollege.schedule.app.activity.data.StartViewModel
+import com.mycollege.schedule.app.activity.ui.state.MainViewModel
+import com.mycollege.schedule.app.activity.ui.state.StartViewModel
 
 @Composable
 fun AppPager(
     pagerState: PagerState,
-    groupsViewModel: GroupsViewModel,
+    groupViewModel: GroupViewModel,
     scheduleViewModel: ScheduleViewModel,
     globalNavHostController: NavHostController
 ) {
@@ -36,7 +36,7 @@ fun AppPager(
         userScrollEnabled = false
     ) { page ->
         when (page) {
-            0 -> GroupScreen(groupsViewModel, pagerState)
+            0 -> GroupScreen(groupViewModel, pagerState)
             1 -> ScheduleScreen(scheduleViewModel, globalNavHostController)
         }
     }
@@ -46,23 +46,23 @@ fun AppPager(
 fun AddNavGraph(
     navController: NavHostController,
     mainViewModel: MainViewModel,
-    groupsViewModel: GroupsViewModel,
+    groupViewModel: GroupViewModel,
     scheduleViewModel: ScheduleViewModel
 ) {
 
-    val firstStartup by mainViewModel.shared.firstStartup.collectAsState()
+    val appState by mainViewModel.appStateHolder.appState.collectAsState()
     val startViewModel: StartViewModel = hiltViewModel()
 
     // restore cache event
     startViewModel.init()
     
-    NavHost(navController = navController, startDestination = if (firstStartup) Onboarding else Start) {
+    NavHost(navController = navController, startDestination = if (appState.firstStartUp) Onboarding else Start) {
         composable<Onboarding>(
         ) {
             OnboardingScreen(hiltViewModel())
         }
         composable<Start> {
-            StartScreen(startViewModel, navController, groupsViewModel, scheduleViewModel)
+            StartScreen(startViewModel, navController, groupViewModel, scheduleViewModel)
         }
         composable<Settings>(
             enterTransition = {

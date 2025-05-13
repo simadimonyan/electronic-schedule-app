@@ -18,11 +18,9 @@ sealed class GroupEvent {
     data class SetSelectedIndex(val index: Int) : GroupEvent()
 
     // action button event
-    object CreateSchedule : GroupEvent()
+    object ChooseGroup : GroupEvent()
 
-    // bottom sheet data displaying
-    data class DisplayGroups(val course: String, val speciality: String) : GroupEvent()
-    data class DisplaySpecialities(val course: String) : GroupEvent()
-    object DisplayCourses : GroupEvent()
+    // display data for group search
+    object Display : GroupEvent()
 
 }

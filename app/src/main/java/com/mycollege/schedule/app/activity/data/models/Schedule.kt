@@ -1,4 +1,4 @@
-package com.mycollege.schedule.core.db.models
+package com.mycollege.schedule.app.activity.data.models
 
 import androidx.compose.runtime.Immutable
 import androidx.room.ColumnInfo
@@ -57,6 +57,10 @@ class Schedule {
     @ColumnInfo(name = "name")
     var name: String = ""
 
+    // тип пары: Практика, Лекция
+    @ColumnInfo(name = "type")
+    var type: String = ""
+
     // номер аудитории
     @ColumnInfo(name = "location")
     var location: String = ""
@@ -69,6 +73,7 @@ class Schedule {
         lessonCount: Int,
         time: String,
         name: String,
+        type: String,
         location: String
     ) {
         this.teacher = teacher
@@ -78,6 +83,7 @@ class Schedule {
         this.lessonCount = lessonCount
         this.time = time
         this.name = name
+        this.type = type
         this.location = location
     }
 

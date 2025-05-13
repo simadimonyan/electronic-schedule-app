@@ -2,6 +2,7 @@ package com.mycollege.schedule.core.di.db
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.RoomDatabase
 import com.mycollege.schedule.core.db.Database
 import dagger.Module
 import dagger.Provides

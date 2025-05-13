@@ -51,8 +51,10 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.mycollege.schedule.R
-import com.mycollege.schedule.feature.schedule.data.models.DataClasses
+import com.mycollege.schedule.app.activity.data.models.Schedule
+import com.mycollege.schedule.app.activity.data.models.Teacher
 import com.mycollege.schedule.app.navigation.Settings
+import com.mycollege.schedule.feature.schedule.data.models.DataClasses
 import com.mycollege.schedule.shared.ui.theme.ScheduleTheme
 import com.mycollege.schedule.shared.ui.theme.background
 import com.mycollege.schedule.shared.ui.theme.buttons
@@ -64,9 +66,9 @@ fun ScheduleScreen(
     globalGraph: NavHostController
 ) {
 
-    val scheduleFullWeek by viewModel.shared.scheduleFullWeek.collectAsState()
-    val loading by viewModel.shared.loading.collectAsState()
-    val scheduleState by viewModel.scheduleState.collectAsState()
+    val settingsState by viewModel.settingsStateHolder.settingsState.collectAsState()
+    val scheduleState by viewModel.scheduleStateHolder.scheduleState.collectAsState()
+    val parseState by viewModel.parserStateHolder.groupParserState.collectAsState()
 
     ScheduleTheme {
         Box(modifier = Modifier
@@ -78,7 +80,7 @@ fun ScheduleScreen(
                     .fillMaxSize()
                     .background(background)
             ) {
-                if (loading) {
+                if (parseState.loading) {
 
                     Row(
                         modifier = Modifier
@@ -97,7 +99,7 @@ fun ScheduleScreen(
                     DefaultLoadingUnit()
                 }
                 else {
-                    if (scheduleFullWeek) {
+                    if (settingsState.fullWeekVisibility) {
                         WeekScheduleRender(viewModel)
                     }
                     else {
@@ -155,11 +157,11 @@ fun SettingsButton(navController: NavHostController) {
 @Composable
 fun WeekScheduleRender(viewModel: ScheduleViewModel) {
 
-    val scheduleState by viewModel.scheduleState.collectAsState()
-    val weekChangeEvent by viewModel.shared.changeWeekCount.collectAsState()
+    val settingsState by viewModel.settingsStateHolder.settingsState.collectAsState()
+    val scheduleState by viewModel.scheduleStateHolder.scheduleState.collectAsState()
 
     LaunchedEffect(Unit) {
-        if (weekChangeEvent) viewModel.changeWeekCountEvent() else viewModel.changeWeekCountEvent()
+        if (settingsState.weekCount) viewModel.changeWeekCountEvent() else viewModel.changeWeekCountEvent()
     }
 
     LazyColumn(
@@ -215,7 +217,7 @@ fun WeekScheduleRender(viewModel: ScheduleViewModel) {
                         }
 
                         lessons.forEach { lesson ->
-                            ScheduleUnit(lesson = lesson)
+                            ScheduleUnit(lesson)
                             Spacer(modifier = Modifier.height(8.dp))
                         }
 
@@ -233,11 +235,11 @@ fun WeekScheduleRender(viewModel: ScheduleViewModel) {
 @Composable
 fun TodayScheduleRender(viewModel: ScheduleViewModel) {
 
-    val scheduleState by viewModel.scheduleState.collectAsState()
-    val weekChangeEvent by viewModel.shared.changeWeekCount.collectAsState()
+    val settingsState by viewModel.settingsStateHolder.settingsState.collectAsState()
+    val scheduleState by viewModel.scheduleStateHolder.scheduleState.collectAsState()
 
     LaunchedEffect(Unit) {
-        if (weekChangeEvent) viewModel.changeWeekCountEvent() else viewModel.changeWeekCountEvent()
+        if (settingsState.weekCount) viewModel.changeWeekCountEvent() else viewModel.changeWeekCountEvent()
     }
 
     Row(
@@ -264,7 +266,7 @@ fun TodayScheduleRender(viewModel: ScheduleViewModel) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             itemsIndexed(scheduleState.todayLessons) { _, lesson ->
-                ScheduleUnit(lesson = lesson)
+                ScheduleUnit(lesson)
             }
         }
     }
@@ -378,31 +380,25 @@ private fun ScheduleUnitContent(lesson: DataClasses.Lesson) {
                 textAlign = TextAlign.End
             )
         }
-        lesson.name?.let {
-            Text(
-                text = it,
-                color = Color.Black,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-        lesson.teacher?.let {
-            Text(
-                text = it,
-                color = Color.Black,
-                fontSize = 15.sp,
-                fontStyle = FontStyle.Italic
-            )
-        }
-        lesson.location?.let {
-            Text(
-                text = it,
-                modifier = Modifier.padding(top = 10.dp),
-                color = Color.Black,
-                fontSize = 15.sp,
-                fontStyle = FontStyle.Italic
-            )
-        }
+        Text(
+            text = lesson.name.toString(),
+            color = Color.Black,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = lesson.teacher.toString(),
+            color = Color.Black,
+            fontSize = 15.sp,
+            fontStyle = FontStyle.Italic
+        )
+        Text(
+            text = lesson.location.toString(),
+            modifier = Modifier.padding(top = 10.dp),
+            color = Color.Black,
+            fontSize = 15.sp,
+            fontStyle = FontStyle.Italic
+        )
     }
 }
 
@@ -434,15 +430,3 @@ fun Loader(resource: Int, height: Dp) {
         }
     }
 }
-
-@Composable
-fun LessonTest() {
-    ScheduleUnit(
-        DataClasses.Lesson(1,
-        "12:30 - 14:40",
-        "Практика",
-        "Физика",
-        "Иванов И.И.",
-        "1-23"))
-}
-

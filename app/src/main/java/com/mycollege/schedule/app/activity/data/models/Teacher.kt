@@ -1,4 +1,4 @@
-package com.mycollege.schedule.core.db.models
+package com.mycollege.schedule.app.activity.data.models
 
 import androidx.compose.runtime.Immutable
 import androidx.room.ColumnInfo

@@ -20,7 +20,7 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="34">
         <activity
-            android:name="com.mycollege.schedule.app.activity.MainActivity"
+            android:name="com.mycollege.schedule.app.activity.ui.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Schedule"
             android:screenOrientation="sensorPortrait"
@@ -32,7 +32,7 @@
             </intent-filter>
         </activity>
         <service
-            android:name=".core.notifications.RuStoreMessagingService"
+            android:name=".app.notifications.RuStoreMessagingService"
             android:exported="true"
             tools:ignore="ExportedService">
             <intent-filter>
@@ -42,7 +42,7 @@
         <meta-data
             android:name="ru.rustore.sdk.pushclient.default_notification_icon"
             android:resource="@drawable/notification" />
-        <receiver android:name="com.mycollege.schedule.core.notifications.NotificationReceiver" android:enabled="true" android:exported="false"/>
+        <receiver android:name="com.mycollege.schedule.app.notifications.NotificationReceiver" android:enabled="true" android:exported="false"/>
     </application>
 
 </manifest>

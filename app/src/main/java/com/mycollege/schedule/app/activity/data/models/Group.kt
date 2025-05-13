@@ -1,4 +1,4 @@
-package com.mycollege.schedule.core.db.models
+package com.mycollege.schedule.app.activity.data.models
 
 import androidx.compose.runtime.Immutable
 import androidx.room.ColumnInfo
@@ -19,13 +19,13 @@ class Group {
 
     // курс
     @ColumnInfo(name = "course")
-    var course: Int = 1
+    var course: String = "1 курс"
 
     // напрвление: СПО, Бакалавриат, Магистратура
     @ColumnInfo(name = "level")
     var level: String = ""
 
-    constructor(name: String, course: Int, level: String) {
+    constructor(name: String, course: String, level: String) {
         this.name = name
         this.course = course
         this.level = level

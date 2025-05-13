@@ -1,5 +1,6 @@
 package com.mycollege.schedule.feature.settings.ui
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -107,11 +108,9 @@ fun Settings(
                     .padding(innerPadding)
             ) {
 
-                val fullWeekState by viewModel.shared.scheduleFullWeek.collectAsState()
-                val changeWeekMode by viewModel.shared.changeWeekCount.collectAsState()
-                val navInvisibilityState by viewModel.shared.navigationInvisibility.collectAsState()
+                val settingsState by viewModel.settingsStateHolder.settingsState.collectAsState()
 
-                AnimatedSegmentedButton(changeWeekMode) {
+                AnimatedSegmentedButton(settingsState.weekCount) {
                     viewModel.handleEvent(SettingsEvent.MakeWeekCountDifferent(it))
                     viewModel.handleEvent(SettingsEvent.SaveSettings)
                 }
@@ -128,7 +127,7 @@ fun Settings(
                 ) {
                     Column(modifier = Modifier.padding(20.dp, 0.dp)) {
 
-                        CardSettings(title = "Показать неделю", checkedState = fullWeekState) {
+                        CardSettings(title = "Показать неделю", checkedState = settingsState.fullWeekVisibility) {
                             viewModel.handleEvent(SettingsEvent.MakeScheduleWeekFull(it))
                             viewModel.handleEvent(SettingsEvent.SaveSettings)
                         }
@@ -143,7 +142,7 @@ fun Settings(
 
                         Spacer(modifier = Modifier.height(5.dp))
 
-                        CardSettings(title = "Скрыть навигацию", checkedState = navInvisibilityState) {
+                        CardSettings(title = "Скрыть навигацию", checkedState = settingsState.navigationVisibility) {
                             viewModel.handleEvent(SettingsEvent.MakeNavigationInvisible(it))
                             viewModel.handleEvent(SettingsEvent.SaveSettings)
                         }
@@ -246,6 +245,7 @@ fun AnimatedSegmentedButton(checkedState: Boolean, onChanged: (Boolean) -> Unit)
     }
 }
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun Label() {
     BoxWithConstraints(

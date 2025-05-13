@@ -1,22 +1,34 @@
-package com.mycollege.schedule.feature.schedule.data.repository
+package com.mycollege.schedule.app.activity.data.network
 
+import com.mycollege.schedule.app.activity.data.models.Group
+import com.mycollege.schedule.app.activity.data.models.Schedule
+import com.mycollege.schedule.app.activity.data.models.Teacher
+import com.mycollege.schedule.core.db.Database
 import com.mycollege.schedule.core.network.Network
 import com.mycollege.schedule.feature.schedule.data.models.DataClasses
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class WebParser {
+@Singleton
+class GroupParser @Inject constructor(
+    private val database: Database
+) {
 
-    companion object {
+    // репозиторий бд
+    private val repository = database.persistence()
 
-        private const val TIMEOUT: Int = 10000
-        private var doc: Document? = null
-        private var groups: HashMap<String, HashMap<String, ArrayList<DataClasses.Group>>> = HashMap()
-        private const val FULL_URL = "https://imsit.ru/timetable/stud/raspisan.html"
-        private var PATTERN_URL = "https://imsit.ru/timetable/stud/"
+    private val TIMEOUT: Int = 10000
+    private var doc: Document? = null
+    private var groups: HashMap<String, HashMap<String, ArrayList<Schedule>>> = HashMap()
+    private val FULL_URL = "https://imsit.ru/timetable/stud/raspisan.html"
+    private var PATTERN_URL = "https://imsit.ru/timetable/stud/"
 
-        fun loadData(progress: (Int) -> Unit): HashMap<String, HashMap<String, ArrayList<DataClasses.Group>>> {
+    fun loadData(progress: (Int) -> Unit) {
+        database.runInTransaction {
+
             doc = Network.Companion.connect(FULL_URL, TIMEOUT)
 
             val table: Element = doc!!.select("table")[0]
@@ -30,18 +42,19 @@ class WebParser {
                 groups[column.text()] = HashMap()
             }
 
-            val sorted = groups.toSortedMap(Comparator.comparingInt {
+            val courses = groups.toSortedMap(Comparator.comparingInt {
                 it.split(" ")[0].toInt()
             })
 
             // Get all of the groups
-            val total = sorted.size + 3
+            val total = courses.size + 3
             var current = 2
             progress((current * 100) / total)
 
             // Get all of the groups
-            for (i in 0 until sorted.size) {
-                val specialityArray = HashMap<String, ArrayList<DataClasses.Group>>()
+            for (i in 0 until courses.size) {
+
+                val course = i + 1
 
                 for (row in rows.drop(1)) {
                     val tableData = row.select("td")
@@ -53,7 +66,15 @@ class WebParser {
                         // getting group schedule
                         val schedule = Network.Companion.connect("$PATTERN_URL$a", TIMEOUT)
 
-                        val weeks = DataClasses.Weeks(null, null)
+                        val level: String = if (tableData[i].text().contains("СПО")) "СПО"
+                        else if (tableData[i].text().contains("Мг")) "Магистратура" else "Бакалавриат"
+
+                        var groupId = repository.findGroupBy(tableData[i].text())
+
+                        // если группы нет в базе
+                        if (groupId == 0L) {
+                            groupId = repository.save(Group(tableData[i].text(), "$course курс", level))
+                        }
 
                         for (j in 1..2) {
                             val tables: Element = schedule.select("table")[if (j == 1) 0 else 1] //odd week and even week as index on the page
@@ -61,13 +82,10 @@ class WebParser {
                             val counts = tRows[0]
                             val period = tRows[1]
 
-                            val week: HashMap<Int, ArrayList<DataClasses.Lesson>> = HashMap()
-
                             // getting day lessons
                             for (day in tRows.drop(2)) {
                                 val data = day.select("td")
                                 val dayWeek = DataClasses.DayWeek.findByShort(data[0].text())
-                                val lessonsArray: ArrayList<DataClasses.Lesson> = ArrayList()
 
                                 var l = 0
                                 for (cell in data) {
@@ -88,7 +106,7 @@ class WebParser {
                                     val finalType = when (type) {
                                         "пр." -> "Практика"
                                         "л." -> "Лекция"
-                                        else -> "Лаборатория"
+                                        else -> "Лабораторная"
                                     }
 
                                     var name = match?.groups?.get(2)?.value // Name: Электротехника
@@ -126,77 +144,42 @@ class WebParser {
                                         }
                                     }
 
-                                    lessonsArray.add(
-                                        DataClasses.Lesson(
-                                            count,
-                                            time,
-                                            finalType,
-                                            name,
-                                            teacher,
-                                            location
+                                    var teacherId = repository.findTeacherBy(teacher.toString())
+
+                                    // если преподавателя нет в базе
+                                    if (teacherId == 0L) {
+                                        teacherId = repository.save(Teacher(teacher.toString()))
+                                    }
+
+                                    repository.save(
+                                        Schedule(
+                                            teacher = teacherId,
+                                            group = groupId,
+                                            dayWeek = dayWeek!!.long,
+                                            weekCount = if (j == 1) 0 else 1, //odd week and even week as index on the page
+                                            lessonCount = count,
+                                            time = time,
+                                            name = name.toString(),
+                                            type = finalType,
+                                            location = location.toString()
                                         )
                                     )
                                     l++
                                 }
 
-                                // sort by lesson order in a day
-                                val sortedLessons = lessonsArray.sortedWith(Comparator.comparingInt {
-                                    it.count
-                                })
-
-                                // adding a lesson to a day
-                                if (dayWeek != null) {
-                                    week[dayWeek.id] = sortedLessons.toMutableList() as ArrayList<DataClasses.Lesson>
-                                }
                             }
 
-                            // sort by day order in a week
-                            val sortedWeek = week.toSortedMap().toMutableMap() as HashMap<Int, ArrayList<DataClasses.Lesson>>
-
-                            // setting full schedule on 2 weeks
-                            if (j == 1) weeks.weekOdd = sortedWeek else weeks.weekEven = sortedWeek
                         }
 
-                        val speciality: String = if (tableData[i].text().contains("СПО")) "СПО"
-                        else if (tableData[i].text().contains("Мг")) "Магистратура" else "Бакалавриат"
-
-                        if (specialityArray[speciality] != null)
-                            specialityArray[speciality]?.add(
-                                DataClasses.Group(
-                                    tableData[i].text(),
-                                    a,
-                                    weeks
-                                )
-                            )
-                        else {
-                            val groupArray = ArrayList<DataClasses.Group>()
-                            groupArray.add(DataClasses.Group(tableData[i].text(), a, weeks))
-                            specialityArray[speciality] = groupArray
-                        }
                     }
 
                 }
-                sorted[sorted.keys.elementAt(i)] = specialityArray.toSortedMap(java.util.Comparator.comparingInt
-                { it.length }).toMutableMap() as HashMap<String, ArrayList<DataClasses.Group>>
 
                 current++
                 progress((current * 100) / total)  // update the progress
             }
 
-            // remove empty course
-            val delete: ArrayList<String> = ArrayList()
-            sorted.keys.forEach { key ->
-                if (sorted[key]?.isEmpty() == true) delete.add(key)
-            }
-            for (del in delete) {
-                sorted.remove(del)
-            }
-
-            groups = sorted.toMutableMap() as HashMap<String, HashMap<String, ArrayList<DataClasses.Group>>>
-
-            return groups
         }
-
     }
 
 }

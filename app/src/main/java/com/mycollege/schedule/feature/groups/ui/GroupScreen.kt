@@ -49,7 +49,7 @@ import com.mycollege.schedule.core.ads.YandexAdsListener
 import com.mycollege.schedule.feature.groups.ui.components.BottomSheetContent
 import com.mycollege.schedule.feature.groups.ui.state.GroupEvent
 import com.mycollege.schedule.feature.groups.ui.state.GroupState
-import com.mycollege.schedule.feature.groups.ui.state.GroupsViewModel
+import com.mycollege.schedule.feature.groups.ui.state.GroupViewModel
 import com.mycollege.schedule.shared.ui.theme.ScheduleTheme
 import com.mycollege.schedule.shared.ui.theme.background
 import com.mycollege.schedule.shared.ui.theme.buttons
@@ -62,7 +62,7 @@ import ru.rustore.sdk.remoteconfig.RemoteConfigClient
 @SuppressLint("MutableCollectionMutableState")
 @Composable
 fun GroupScreen(
-    viewModel: GroupsViewModel = hiltViewModel(),
+    viewModel: GroupViewModel = hiltViewModel(),
     pagerState: PagerState
 ) {
     MainFrame(viewModel = viewModel, pagerState)
@@ -70,9 +70,9 @@ fun GroupScreen(
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
-fun MainFrame(viewModel: GroupsViewModel, pagerState: PagerState) {
+fun MainFrame(viewModel: GroupViewModel, pagerState: PagerState) {
     val context = LocalContext.current
-    val groupState by viewModel.groupState.collectAsState()
+    val groupState by viewModel.groupStateHolder.groupState.collectAsState()
     val scope = rememberCoroutineScope()
     var showAds by remember { mutableStateOf(false) }
 
@@ -105,10 +105,9 @@ fun MainFrame(viewModel: GroupsViewModel, pagerState: PagerState) {
                     text = context.getString(R.string.choose),
                     icon = R.drawable.logo,
                     onClick = {
-                        viewModel.handleEvent(GroupEvent.CreateSchedule)
-                        groupState.scheduleCreation
+                        viewModel.handleEvent(GroupEvent.ChooseGroup)
                         scope.launch {
-                            viewModel.shared.updateIndex(1)
+                            viewModel.appStateHolder.updateIndex(1)
                             pagerState
                                 .animateScrollToPage(1)
                         }
@@ -137,12 +136,11 @@ fun MainFrame(viewModel: GroupsViewModel, pagerState: PagerState) {
 
 @Composable
 fun Body(
-    viewModel: GroupsViewModel,
+    viewModel: GroupViewModel,
     context: Context,
     groupState: GroupState
 ) {
-    val loading by viewModel.shared.loading.collectAsState(true)
-    val progress by viewModel.shared.progress.collectAsState(0)
+    val parserState by viewModel.groupParserStateHolder.groupParserState.collectAsState()
 
     Column {
         CardContent(
@@ -150,7 +148,7 @@ fun Body(
             title = context.getString(R.string.course),
             subtitle = groupState.course,
             onClick = {
-                viewModel.handleEvent(GroupEvent.DisplayCourses)
+                viewModel.handleEvent(GroupEvent.Display)
                 viewModel.handleEvent(GroupEvent.ShowBottomSheet)
                 viewModel.handleEvent(GroupEvent.SetSelectedIndex(0))
             }
@@ -159,9 +157,9 @@ fun Body(
         CardContent(
             icon = R.drawable.books,
             title = context.getString(R.string.speciality),
-            subtitle = groupState.speciality,
+            subtitle = groupState.level,
             onClick = {
-                viewModel.handleEvent(GroupEvent.DisplaySpecialities(groupState.course))
+                viewModel.handleEvent(GroupEvent.Display)
                 viewModel.handleEvent(GroupEvent.ShowBottomSheet)
                 viewModel.handleEvent(GroupEvent.SetSelectedIndex(1))
             }
@@ -172,7 +170,7 @@ fun Body(
             title = context.getString(R.string.group),
             subtitle = groupState.group,
             onClick = {
-                viewModel.handleEvent(GroupEvent.DisplayGroups(groupState.course, groupState.speciality))
+                viewModel.handleEvent(GroupEvent.Display)
                 viewModel.handleEvent(GroupEvent.ShowBottomSheet)
                 viewModel.handleEvent(GroupEvent.SetSelectedIndex(2))
             }
@@ -181,8 +179,8 @@ fun Body(
 
     if (groupState.showBottomSheet) {
         BottomSheetContent(
-            loading = loading,
-            progress = progress,
+            loading = parserState.loading,
+            progress = parserState.progress,
             viewModel = viewModel,
             selectedIndex = groupState.selectedIndex,
             onDismiss = { viewModel.handleEvent(GroupEvent.HideBottomSheet) }
