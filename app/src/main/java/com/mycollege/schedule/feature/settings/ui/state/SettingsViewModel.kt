@@ -1,5 +1,6 @@
 package com.mycollege.schedule.feature.settings.ui.state
 
+import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import com.mycollege.schedule.core.cache.CacheManager

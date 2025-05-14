@@ -7,7 +7,6 @@ import android.content.Intent
 import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.hilt.work.HiltWorker
-import androidx.preference.PreferenceManager
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -17,13 +16,13 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.mycollege.schedule.R
-import com.mycollege.schedule.app.activity.data.models.Schedule
 import com.mycollege.schedule.app.activity.domain.usecases.GetScheduleUseCase
 import com.mycollege.schedule.app.notifications.NotificationReceiver
 import com.mycollege.schedule.app.notifications.NotificationsManager
 import com.mycollege.schedule.feature.schedule.data.models.DataClasses
+import com.mycollege.schedule.feature.schedule.data.models.DataClasses.DayWeek
 import com.mycollege.schedule.feature.schedule.domain.usecase.GetChosenGroupUseCase
-import com.mycollege.schedule.feature.schedule.domain.usecase.GetWeekScheduleUseCase
+import com.mycollege.schedule.feature.schedule.domain.usecase.GetTodayScheduleUseCase
 import com.mycollege.schedule.feature.settings.ui.state.SettingsState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -36,9 +35,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
-import java.util.Locale
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -235,7 +232,7 @@ class ScheduleWorker @AssistedInject constructor(
     @Assisted workerParams: WorkerParameters,
     private var cacheManager: CacheManager,
     private val getChosenGroupUseCase: GetChosenGroupUseCase,
-    private val getWeekScheduleUseCase: GetWeekScheduleUseCase
+    private val getTodayScheduleUseCase: GetTodayScheduleUseCase
 ) : CoroutineWorker(context, workerParams) {
 
     /**
@@ -332,62 +329,17 @@ class ScheduleWorker @AssistedInject constructor(
     }
 
     /**
-     * Получить пары на неделю
-     */
-    private suspend fun getWeekLessonsByGroup(): HashMap<Int, ArrayList<DataClasses.Lesson>> {
-        return withContext(Dispatchers.IO) {
-
-            var chosenGroup = getChosenGroupUseCase.getByName(cacheManager.loadLastConfiguration().group)
-            var count = calculateCount()
-
-            if (cacheManager.loadLastSettings().weekCount)
-                count = if (count == 1) 0 else 1 // if change week event is executed
-
-            if (chosenGroup != null) {
-                return@withContext getWeekScheduleUseCase.getWeekSchedule(chosenGroup, count)
-            }
-            return@withContext HashMap()
-        }
-    }
-
-    /**
      * Получить пары на сегодня
      */
     private suspend fun getTodayLessons(): ArrayList<DataClasses.Lesson> {
         return withContext(Dispatchers.IO) {
-            val week: HashMap<Int, ArrayList<DataClasses.Lesson>> = getWeekLessonsByGroup()
-
-            val currentDate = LocalDate.now(ZoneId.systemDefault())
-            val formatter = DateTimeFormatter.ofPattern("EEEE", Locale.ENGLISH)
-            val dayWeek = currentDate.format(formatter).uppercase()
-
-            for (day in week.keys) {
-                if (DataClasses.DayWeek.findById(day)?.name == dayWeek) {
-                    return@withContext week[day] as ArrayList<DataClasses.Lesson>
-                }
-            }
-            return@withContext ArrayList()
+            val today = getTodayScheduleUseCase.getTodaySchedule(
+                getChosenGroupUseCase.getByName(cacheManager.loadLastConfiguration().group)!!,
+                DayWeek.findById(LocalDate.now().dayOfWeek.value)?.long ?: "Понедельник",
+                if (cacheManager.loadLastSettings().weekCount) 0 else 1
+            )
+            return@withContext today as ArrayList<DataClasses.Lesson>
         }
-    }
-
-    /**
-     * Посчитать номер недели
-     */
-    private fun calculateCount(): Int {
-        val currentDate = LocalDate.now()
-
-        val firstSeptember = LocalDate.of(currentDate.year, 9, 1)
-
-        val startDate = if (currentDate.isBefore(firstSeptember)) {
-            LocalDate.of(currentDate.year - 1, 9, 1)
-        } else {
-            firstSeptember
-        }
-
-        val weeksBetween = ChronoUnit.WEEKS.between(startDate, currentDate).toInt()
-
-        // Count: 0 - even, 1 - odd
-        return weeksBetween % 2
     }
 
 }

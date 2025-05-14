@@ -35,6 +35,7 @@ class GetTodayScheduleUseCase @Inject constructor(
                     lesson.location
                 ))
             }
+            Log.d("TODAY2", result.toString())
         return@withContext result
     }
 

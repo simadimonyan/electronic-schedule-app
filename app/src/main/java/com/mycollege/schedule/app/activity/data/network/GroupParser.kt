@@ -29,6 +29,9 @@ class GroupParser @Inject constructor(
     fun loadData(progress: (Int) -> Unit) {
         database.runInTransaction {
 
+            // очистить все данные перед обновлением
+            database.clearAllTables()
+
             doc = Network.Companion.connect(FULL_URL, TIMEOUT)
 
             val table: Element = doc!!.select("table")[0]

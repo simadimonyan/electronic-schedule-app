@@ -28,7 +28,6 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 import javax.inject.Inject
@@ -81,7 +80,7 @@ class ScheduleViewModel @Inject constructor(
     private fun getWeekLessons() {
         viewModelScope.launch {
             var chosenGroup = getChosenGroupUseCase.getByName(groupStateHolder.groupState.value.group)
-            var count = calculateCount()
+            var count = if (settingsStateHolder.settingsState.value.weekCount) 0 else 1
 
             if (settingsStateHolder.settingsState.value.weekCount)
                 count = if (count == 1) 0 else 1 // if change week event is executed
@@ -102,7 +101,7 @@ class ScheduleViewModel @Inject constructor(
             val today = getTodayScheduleUseCase.getTodaySchedule(
                 getChosenGroupUseCase.getByName(groupStateHolder.groupState.value.group)!!,
                 DayWeek.findById(LocalDate.now().dayOfWeek.value)?.long ?: "Понедельник",
-                calculateCount()
+                if (settingsStateHolder.settingsState.value.weekCount) 0 else 1
             )
 
             // clear all of the alarms
@@ -210,26 +209,6 @@ class ScheduleViewModel @Inject constructor(
             val formatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM", Locale("RU"))
             return@withContext currentDate.format(formatter).replaceFirstChar { it.uppercase() }
         }
-    }
-
-    /**
-     * Посчитать номер недели
-     */
-    private fun calculateCount(): Int {
-        val currentDate = LocalDate.now()
-
-        val firstSeptember = LocalDate.of(currentDate.year, 9, 1)
-
-        val startDate = if (currentDate.isBefore(firstSeptember)) {
-            LocalDate.of(currentDate.year - 1, 9, 1)
-        } else {
-            firstSeptember
-        }
-
-        val weeksBetween = ChronoUnit.WEEKS.between(startDate, currentDate).toInt()
-
-        // Count: 0 - even, 1 - odd
-        return weeksBetween % 2
     }
 
 }

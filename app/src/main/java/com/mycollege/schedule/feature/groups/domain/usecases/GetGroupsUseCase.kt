@@ -15,7 +15,7 @@ class GetGroupsUseCase @Inject constructor(
 
     suspend fun getGroups(course: String, level: String): Set<String> {
         return withContext(Dispatchers.IO) {
-            if (course == "Все специальности")
+            if (level == "Все специальности")
                 return@withContext database.groups().getAllGroupNamesBy(course).toSortedSet()
             else
                 return@withContext database.groups().getGroupNamesBy(level, course).toSortedSet()

@@ -1,6 +1,7 @@
 package com.mycollege.schedule.app.activity.data.repository
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import com.mycollege.schedule.app.activity.data.models.Group

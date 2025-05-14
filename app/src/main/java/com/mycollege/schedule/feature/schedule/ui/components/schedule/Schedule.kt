@@ -74,19 +74,19 @@ private fun ScheduleUnitContent(lesson: DataClasses.Lesson) {
             )
         }
         Text(
-            text = lesson.name.toString(),
+            text =  (if (lesson.name.equals("null")) "Неизвестная дисциплина" else lesson.name).toString(),
             color = Color.Black,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = lesson.teacher.toString(),
+            text =  (if (lesson.teacher.equals("null")) "" else lesson.teacher).toString(),
             color = Color.Black,
             fontSize = 15.sp,
             fontStyle = FontStyle.Italic
         )
         Text(
-            text = lesson.location.toString(),
+            text = (if (lesson.location.equals("null")) "Неизвестная аудитория" else lesson.location).toString(),
             modifier = Modifier.padding(top = 10.dp),
             color = Color.Black,
             fontSize = 15.sp,

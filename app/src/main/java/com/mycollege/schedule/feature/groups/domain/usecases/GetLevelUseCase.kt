@@ -15,7 +15,9 @@ class GetLevelUseCase @Inject constructor(
 
     suspend fun getLevels(course: String): Set<String> {
         return withContext(Dispatchers.IO) {
-            return@withContext database.groups().getLevelsBy(course).toSortedSet()
+            return@withContext database.groups().getLevelsBy(course).toSortedSet { level1, level2 ->
+                level1.length.compareTo(level2.length) // сортировка по возрастанию длины
+            }
         }
     }
 
