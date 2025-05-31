@@ -77,6 +77,9 @@ fun BottomSheetContent(
             Spacer(modifier = Modifier.height(20.dp))
         } else {
 
+            // отобразить данные по окончанию загрузки
+            viewModel.handleEvent(GroupEvent.Display)
+
             BottomSheet(viewModel) { newValue ->
                 when (selectedIndex) {
                     0 -> viewModel.handleEvent(GroupEvent.UpdateCourse(newValue))

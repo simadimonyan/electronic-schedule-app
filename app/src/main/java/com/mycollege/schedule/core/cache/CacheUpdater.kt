@@ -269,7 +269,7 @@ class ScheduleWorker @AssistedInject constructor(
             for ((i, lesson) in todayLessons.withIndex()) {
                 Log.e("ScheduleWorker", "setting alarms...")
                 val intent = setNotificationForLesson(applicationContext, lesson, i)
-                intents.add(CacheManager.IntentConf(i, intent))
+                if (intent != null) intents.add(CacheManager.IntentConf(i, intent))
             }
             cacheManager.saveAlarms(intents)
 
@@ -284,7 +284,7 @@ class ScheduleWorker @AssistedInject constructor(
     /**
      * Установить отложенное уведомление на пару
      */
-    private fun setNotificationForLesson(context: Context, lesson: DataClasses.Lesson, id: Int): Intent {
+    private fun setNotificationForLesson(context: Context, lesson: DataClasses.Lesson, id: Int): Intent? {
         val lessonName = lesson.name
         val lessonCount = lesson.count
         val lessonLocation = lesson.location
@@ -301,16 +301,14 @@ class ScheduleWorker @AssistedInject constructor(
 
         val notificationTime = lessonTimeInMillis - 5 * 60 * 1000
 
-        if (notificationTime < System.currentTimeMillis()) {
+        if (lessonTimeInMillis < System.currentTimeMillis()) {
             Log.w("ScheduleWorker", "Уведомление пропущено: $lessonName, время уже прошло")
-            val intent = Intent(context, NotificationReceiver::class.java).apply {
-                putExtra("lesson", "Пара $lessonCount: $lessonName в $lessonLocation")
-            }
-            return intent
+            return null
         }
 
         val intent = Intent(context, NotificationReceiver::class.java).apply {
             putExtra("lesson", "Пара $lessonCount: $lessonName в $lessonLocation")
+            putExtra("timestamp", lessonTimeInMillis)
         }
         val pendingIntent = PendingIntent.getBroadcast(
             context,

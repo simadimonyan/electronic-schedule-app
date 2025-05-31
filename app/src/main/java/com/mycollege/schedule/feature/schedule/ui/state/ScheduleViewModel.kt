@@ -68,9 +68,12 @@ class ScheduleViewModel @Inject constructor(
      * Обновить расписание по четности недели
      */
     private fun changedWeekCountEvent() {
-        viewModelScope.launch {
-            getTodayLessons()
-            if (settingsStateHolder.settingsState.value.fullWeekVisibility) getWeekLessons()
+        viewModelScope.launch { // при условии, что группа выбрана
+            scheduleStateHolder.showDateToday(getTodayDate())
+            if (cacheManager.loadLastConfiguration() != null && cacheManager.loadLastConfiguration().group != "Выбрать") {
+                getTodayLessons()
+                if (settingsStateHolder.settingsState.value.fullWeekVisibility) getWeekLessons()
+            }
         }
     }
 
@@ -131,7 +134,6 @@ class ScheduleViewModel @Inject constructor(
             }
             cacheManager.saveAlarms(intents)
 
-            scheduleStateHolder.showDateToday(getTodayDate())
             scheduleStateHolder.showTodayLessons(today)
         }
     }
@@ -174,11 +176,12 @@ class ScheduleViewModel @Inject constructor(
                 currentDate.atTime(lessonStartTime).atZone(ZoneId.systemDefault()).toInstant()
                     .toEpochMilli()
 
-            if (lessonTimeInMillis > System.currentTimeMillis()) {
+            if (lessonTimeInMillis >= System.currentTimeMillis()) {
                 val notificationTime = lessonTimeInMillis - 5 * 60 * 1000
 
                 val intent = Intent(context, NotificationReceiver::class.java).apply {
                     putExtra("lesson", "Пара $lessonCount: $lessonName в $lessonLocation")
+                    putExtra("timestamp", lessonTimeInMillis)
                 }
                 val pendingIntent = PendingIntent.getBroadcast(
                     context,

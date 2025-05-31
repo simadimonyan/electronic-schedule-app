@@ -98,6 +98,7 @@ class NotificationReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val lesson = intent.getStringExtra("lesson")
+        val timestamp = intent.getLongExtra("timestamp", 0L)
         val manager = NotificationsManager()
         val notification = manager.createLessonAlertNotification(context, lesson.toString())
         val notificationManager = NotificationManagerCompat.from(context)
@@ -113,7 +114,9 @@ class NotificationReceiver : BroadcastReceiver() {
             // for ActivityCompat#requestPermissions for more details.
             return
         }
-        notificationManager.notify(lesson.hashCode(), notification)
+        if (timestamp >= System.currentTimeMillis()) {
+            notificationManager.notify(lesson.hashCode(), notification)
+        }
     }
 
 }
