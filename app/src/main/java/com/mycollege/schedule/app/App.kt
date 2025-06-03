@@ -1,6 +1,7 @@
 package com.mycollege.schedule.app
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.provider.Settings
@@ -27,6 +28,9 @@ import ru.ok.tracer.crash.report.CrashReportConfiguration
 import ru.ok.tracer.crash.report.TracerCrashReport
 import ru.ok.tracer.disk.usage.DiskUsageConfiguration
 import ru.ok.tracer.heap.dumps.HeapDumpConfiguration
+import ru.rustore.sdk.appupdate.manager.factory.RuStoreAppUpdateManagerFactory
+import ru.rustore.sdk.appupdate.model.AppUpdateOptions
+import ru.rustore.sdk.appupdate.model.UpdateAvailability
 import ru.rustore.sdk.core.feature.model.FeatureAvailabilityResult
 import ru.rustore.sdk.pushclient.RuStorePushClient
 import ru.rustore.sdk.pushclient.common.logger.DefaultLogger
@@ -36,7 +40,6 @@ import ru.rustore.sdk.remoteconfig.DeviceId
 import ru.rustore.sdk.remoteconfig.RemoteConfigClientBuilder
 import ru.rustore.sdk.remoteconfig.UpdateBehaviour
 import javax.inject.Inject
-
 
 @HiltAndroidApp
 class App : Application(), HasTracerConfiguration, Configuration.Provider {
@@ -53,6 +56,28 @@ class App : Application(), HasTracerConfiguration, Configuration.Provider {
     @SuppressLint("HardwareIds")
     override fun onCreate() {
         super.onCreate()
+
+        val updateManager = RuStoreAppUpdateManagerFactory.create(applicationContext)
+
+        updateManager.getAppUpdateInfo().addOnSuccessListener { appUpdateInfo ->
+            Log.d("App", "check update")
+            if (appUpdateInfo.updateAvailability == UpdateAvailability.UPDATE_AVAILABLE) {
+                updateManager.startUpdateFlow(appUpdateInfo, AppUpdateOptions.Builder().build()).addOnSuccessListener { resultCode ->
+                    if (resultCode == Activity.RESULT_CANCELED) {
+                        // Пользователь отказался от скачивания
+                    }
+                }
+                .addOnFailureListener { throwable ->
+                    Log.e("App", "startUpdateFlow error", throwable)
+                }
+            }
+            else {
+                Log.d("App", "check update result: ${appUpdateInfo.updateAvailability}")
+            }
+        }
+        .addOnFailureListener { throwable ->
+            Log.e("App", "getAppUpdateInfo error", throwable)
+        }
 
         MobileAds.initialize(this) {
             Log.i("MobileAds", "Initialized")

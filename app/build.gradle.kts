@@ -111,6 +111,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.appupdate)
+
     implementation(libs.dagger.compiler)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
