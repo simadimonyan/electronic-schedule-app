@@ -63,15 +63,17 @@ class GroupViewModel @Inject constructor(
      */
     private fun display() {
         viewModelScope.launch {
-            val groupState = groupStateHolder.groupState.value
+            if (!appStateHolder.appState.value.firstStartUp) {
+                val groupState = groupStateHolder.groupState.value
 
-            val courses = getCoursesUseCase.getCourses()
-            val levels = getLevelUseCase.getLevels(groupState.course)
-            val groups = getGroupsUseCase.getGroups(groupState.course, groupState.level)
+                val courses = getCoursesUseCase.getCourses()
+                val levels = getLevelUseCase.getLevels(groupState.course)
+                val groups = getGroupsUseCase.getGroups(groupState.course, groupState.level)
 
-            groupStateHolder.updateCoursesToDisplay(courses.toList())
-            groupStateHolder.updateLevelsToDisplay(levels.toList())
-            groupStateHolder.updateGroupsToDisplay(groups.toList())
+                groupStateHolder.updateCoursesToDisplay(courses.toList())
+                groupStateHolder.updateLevelsToDisplay(levels.toList())
+                groupStateHolder.updateGroupsToDisplay(groups.toList())
+            }
         }
     }
 

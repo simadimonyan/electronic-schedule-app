@@ -23,8 +23,8 @@ class GroupParser @Inject constructor(
     private val TIMEOUT: Int = 10000
     private var doc: Document? = null
     private var groups: HashMap<String, HashMap<String, ArrayList<Schedule>>> = HashMap()
-    private val FULL_URL = "https://imsit.ru/timetable/stud/raspisan.html"
-    private var PATTERN_URL = "https://imsit.ru/timetable/stud/"
+    private val STUDENT_FULL_URL = "https://imsit.ru/timetable/stud/raspisan.html"
+    private var STUDENT_PATTERN_URL = "https://imsit.ru/timetable/stud/"
 
     fun loadData(progress: (Int) -> Unit) {
         database.runInTransaction {
@@ -32,7 +32,7 @@ class GroupParser @Inject constructor(
             // очистить все данные перед обновлением
             database.clearAllTables()
 
-            doc = Network.Companion.connect(FULL_URL, TIMEOUT)
+            doc = Network.Companion.connect(STUDENT_FULL_URL, TIMEOUT)
 
             val table: Element = doc!!.select("table")[0]
             val rows = table.select("tr")
@@ -67,7 +67,7 @@ class GroupParser @Inject constructor(
                     if (!tableData[i].text().equals("") && !tableData[i].text().equals(" ")) {
 
                         // getting group schedule
-                        val schedule = Network.Companion.connect("$PATTERN_URL$a", TIMEOUT)
+                        val schedule = Network.Companion.connect("$STUDENT_PATTERN_URL$a", TIMEOUT)
 
                         val level: String = if (tableData[i].text().contains("СПО")) "СПО"
                         else if (tableData[i].text().contains("Мг")) "Магистратура" else "Бакалавриат"

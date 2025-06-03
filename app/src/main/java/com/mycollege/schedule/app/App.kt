@@ -2,10 +2,22 @@ package com.mycollege.schedule.app
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.content.Context
 import android.provider.Settings
 import android.util.Log
+import androidx.work.Configuration
+import androidx.work.ListenableWorker
+import androidx.work.WorkerFactory
+import androidx.work.WorkerParameters
 import com.mycollege.schedule.BuildConfig
+import com.mycollege.schedule.app.activity.domain.usecases.GetScheduleUseCase
+import com.mycollege.schedule.app.workmanager.GroupSyncWorker
+import com.mycollege.schedule.app.workmanager.ScheduleWorker
+import com.mycollege.schedule.app.workmanager.WeekChangeWorker
+import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.core.network.remote.RemoteConfigListener
+import com.mycollege.schedule.feature.schedule.domain.usecase.GetChosenGroupUseCase
+import com.mycollege.schedule.feature.schedule.domain.usecase.GetTodayScheduleUseCase
 import com.yandex.mobile.ads.common.MobileAds
 import dagger.hilt.android.HiltAndroidApp
 import ru.ok.tracer.HasTracerConfiguration
@@ -23,9 +35,20 @@ import ru.rustore.sdk.remoteconfig.AppVersion
 import ru.rustore.sdk.remoteconfig.DeviceId
 import ru.rustore.sdk.remoteconfig.RemoteConfigClientBuilder
 import ru.rustore.sdk.remoteconfig.UpdateBehaviour
+import javax.inject.Inject
+
 
 @HiltAndroidApp
-class App : Application(), HasTracerConfiguration {
+class App : Application(), HasTracerConfiguration, Configuration.Provider {
+
+    @Inject
+    lateinit var workerFactory: CustomWorkerFactory
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .setMinimumLoggingLevel(Log.DEBUG)
+            .build()
 
     @SuppressLint("HardwareIds")
     override fun onCreate() {
@@ -97,4 +120,25 @@ class App : Application(), HasTracerConfiguration {
             },
         )
 
+}
+
+class CustomWorkerFactory @Inject constructor(
+    private val cacheManager: CacheManager,
+    private var getScheduleUseCase: GetScheduleUseCase,
+    private val getChosenGroupUseCase: GetChosenGroupUseCase,
+    private val getTodayScheduleUseCase: GetTodayScheduleUseCase
+) : WorkerFactory() {
+
+    override fun createWorker(
+        appContext: Context,
+        workerClassName: String,
+        workerParameters: WorkerParameters
+    ): ListenableWorker? {
+        return when(workerClassName) {
+            GroupSyncWorker::class.java.name -> GroupSyncWorker(appContext, workerParameters, cacheManager, getScheduleUseCase)
+            ScheduleWorker::class.java.name -> ScheduleWorker(appContext, workerParameters, cacheManager, getChosenGroupUseCase, getTodayScheduleUseCase)
+            WeekChangeWorker::class.java.name -> WeekChangeWorker(appContext, workerParameters, cacheManager)
+            else -> null
+        }
+    }
 }

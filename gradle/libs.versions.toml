@@ -2,6 +2,7 @@
 accompanistPager = "0.30.1"
 agp = "8.9.1"
 animation = "1.7.6"
+appupdate = "8.0.0"
 bcprovJdk15on = "1.70"
 conscryptAndroid = "2.5.2"
 converterGson = "2.9.0"
@@ -43,6 +44,7 @@ profileinstaller = "1.4.1"
 uiToolingPreviewAndroid = "1.7.6"
 roomRuntime = "2.7.1"
 remoteConfig = "7.0.0"
+hiltWork = "1.0.0"
 
 [libraries]
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
@@ -51,12 +53,13 @@ androidx-animation = { module = "androidx.compose.animation:animation", version.
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-v127 = { module = "androidx.test:core", version.ref = "core" }
 androidx-hilt-navigation-compose-v120 = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationComposeVersion" }
-androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltNavigationComposeVersion" }
+androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltWork" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preferenceKtx" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workTesting" }
 androidx-work-testing = { module = "androidx.work:work-testing", version.ref = "workTesting" }
+appupdate = { module = "ru.rustore.sdk:appupdate", version.ref = "appupdate" }
 bcpkix-jdk15on = { module = "org.bouncycastle:bcpkix-jdk15on", version.ref = "bcprovJdk15on" }
 bcprov-jdk15on = { module = "org.bouncycastle:bcprov-jdk15on", version.ref = "bcprovJdk15on" }
 conscrypt-android = { module = "org.conscrypt:conscrypt-android", version.ref = "conscryptAndroid" }
