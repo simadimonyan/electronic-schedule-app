@@ -92,9 +92,14 @@ class ScheduleWorker @AssistedInject constructor(
         val lessonStartTimeString = lessonTime.split("-")[0]
         val formatter = DateTimeFormatter.ofPattern("HH:mm")
         val lessonStartTime = LocalTime.parse(lessonStartTimeString, formatter)
-        val currentDate = LocalDate.now(ZoneId.systemDefault()) // replaced by parameter
+        val currentDate = LocalDate.now(ZoneId.systemDefault())
 
         val lessonTimeInMillis = currentDate.atTime(lessonStartTime).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+        if (cacheManager.isNotificationDismissed(currentDate.dayOfWeek.toString(), "Пара $lessonCount: $lessonName в $lessonLocation")) {
+            Log.d("ScheduleWorker", "Уведомление для пары $lessonName (lesson: Пара $lessonCount: $lessonName в $lessonLocation, date: $currentDate) уже смахнуто, пропускаем")
+            return null
+        }
 
         Log.d("ScheduleWorker", "scheduling lesson...")
 

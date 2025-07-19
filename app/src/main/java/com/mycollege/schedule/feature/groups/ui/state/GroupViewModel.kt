@@ -7,6 +7,7 @@ import com.mycollege.schedule.R
 import com.mycollege.schedule.app.activity.domain.models.GroupParserStateHolder
 import com.mycollege.schedule.app.activity.ui.state.AppStateHolder
 import com.mycollege.schedule.core.cache.CacheManager
+import com.mycollege.schedule.core.cache.CacheUpdater
 import com.mycollege.schedule.feature.groups.domain.usecases.GetCoursesUseCase
 import com.mycollege.schedule.feature.groups.domain.usecases.GetGroupsUseCase
 import com.mycollege.schedule.feature.groups.domain.usecases.GetLevelUseCase
@@ -22,6 +23,7 @@ class GroupViewModel @Inject constructor(
     // cache & resources
     private val resources: ResourceManager,
     private val cacheManager: CacheManager,
+    private val cacheUpdater: CacheUpdater,
 
     // state
     val appStateHolder: AppStateHolder,
@@ -145,12 +147,16 @@ class GroupViewModel @Inject constructor(
      */
     private fun chooseGroup(): Boolean {
         if (!groupStateHolder.groupState.value.group.contains("Выбрать")) {
+            val context = resources.getContext()
 
             // save configuration on schedule create only
             updateCache()
 
             // send signal to create schedule
             viewModelScope.launch {
+
+                // work-manager lessons schedule
+                cacheUpdater.setupPeriodicScheduleWork(context)
                 groupStateHolder.sendCreateScheduleSignal()
             }
             return true

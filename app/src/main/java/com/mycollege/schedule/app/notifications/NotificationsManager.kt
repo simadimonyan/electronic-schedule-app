@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -24,6 +25,8 @@ import ru.ok.tracer.crash.report.TracerCrashReport
 import ru.rustore.sdk.pushclient.messaging.exception.RuStorePushClientException
 import ru.rustore.sdk.pushclient.messaging.model.RemoteMessage
 import ru.rustore.sdk.pushclient.messaging.service.RuStoreMessagingService
+import java.time.LocalDate
+import java.time.ZoneId
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -56,11 +59,26 @@ class NotificationsManager {
             .build()
     }
 
-    fun createLessonAlertNotification(context: Context, message: String): Notification {
+    fun createLessonAlertNotification(context: Context, message: String, lessonCount: Int, date: String): Notification {
+
+        val notificationId = "${date}-${lessonCount}".hashCode()
+        val deleteIntent = Intent(context, NotificationDismissReceiver::class.java).apply {
+            putExtra("lesson", message)
+            putExtra("date", date)
+            putExtra("notificationId", notificationId)
+        }
+        val deletePendingIntent = PendingIntent.getBroadcast(
+            context,
+            notificationId,
+            deleteIntent,
+            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         return NotificationCompat.Builder(context, "GROUP_SYNC_CHANNEL")
             .setSmallIcon(R.drawable.notification, 0)
             .setContentTitle(context.getString(R.string.lesson_alert))
             .setContentText(message)
+            .setDeleteIntent(deletePendingIntent)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setDefaults(NotificationCompat.PRIORITY_HIGH)
@@ -100,7 +118,11 @@ class NotificationReceiver : BroadcastReceiver() {
         val lesson = intent.getStringExtra("lesson")
         val timestamp = intent.getLongExtra("timestamp", 0L)
         val manager = NotificationsManager()
-        val notification = manager.createLessonAlertNotification(context, lesson.toString())
+        val date = LocalDate.now(ZoneId.systemDefault())
+        val notificationId = "${date}-${lesson}".hashCode()
+
+        val notification = manager.createLessonAlertNotification(context, lesson.toString(), notificationId, date.toString())
+
         val notificationManager = NotificationManagerCompat.from(context)
         if (ActivityCompat.checkSelfPermission(
                 context,
@@ -119,6 +141,25 @@ class NotificationReceiver : BroadcastReceiver() {
         }
     }
 
+}
+
+@AndroidEntryPoint
+class NotificationDismissReceiver : BroadcastReceiver() {
+
+    @Inject lateinit var cacheManager: CacheManager
+
+    override fun onReceive(context: Context, intent: Intent) {
+        Log.d("NotificationDismissReceiver", "Получено намерение смахивания: ${intent.extras?.keySet()?.joinToString()}")
+        val lesson = intent.getStringExtra("lesson")
+        val date = LocalDate.now(ZoneId.systemDefault()).dayOfWeek.toString()
+        val notificationId = intent.getIntExtra("notificationId", -1)
+        if (lesson != null) {
+            cacheManager.saveDismissedNotification(date, lesson)
+            Log.d("NotificationDismissReceiver", "Уведомление смахнуто: notificationId=$notificationId, lesson=$lesson, date=$date")
+        } else {
+            Log.e("NotificationDismissReceiver", "Неверные данные: lesson=$lesson, date=$date, notificationId=$notificationId")
+        }
+    }
 }
 
 @Immutable

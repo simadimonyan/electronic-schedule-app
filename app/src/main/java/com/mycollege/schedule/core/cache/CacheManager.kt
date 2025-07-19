@@ -2,6 +2,7 @@ package com.mycollege.schedule.core.cache
 
 import android.content.Intent
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import com.google.gson.Gson
@@ -21,6 +22,7 @@ class CacheManager @Inject constructor(
     private val firstStartUp = "first_startup"
     private val alarmsKey = "alarms"
     private val rustoreConfigKey = "rustore_config"
+    private val dismissedNotificationsKey = "dismissed_notifications"
 
     @Immutable
     data class Configuration(val course: String, val speciality: String, val group: String)
@@ -30,6 +32,40 @@ class CacheManager @Inject constructor(
 
     @Immutable
     data class RuStoreConfig(val pushToken: String, val sentToServer: Boolean)
+
+    fun saveDismissedNotification(date: String, lesson: String) {
+        val dismissed = loadDismissedNotifications().toMutableSet()
+        val notificationKey = "$date-$lesson"
+        dismissed.add(notificationKey)
+        val json = gson.toJson(dismissed)
+        preferences.edit { putString(dismissedNotificationsKey, json) }
+        Log.d("CacheManager", "Сохранено смахнутое уведомление: $notificationKey")
+    }
+
+    fun loadDismissedNotifications(): Set<String> {
+        val json = preferences.getString(dismissedNotificationsKey, null)
+        val type = object : TypeToken<Set<String>>() {}.type
+        val result = try {
+            gson.fromJson(json, type) ?: mutableSetOf<String>()
+        } catch (e: Exception) {
+            Log.e("CacheManager", "Ошибка загрузки смахнутых уведомлений", e)
+            mutableSetOf<String>()
+        }
+        Log.d("CacheManager", "Загружены смахнутые уведомления: $result")
+        return result
+    }
+
+    fun isNotificationDismissed(date: String, lesson: String): Boolean {
+        val notificationKey = "$date-$lesson"
+        val isDismissed = loadDismissedNotifications().contains(notificationKey)
+        Log.d("CacheManager", "Проверка уведомления $notificationKey: смахнуто=$isDismissed")
+        return isDismissed
+    }
+
+    fun clearDismissedNotifications() {
+        preferences.edit { remove(dismissedNotificationsKey) }
+        Log.d("CacheManager", "Список смахнутых уведомлений очищен")
+    }
 
     fun loadLastRuStoreConfig(): RuStoreConfig? {
         val json = preferences.getString(rustoreConfigKey, null)

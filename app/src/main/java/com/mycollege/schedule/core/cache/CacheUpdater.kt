@@ -80,6 +80,10 @@ class CacheUpdater @Inject constructor(
             .setInitialDelay(delay, TimeUnit.MILLISECONDS)
             .setConstraints(
                 Constraints.Builder()
+                    .setRequiresCharging(false)
+                    .setRequiresBatteryNotLow(false)
+                    .setRequiresStorageNotLow(false)
+                    .setRequiresDeviceIdle(false)
                     .setRequiredNetworkType(NetworkType.CONNECTED)
                     .build()
             )
@@ -87,7 +91,7 @@ class CacheUpdater @Inject constructor(
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             "GroupSyncWorker",
-            ExistingPeriodicWorkPolicy.UPDATE,
+            ExistingPeriodicWorkPolicy.KEEP,
             periodicWorkRequest
         )
     }
@@ -100,11 +104,20 @@ class CacheUpdater @Inject constructor(
 
         val periodicScheduleWorkRequest = PeriodicWorkRequestBuilder<ScheduleWorker>(1, TimeUnit.DAYS)
             .setInitialDelay(delayUntilMidnight, TimeUnit.MILLISECONDS)
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiresCharging(false)
+                    .setRequiresBatteryNotLow(false)
+                    .setRequiresStorageNotLow(false)
+                    .setRequiresDeviceIdle(false)
+                    .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
+                    .build()
+            )
             .build()
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             "ScheduleWorker",
-            ExistingPeriodicWorkPolicy.UPDATE,
+            ExistingPeriodicWorkPolicy.KEEP,
             periodicScheduleWorkRequest
         )
     }
@@ -115,6 +128,15 @@ class CacheUpdater @Inject constructor(
     fun scheduleWeekChangeWorker(context: Context) {
         val workRequest = PeriodicWorkRequestBuilder<WeekChangeWorker>(7, TimeUnit.DAYS)
             .setInitialDelay(getDelayUntilNextMonday(), TimeUnit.MILLISECONDS)
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiresCharging(false)
+                    .setRequiresBatteryNotLow(false)
+                    .setRequiresStorageNotLow(false)
+                    .setRequiresDeviceIdle(false)
+                    .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
+                    .build()
+            )
             .build()
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(

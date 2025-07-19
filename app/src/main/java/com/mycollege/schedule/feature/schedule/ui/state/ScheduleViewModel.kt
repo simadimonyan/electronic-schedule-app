@@ -4,6 +4,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -175,6 +176,11 @@ class ScheduleViewModel @Inject constructor(
             val lessonTimeInMillis =
                 currentDate.atTime(lessonStartTime).atZone(ZoneId.systemDefault()).toInstant()
                     .toEpochMilli()
+
+            if (cacheManager.isNotificationDismissed(currentDate.dayOfWeek.toString(), "Пара $lessonCount: $lessonName в $lessonLocation")) {
+                Log.d("ScheduleWorker", "Уведомление для пары $lessonName (lesson: Пара $lessonCount: $lessonName в $lessonLocation, date: $currentDate) уже смахнуто, пропускаем")
+                return@withContext null
+            }
 
             if (lessonTimeInMillis >= System.currentTimeMillis()) {
                 val notificationTime = lessonTimeInMillis - 5 * 60 * 1000

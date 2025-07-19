@@ -32,6 +32,7 @@ class WeekChangeWorker @AssistedInject constructor(
                     !settings.weekCount
                 )
             )
+            cacheManager.clearDismissedNotifications()
             Log.e("WeekChangerWorker", "Week auto-changing executed!")
             Result.success()
         } catch (e: Exception) {
