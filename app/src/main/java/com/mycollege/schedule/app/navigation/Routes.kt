@@ -18,7 +18,7 @@ import com.mycollege.schedule.feature.groups.ui.state.GroupViewModel
 import com.mycollege.schedule.feature.onboarding.ui.OnboardingScreen
 import com.mycollege.schedule.app.activity.ui.StartScreen
 import com.mycollege.schedule.feature.schedule.ui.ScheduleScreen
-import com.mycollege.schedule.feature.settings.ui.Settings
+import com.mycollege.schedule.feature.settings.ui.SettingsScreen
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleViewModel
 import com.mycollege.schedule.app.activity.ui.state.MainViewModel
 import com.mycollege.schedule.app.activity.ui.state.StartViewModel
@@ -82,7 +82,7 @@ fun AddNavGraph(
                 )
             }
         ) {
-            Settings(hiltViewModel(), navController)
+            SettingsScreen(hiltViewModel(), navController)
         }
     }
 }
