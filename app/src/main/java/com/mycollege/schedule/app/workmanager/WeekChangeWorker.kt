@@ -25,13 +25,7 @@ class WeekChangeWorker @AssistedInject constructor(
     override suspend fun doWork(): Result {
         return try {
             val settings = cacheManager.loadLastSettings()
-            cacheManager.saveActualSettings(
-                SettingsState(
-                    settings.navigationVisibility,
-                    settings.fullWeekVisibility,
-                    !settings.weekCount
-                )
-            )
+            cacheManager.saveActualSettings(settings)
             cacheManager.clearDismissedNotifications()
             Log.e("WeekChangerWorker", "Week auto-changing executed!")
             Result.success()

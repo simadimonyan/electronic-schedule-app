@@ -20,6 +20,7 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.SaveSettings -> saveSettings()
             is SettingsEvent.MakeScheduleWeekFull -> makeScheduleFullWeek(event.isFull)
             is SettingsEvent.MakeWeekCountDifferent -> changeWeekCountMode(event.toChange)
+            is SettingsEvent.MakeNotificationsEnabled -> makeNotificationsEnabled(event.isEnabled)
         }
     }
 
@@ -29,9 +30,16 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun saveSettings() {
+        Log.d("Settings", settingsStateHolder.settingsState.value.toString())
         cacheManager.saveActualSettings(
             settingsStateHolder.settingsState.value
         )
+        Log.d("Settings", cacheManager.loadLastSettings().toString())
+    }
+
+    private fun makeNotificationsEnabled(isEnabled: Boolean) {
+        settingsStateHolder.updateNotificationsEnabled(isEnabled)
+        saveSettings()
     }
 
     private fun makeScheduleFullWeek(isFull: Boolean) {

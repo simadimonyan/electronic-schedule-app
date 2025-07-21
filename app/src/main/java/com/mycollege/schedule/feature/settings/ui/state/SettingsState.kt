@@ -16,6 +16,11 @@ data class SettingsState(
     val navigationVisibility: Boolean = false,
 
     /**
+     * Уведомления включены
+     */
+    val notificationsEnabled: Boolean = true,
+
+    /**
      * Видимость расписания на неделю
      */
     val fullWeekVisibility: Boolean = false,
@@ -34,8 +39,16 @@ class SettingsStateHolder @Inject constructor() {
     private val _settingsState = MutableStateFlow(SettingsState())
     val settingsState: StateFlow<SettingsState> = _settingsState
 
+    fun updateSettingsState(state: SettingsState) {
+        _settingsState.update { state }
+    }
+
     fun updateWeekChangeMode(toChange: Boolean) {
         _settingsState.update { it.copy(weekCount = toChange) }
+    }
+
+    fun updateNotificationsEnabled(isEnabled: Boolean) {
+        _settingsState.update { it.copy(notificationsEnabled = isEnabled) }
     }
 
     fun updateFullWeek(isFull: Boolean) {

@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
@@ -27,6 +26,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -61,12 +61,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.mycollege.schedule.R
+import com.mycollege.schedule.app.navigation.Start
 import com.mycollege.schedule.feature.settings.ui.state.SettingsEvent
+import com.mycollege.schedule.feature.settings.ui.state.SettingsViewModel
 import com.mycollege.schedule.shared.ui.theme.ScheduleTheme
 import com.mycollege.schedule.shared.ui.theme.background
 import com.mycollege.schedule.shared.ui.theme.buttons
-import com.mycollege.schedule.app.navigation.Start
-import com.mycollege.schedule.feature.settings.ui.state.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -121,26 +121,26 @@ fun Settings(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp, 0.dp, 20.dp, 0.dp)
-                        .size(width = 0.dp, height = 140.dp),
+                        .wrapContentHeight(),
+                        //.size(width = 0.dp, height = 140.dp),
                     elevation = CardDefaults.cardElevation(2.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
                     Column(modifier = Modifier.padding(20.dp, 0.dp)) {
+
+                        CardSettings(title = "Уведомления", checkedState = settingsState.notificationsEnabled) {
+                            viewModel.handleEvent(SettingsEvent.MakeNotificationsEnabled(it))
+                            viewModel.handleEvent(SettingsEvent.SaveSettings)
+                        }
+
+                        HorizontalDivider(Modifier.padding(horizontal = 10.dp))
 
                         CardSettings(title = "Показать неделю", checkedState = settingsState.fullWeekVisibility) {
                             viewModel.handleEvent(SettingsEvent.MakeScheduleWeekFull(it))
                             viewModel.handleEvent(SettingsEvent.SaveSettings)
                         }
 
-                        Spacer(modifier = Modifier.height(5.dp))
-
-                        Box(modifier = Modifier
-                            .background(Color.LightGray)
-                            .fillMaxWidth()
-                            .padding(start = 20.dp, end = 20.dp)
-                            .height(0.5.dp))
-
-                        Spacer(modifier = Modifier.height(5.dp))
+                        HorizontalDivider(Modifier.padding(horizontal = 10.dp))
 
                         CardSettings(title = "Скрыть навигацию", checkedState = settingsState.navigationVisibility) {
                             viewModel.handleEvent(SettingsEvent.MakeNavigationInvisible(it))
@@ -181,8 +181,8 @@ fun CardSettings(title: String, checkedState: Boolean, onChanged: (Boolean) -> U
                 colors = SwitchDefaults.colors(
                     checkedTrackColor = buttons,
                     uncheckedTrackColor = Color.LightGray,
-                    uncheckedBorderColor = Color.Transparent,
-                    checkedBorderColor = Color.Transparent,
+                    uncheckedBorderColor = Color.Gray,
+                    checkedBorderColor = buttons,
                     checkedThumbColor = Color.White,
                     uncheckedThumbColor = Color.White,
                 )

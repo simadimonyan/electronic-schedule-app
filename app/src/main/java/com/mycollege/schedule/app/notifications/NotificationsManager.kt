@@ -112,32 +112,39 @@ class NotificationsManager {
 
 }
 
+@AndroidEntryPoint
 class NotificationReceiver : BroadcastReceiver() {
 
+    @Inject lateinit var cacheManager: CacheManager
+
     override fun onReceive(context: Context, intent: Intent) {
-        val lesson = intent.getStringExtra("lesson")
-        val timestamp = intent.getLongExtra("timestamp", 0L)
-        val manager = NotificationsManager()
-        val date = LocalDate.now(ZoneId.systemDefault())
-        val notificationId = "${date}-${lesson}".hashCode()
+        if (cacheManager.loadLastSettings().notificationsEnabled) {
 
-        val notification = manager.createLessonAlertNotification(context, lesson.toString(), notificationId, date.toString())
+            val lesson = intent.getStringExtra("lesson")
+            val timestamp = intent.getLongExtra("timestamp", 0L)
+            val manager = NotificationsManager()
+            val date = LocalDate.now(ZoneId.systemDefault())
+            val notificationId = "${date}-${lesson}".hashCode()
 
-        val notificationManager = NotificationManagerCompat.from(context)
-        if (ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return
-        }
-        if (timestamp >= System.currentTimeMillis()) {
-            notificationManager.notify(lesson.hashCode(), notification)
+            val notification = manager.createLessonAlertNotification(context, lesson.toString(), notificationId, date.toString())
+
+            val notificationManager = NotificationManagerCompat.from(context)
+            if (ActivityCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return
+            }
+            if (timestamp >= System.currentTimeMillis()) {
+                notificationManager.notify(lesson.hashCode(), notification)
+            }
+
         }
     }
 
