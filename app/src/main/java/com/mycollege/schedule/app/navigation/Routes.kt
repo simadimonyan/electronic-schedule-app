@@ -13,15 +13,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.mycollege.schedule.app.activity.ui.StartScreen
+import com.mycollege.schedule.app.activity.ui.state.MainViewModel
+import com.mycollege.schedule.app.activity.ui.state.StartViewModel
 import com.mycollege.schedule.feature.groups.ui.GroupScreen
 import com.mycollege.schedule.feature.groups.ui.state.GroupViewModel
 import com.mycollege.schedule.feature.onboarding.ui.OnboardingScreen
-import com.mycollege.schedule.app.activity.ui.StartScreen
 import com.mycollege.schedule.feature.schedule.ui.ScheduleScreen
-import com.mycollege.schedule.feature.settings.ui.SettingsScreen
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleViewModel
-import com.mycollege.schedule.app.activity.ui.state.MainViewModel
-import com.mycollege.schedule.app.activity.ui.state.StartViewModel
+import com.mycollege.schedule.feature.settings.ui.SettingsScreen
+import com.mycollege.schedule.feature.settings.ui.state.SettingsViewModel
 
 @Composable
 fun AppPager(
@@ -52,6 +53,7 @@ fun AddNavGraph(
 
     val appState by mainViewModel.appStateHolder.appState.collectAsState()
     val startViewModel: StartViewModel = hiltViewModel()
+    val settingsViewModel: SettingsViewModel = hiltViewModel()
 
     // restore cache event
     startViewModel.init()
@@ -82,7 +84,7 @@ fun AddNavGraph(
                 )
             }
         ) {
-            SettingsScreen(hiltViewModel(), navController)
+            SettingsScreen(settingsViewModel, navController)
         }
     }
 }

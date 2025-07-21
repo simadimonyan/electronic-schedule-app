@@ -1,14 +1,17 @@
 package com.mycollege.schedule.feature.settings.ui
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,17 +25,24 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.mycollege.schedule.app.navigation.Start
+import com.mycollege.schedule.feature.settings.ui.components.AboutBottomSheet
 import com.mycollege.schedule.feature.settings.ui.components.CardSettings
 import com.mycollege.schedule.feature.settings.ui.components.ContactLabel
+import com.mycollege.schedule.feature.settings.ui.components.PdfViewerFromAssets
 import com.mycollege.schedule.feature.settings.ui.components.SegmentedButton
 import com.mycollege.schedule.feature.settings.ui.state.SettingsEvent
 import com.mycollege.schedule.feature.settings.ui.state.SettingsState
@@ -43,7 +53,7 @@ import com.mycollege.schedule.shared.ui.theme.background
 @Preview
 @Composable
 fun SettingsPreview() {
-    SettingsContent(SettingsState(), {}, {})
+    SettingsContent(SettingsState(), {}, {}, {}, {})
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,6 +64,7 @@ fun SettingsScreen(
 ) {
 
     val settingsState by viewModel.settingsStateHolder.settingsState.collectAsState()
+    var aboutBottomSheet by remember { mutableStateOf(false) }
 
     val handleEvent: (SettingsEvent) -> Unit = { event ->
         viewModel.handleEvent(event)
@@ -69,7 +80,30 @@ fun SettingsScreen(
         }
     }
 
-    SettingsContent(settingsState, handleEvent, onExit)
+    var showDialog by remember { mutableStateOf(false) }
+
+    val openCopyrights: () -> Unit = {
+        showDialog = true
+    }
+
+    val onAboutToggle: () -> Unit = {
+        aboutBottomSheet = !aboutBottomSheet
+    }
+
+    if (aboutBottomSheet) {
+        AboutBottomSheet(onAboutToggle)
+    }
+
+    SettingsContent(settingsState, handleEvent, onAboutToggle, openCopyrights, onExit)
+
+    if (showDialog) {
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = { showDialog = false }
+        ) {
+            PdfViewerFromAssets("copyrights.pdf")
+        }
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,6 +111,8 @@ fun SettingsScreen(
 fun SettingsContent(
     settingsState: SettingsState,
     handleEvent: (SettingsEvent) -> Unit,
+    onAboutToggle: () -> Unit,
+    openCopyrights: () -> Unit,
     onExit: () -> Unit
 ) {
     ScheduleTheme {
@@ -87,7 +123,9 @@ fun SettingsContent(
             },
             topBar = {
                 TopAppBar(
-                    title = { Text("Настройки", color = Color.Black, fontWeight = FontWeight.Medium) },
+                    title = {
+                        Text("Настройки", color = Color.Black, fontWeight = FontWeight.Medium)
+                    },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = background
                     ),
@@ -130,20 +168,78 @@ fun SettingsContent(
                             handleEvent(SettingsEvent.SaveSettings)
                         }
 
-                        HorizontalDivider(Modifier.padding(horizontal = 10.dp))
+                        HorizontalDivider()
 
                         CardSettings(title = "Показать неделю", checkedState = settingsState.fullWeekVisibility) {
                             handleEvent(SettingsEvent.MakeScheduleWeekFull(it))
                             handleEvent(SettingsEvent.SaveSettings)
                         }
 
-                        HorizontalDivider(Modifier.padding(horizontal = 10.dp))
+                        HorizontalDivider()
 
                         CardSettings(title = "Скрыть навигацию", checkedState = settingsState.navigationVisibility) {
                             handleEvent(SettingsEvent.MakeNavigationInvisible(it))
                             handleEvent(SettingsEvent.SaveSettings)
                         }
 
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp, 0.dp, 20.dp, 0.dp)
+                        .wrapContentHeight(),
+                    elevation = CardDefaults.cardElevation(2.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    onClick = openCopyrights
+                ) {
+
+                    Row(
+                        modifier = Modifier
+                            .height(60.dp)
+                            .padding(horizontal = 20.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Outlined.Info,
+                            contentDescription = "Info",
+                            tint = Color.LightGray
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = "Авторские права",
+                            fontSize = 18.sp
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp, 0.dp, 20.dp, 0.dp)
+                        .wrapContentHeight(),
+                    elevation = CardDefaults.cardElevation(2.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    onClick = onAboutToggle
+                ) {
+
+                    Row(
+                        modifier = Modifier
+                            .height(60.dp)
+                            .padding(horizontal = 20.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Outlined.Info, contentDescription = "Info", tint = Color.LightGray)
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = "О приложении",
+                            fontSize = 18.sp
+                        )
                     }
                 }
 
