@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.core.graphics.createBitmap
 import kotlinx.coroutines.launch
 import java.io.File
@@ -85,13 +86,14 @@ fun PdfViewerFromAssets(assetFileName: String) {
                 bitmap = bitmap,
                 contentDescription = "copyrights",
                 modifier = Modifier
-                    .size(2000.dp)
+                    .fillMaxSize()
                     .align(Alignment.Center)
                     .graphicsLayer(
                         scaleX = scale,
                         scaleY = scale,
                         translationX = offsetX.value,
-                        translationY = offsetY.value
+                        translationY = offsetY.value,
+                        transformOrigin = TransformOrigin.Center
                     )
             )
 

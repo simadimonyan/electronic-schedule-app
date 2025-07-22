@@ -1,5 +1,7 @@
 package com.mycollege.schedule.feature.settings.ui
 
+import android.annotation.SuppressLint
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -42,7 +44,7 @@ import com.mycollege.schedule.app.navigation.Start
 import com.mycollege.schedule.feature.settings.ui.components.AboutBottomSheet
 import com.mycollege.schedule.feature.settings.ui.components.CardSettings
 import com.mycollege.schedule.feature.settings.ui.components.ContactLabel
-import com.mycollege.schedule.feature.settings.ui.components.PdfViewerFromAssets
+import com.mycollege.schedule.feature.settings.ui.components.CopyrightView
 import com.mycollege.schedule.feature.settings.ui.components.SegmentedButton
 import com.mycollege.schedule.feature.settings.ui.state.SettingsEvent
 import com.mycollege.schedule.feature.settings.ui.state.SettingsState
@@ -56,6 +58,7 @@ fun SettingsPreview() {
     SettingsContent(SettingsState(), {}, {}, {}, {})
 }
 
+@SuppressLint("ContextCastToActivity")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -97,11 +100,9 @@ fun SettingsScreen(
     SettingsContent(settingsState, handleEvent, onAboutToggle, openCopyrights, onExit)
 
     if (showDialog) {
-        androidx.compose.ui.window.Dialog(
-            onDismissRequest = { showDialog = false }
-        ) {
-            PdfViewerFromAssets("copyrights.pdf")
-        }
+        CopyrightView(
+            onDisposable = { showDialog = !showDialog }
+        )
     }
 
 }
@@ -157,7 +158,6 @@ fun SettingsContent(
                         .fillMaxWidth()
                         .padding(20.dp, 0.dp, 20.dp, 0.dp)
                         .wrapContentHeight(),
-                    //.size(width = 0.dp, height = 140.dp),
                     elevation = CardDefaults.cardElevation(2.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
@@ -194,43 +194,34 @@ fun SettingsContent(
                         .wrapContentHeight(),
                     elevation = CardDefaults.cardElevation(2.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
-                    onClick = openCopyrights
                 ) {
 
                     Row(
                         modifier = Modifier
+                            .clickable {
+                                openCopyrights()
+                            }
                             .height(60.dp)
+                            .fillMaxWidth()
                             .padding(horizontal = 20.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            Icons.Outlined.Info,
-                            contentDescription = "Info",
-                            tint = Color.LightGray
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
+                        Spacer(modifier = Modifier.width(20.dp))
                         Text(
                             text = "Авторские права",
                             fontSize = 18.sp
                         )
                     }
-                }
 
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp, 0.dp, 20.dp, 0.dp)
-                        .wrapContentHeight(),
-                    elevation = CardDefaults.cardElevation(2.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    onClick = onAboutToggle
-                ) {
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp))
 
                     Row(
                         modifier = Modifier
+                            .clickable {
+                                onAboutToggle()
+                            }
                             .height(60.dp)
+                            .fillMaxWidth()
                             .padding(horizontal = 20.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
