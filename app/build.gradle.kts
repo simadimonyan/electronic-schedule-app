@@ -168,6 +168,7 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.jsoup)
 
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.preference.ktx)
