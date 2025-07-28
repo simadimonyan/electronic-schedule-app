@@ -39,7 +39,7 @@ class ScheduleWorker @AssistedInject constructor(
      */
     override suspend fun doWork(): Result {
         return try {
-            Log.e("ScheduleWorker", "Starting")
+            Log.i("ScheduleWorker", "Starting")
             val appContext = applicationContext
 
             val todayLessons = getTodayLessons()
@@ -66,7 +66,7 @@ class ScheduleWorker @AssistedInject constructor(
             // creating new alarms
             val intents = ArrayList<CacheManager.IntentConf>()
             for ((i, lesson) in todayLessons.withIndex()) {
-                Log.e("ScheduleWorker", "setting alarms...")
+                Log.i("ScheduleWorker", "setting alarms...")
                 val intent = setNotificationForLesson(applicationContext, lesson, i)
                 if (intent != null) intents.add(CacheManager.IntentConf(i, intent))
             }

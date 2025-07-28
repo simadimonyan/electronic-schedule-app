@@ -118,7 +118,8 @@ class NotificationReceiver : BroadcastReceiver() {
     @Inject lateinit var cacheManager: CacheManager
 
     override fun onReceive(context: Context, intent: Intent) {
-        if (cacheManager.loadLastSettings().notificationsEnabled) {
+        val settings = cacheManager.loadLastSettings()
+        if (settings == null || settings.notificationsEnabled) {
 
             val lesson = intent.getStringExtra("lesson")
             val timestamp = intent.getLongExtra("timestamp", 0L)

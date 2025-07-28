@@ -124,7 +124,7 @@ class CacheManager @Inject constructor(
             gson.fromJson(json, type)
         }
         catch (e: Exception) {
-            SettingsState(false, false, false)
+            return SettingsState(false, true, false, false)
         }
 
         return value

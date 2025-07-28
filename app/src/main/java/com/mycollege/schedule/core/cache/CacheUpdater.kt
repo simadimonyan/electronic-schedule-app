@@ -91,7 +91,7 @@ class CacheUpdater @Inject constructor(
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             "GroupSyncWorker",
-            ExistingPeriodicWorkPolicy.KEEP,
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
             periodicWorkRequest
         )
     }
@@ -117,7 +117,7 @@ class CacheUpdater @Inject constructor(
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             "ScheduleWorker",
-            ExistingPeriodicWorkPolicy.KEEP,
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
             periodicScheduleWorkRequest
         )
     }
@@ -141,7 +141,7 @@ class CacheUpdater @Inject constructor(
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             "WeekChangeWorker",
-            ExistingPeriodicWorkPolicy.KEEP,
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
             workRequest
         )
     }
