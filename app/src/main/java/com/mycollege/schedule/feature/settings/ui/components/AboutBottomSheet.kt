@@ -82,7 +82,6 @@ fun AboutContent() {
                 painter = painterResource(R.drawable.logo),
                 contentDescription = "Logo",
                 modifier = Modifier
-                    .border(1.dp, Color.LightGray, RoundedCornerShape(10.dp))
                     .clip(RoundedCornerShape(10.dp))
                     .size(100.dp)
             )
