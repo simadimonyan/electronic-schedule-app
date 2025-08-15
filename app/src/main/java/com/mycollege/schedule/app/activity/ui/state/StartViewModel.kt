@@ -25,10 +25,11 @@ class StartViewModel @Inject constructor(
             }
 
             // Settings
-            settingsStateHolder.updateSettingsState(settings)
-//            settingsStateHolder.updateFullWeek(settings.fullWeekVisibility)
-//            settingsStateHolder.updateNavInvisibility(settings.navigationVisibility)
-//            settingsStateHolder.updateWeekChangeMode(settings.weekCount)
+            //settingsStateHolder.updateSettingsState(settings)
+            settingsStateHolder.updateFullWeek(settings.fullWeekVisibility)
+            settingsStateHolder.updateNavInvisibility(settings.navigationVisibility)
+            settingsStateHolder.updateWeekChangeMode(settings.weekCount)
+            settingsStateHolder.updateNotificationsEnabled(settings.notificationsEnabled)
         }
         catch (_: Exception) {}
     }

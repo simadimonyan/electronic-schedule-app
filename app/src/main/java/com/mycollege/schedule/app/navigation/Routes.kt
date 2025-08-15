@@ -48,12 +48,12 @@ fun AddNavGraph(
     navController: NavHostController,
     mainViewModel: MainViewModel,
     groupViewModel: GroupViewModel,
-    scheduleViewModel: ScheduleViewModel
+    scheduleViewModel: ScheduleViewModel,
+    settingsViewModel: SettingsViewModel
 ) {
 
     val appState by mainViewModel.appStateHolder.appState.collectAsState()
     val startViewModel: StartViewModel = hiltViewModel()
-    val settingsViewModel: SettingsViewModel = hiltViewModel()
 
     // restore cache event
     startViewModel.init()

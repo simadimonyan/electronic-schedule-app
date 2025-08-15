@@ -48,7 +48,7 @@ android {
     defaultConfig {
         applicationId = "com.mycollege.schedule"
         minSdk = 29
-        versionCode = 9
+        versionCode = 10
         versionName = "1.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

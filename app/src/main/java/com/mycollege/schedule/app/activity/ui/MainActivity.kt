@@ -30,6 +30,7 @@ import com.mycollege.schedule.core.network.RetrofitClient
 import com.mycollege.schedule.core.network.dto.PushTokenRequest
 import com.mycollege.schedule.feature.groups.ui.state.GroupViewModel
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleViewModel
+import com.mycollege.schedule.feature.settings.ui.state.SettingsViewModel
 import com.mycollege.schedule.shared.ui.theme.background
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -44,6 +45,7 @@ class MainActivity : ComponentActivity() {
     private val mainViewModel: MainViewModel by viewModels()
     private val groupViewModel: GroupViewModel by viewModels()
     private val scheduleViewModel: ScheduleViewModel by viewModels()
+    private val settingsViewModel: SettingsViewModel by viewModels()
 
     @SuppressLint("HardwareIds")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -152,7 +154,8 @@ class MainActivity : ComponentActivity() {
                     navController = navController,
                     mainViewModel = mainViewModel,
                     groupViewModel = groupViewModel,
-                    scheduleViewModel = scheduleViewModel
+                    scheduleViewModel = scheduleViewModel,
+                    settingsViewModel = settingsViewModel
                 )
 
             }

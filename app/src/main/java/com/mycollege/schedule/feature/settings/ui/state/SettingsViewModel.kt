@@ -26,30 +26,30 @@ class SettingsViewModel @Inject constructor(
 
     private fun changeWeekCountMode(toChange: Boolean) {
         settingsStateHolder.updateWeekChangeMode(toChange)
-        saveSettings()
+        //saveSettings()
     }
 
     private fun saveSettings() {
-        Log.d("Settings", settingsStateHolder.settingsState.value.toString())
+        Log.d("Settings", "before save: " + settingsStateHolder.settingsState.value.toString())
         cacheManager.saveActualSettings(
             settingsStateHolder.settingsState.value
         )
-        Log.d("Settings", cacheManager.loadLastSettings().toString())
+        Log.d("Settings", "after save: " + cacheManager.loadLastSettings().toString())
     }
 
     private fun makeNotificationsEnabled(isEnabled: Boolean) {
         settingsStateHolder.updateNotificationsEnabled(isEnabled)
-        saveSettings()
+        //saveSettings()
     }
 
     private fun makeScheduleFullWeek(isFull: Boolean) {
         settingsStateHolder.updateFullWeek(isFull)
-        saveSettings()
+        //saveSettings()
     }
 
     private fun makeNavInvisible(isVisible: Boolean) {
         settingsStateHolder.updateNavInvisibility(isVisible)
-        saveSettings()
+        //saveSettings()
     }
 
 }
