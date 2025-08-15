@@ -9,6 +9,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import javax.inject.Inject
 import androidx.core.content.edit
+import com.mycollege.schedule.feature.groups.ui.state.GroupEvent
 import com.mycollege.schedule.feature.settings.ui.state.SettingsState
 
 @Stable
@@ -20,6 +21,7 @@ class CacheManager @Inject constructor(
     private val chosenConfigurationKey = "chosen_configuration"
     private val settingsConfKey = "settings_configuration"
     private val firstStartUp = "first_startup"
+    private val studentModeKey = "student_mode"
     private val alarmsKey = "alarms"
     private val rustoreConfigKey = "rustore_config"
     private val dismissedNotificationsKey = "dismissed_notifications"
@@ -32,6 +34,14 @@ class CacheManager @Inject constructor(
 
     @Immutable
     data class RuStoreConfig(val pushToken: String, val sentToServer: Boolean)
+
+    fun loadStudentMode(): Boolean {
+        return preferences.getBoolean(studentModeKey, false)
+    }
+
+    fun saveStudentMode(studentMode: Boolean) {
+        preferences.edit { putBoolean(studentModeKey, studentMode) }
+    }
 
     fun saveDismissedNotification(date: String, lesson: String) {
         val dismissed = loadDismissedNotifications().toMutableSet()

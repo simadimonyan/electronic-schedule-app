@@ -30,7 +30,6 @@ tracer {
 
         uploadMapping = true
     }
-
 }
 
 android {
@@ -48,8 +47,8 @@ android {
     defaultConfig {
         applicationId = "com.mycollege.schedule"
         minSdk = 29
-        versionCode = 10
-        versionName = "1.3"
+        versionCode = 11
+        versionName = "1.3.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

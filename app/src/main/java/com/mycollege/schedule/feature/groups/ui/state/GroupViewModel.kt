@@ -47,6 +47,7 @@ class GroupViewModel @Inject constructor(
             is GroupEvent.SetSelectedIndex -> setSelectedIndex(event.index)
             is GroupEvent.ChooseGroup -> chooseGroup()
             is GroupEvent.Display -> display()
+            is GroupEvent.ChangeStudentMode -> changeAppModeToggle(event.studentMode)
         }
     }
 
@@ -57,6 +58,16 @@ class GroupViewModel @Inject constructor(
         // get last chosen configuration
         viewModelScope.launch {
             restoreCache()
+        }
+    }
+
+    /**
+     * Изменить состояние выбора режима студента/преподавателя
+     */
+    private fun changeAppModeToggle(studentMode: Boolean) {
+        viewModelScope.launch {
+            appStateHolder.updateStudentMode(studentMode)
+            cacheManager.saveStudentMode(studentMode)
         }
     }
 
@@ -131,12 +142,14 @@ class GroupViewModel @Inject constructor(
     // in main thread only | to avoid delay of loading
     private fun restoreCache() {
         try {
+            val applicationMode = cacheManager.loadStudentMode()
             val configuration = cacheManager.loadLastConfiguration()
             if (configuration.group.isNotEmpty()) {
                 groupStateHolder.updateGroup(configuration.group)
                 groupStateHolder.updateLevel(configuration.speciality)
                 groupStateHolder.updateCourse(configuration.course)
             }
+            appStateHolder.updateStudentMode(applicationMode)
         } catch (_: Exception) {
             // first-time setup or empty cache case
         }

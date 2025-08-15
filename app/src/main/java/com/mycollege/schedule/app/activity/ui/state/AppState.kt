@@ -18,7 +18,12 @@ data class AppState(
     /**
      * Приложение было первый раз запущено
      */
-    val firstStartUp: Boolean = false
+    val firstStartUp: Boolean = false,
+
+    /**
+     * Режим студента / преподавателя
+     */
+    val studentMode: Boolean = true
 
 )
 
@@ -35,6 +40,10 @@ class AppStateHolder @Inject constructor() {
 
     fun updatingFirstStartup(isFirst: Boolean) {
         _appState.update { it.copy(firstStartUp = isFirst) }
+    }
+
+    fun updateStudentMode(studentMode: Boolean) {
+        _appState.update { it.copy(studentMode = studentMode) }
     }
 
 }

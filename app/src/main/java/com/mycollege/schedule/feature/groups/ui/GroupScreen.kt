@@ -25,6 +25,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,7 +39,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -47,6 +47,7 @@ import com.mycollege.schedule.BuildConfig
 import com.mycollege.schedule.R
 import com.mycollege.schedule.core.ads.YandexAdsListener
 import com.mycollege.schedule.feature.groups.ui.components.BottomSheetContent
+import com.mycollege.schedule.feature.groups.ui.components.ModeSegmentedButton
 import com.mycollege.schedule.feature.groups.ui.state.GroupEvent
 import com.mycollege.schedule.feature.groups.ui.state.GroupState
 import com.mycollege.schedule.feature.groups.ui.state.GroupViewModel
@@ -73,6 +74,7 @@ fun GroupScreen(
 fun MainFrame(viewModel: GroupViewModel, pagerState: PagerState) {
     val context = LocalContext.current
     val groupState by viewModel.groupStateHolder.groupState.collectAsState()
+    val appState by viewModel.appStateHolder.appState.collectAsState()
     val scope = rememberCoroutineScope()
     var showAds by remember { mutableStateOf(false) }
 
@@ -81,17 +83,20 @@ fun MainFrame(viewModel: GroupViewModel, pagerState: PagerState) {
 
     ScheduleTheme {
         Scaffold(modifier = Modifier.fillMaxSize(), contentWindowInsets = WindowInsets(0), containerColor = background) { innerPadding ->
-            Column(modifier = Modifier.fillMaxHeight()) {
-                Text(
-                    context.getString(R.string.choose_group),
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .fillMaxWidth()
-                        .padding(0.dp, 70.dp, 0.dp, 0.dp),
-                    textAlign = TextAlign.Center,
-                    fontSize = 23.sp,
-                    fontWeight = FontWeight.Bold
-                )
+            Column(modifier = Modifier.fillMaxHeight().padding(innerPadding).padding(0.dp, 70.dp, 0.dp, 0.dp)) {
+//                Text(
+//                    context.getString(R.string.choose_group),
+//                    modifier = Modifier
+//                        .padding(innerPadding)
+//                        .fillMaxWidth()
+//                        .padding(0.dp, 70.dp, 0.dp, 0.dp),
+//                    textAlign = TextAlign.Center,
+//                    fontSize = 23.sp,
+//                    fontWeight = FontWeight.Bold
+//                )
+                ModeSegmentedButton(appState.studentMode) {
+                    viewModel.handleEvent(GroupEvent.ChangeStudentMode(it))
+                }
 
                 // 480.dp is size of height when 80.dp is too big
                 BoxWithConstraints {
