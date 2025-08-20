@@ -28,9 +28,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mycollege.schedule.R
-import com.mycollege.schedule.app.activity.data.models.Group
 import com.mycollege.schedule.feature.groups.ui.state.GroupEvent
-import com.mycollege.schedule.feature.groups.ui.state.GroupViewModel
+import com.mycollege.schedule.feature.groups.ui.state.GroupState
 import com.mycollege.schedule.shared.ui.theme.background
 import com.mycollege.schedule.shared.ui.theme.buttons
 
@@ -39,7 +38,8 @@ import com.mycollege.schedule.shared.ui.theme.buttons
 fun BottomSheetContent(
     loading: Boolean,
     progress: Int,
-    viewModel: GroupViewModel,
+    groupState: GroupState,
+    handleEvent: (GroupEvent) -> Unit,
     selectedIndex: Int,
     onDismiss: () -> Unit
 ) {
@@ -78,13 +78,13 @@ fun BottomSheetContent(
         } else {
 
             // отобразить данные по окончанию загрузки
-            viewModel.handleEvent(GroupEvent.Display)
+            handleEvent(GroupEvent.Display)
 
-            BottomSheet(viewModel) { newValue ->
+            BottomSheet(groupState) { newValue ->
                 when (selectedIndex) {
-                    0 -> viewModel.handleEvent(GroupEvent.UpdateCourse(newValue))
-                    1 -> viewModel.handleEvent(GroupEvent.UpdateSpeciality(newValue))
-                    2 -> viewModel.handleEvent(GroupEvent.UpdateGroup(newValue))
+                    0 -> handleEvent(GroupEvent.UpdateCourse(newValue))
+                    1 -> handleEvent(GroupEvent.UpdateSpeciality(newValue))
+                    2 -> handleEvent(GroupEvent.UpdateGroup(newValue))
                 }
                 onDismiss()
             }
@@ -97,11 +97,9 @@ fun BottomSheetContent(
 
 @Composable
 fun BottomSheet(
-    viewModel: GroupViewModel,
+    groupState: GroupState,
     updateValue: (String) -> Unit,
 ) {
-    val groupState by viewModel.groupStateHolder.groupState.collectAsState()
-
     when (groupState.selectedIndex) {
         0 -> CourseKeys(groupState.coursesToDisplay, updateValue)
         1 -> SpecialityKeys(groupState.levelsToDisplay, updateValue)

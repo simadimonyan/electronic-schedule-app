@@ -1,8 +1,6 @@
 package com.mycollege.schedule.feature.groups.ui
 
 import android.annotation.SuppressLint
-import android.content.Context
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -13,52 +11,52 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.mycollege.schedule.BuildConfig
 import com.mycollege.schedule.R
+import com.mycollege.schedule.app.activity.domain.models.GroupParserState
+import com.mycollege.schedule.app.activity.ui.state.AppState
 import com.mycollege.schedule.core.ads.YandexAdsListener
+import com.mycollege.schedule.feature.groups.ui.components.ActionButton
 import com.mycollege.schedule.feature.groups.ui.components.BottomSheetContent
+import com.mycollege.schedule.feature.groups.ui.components.GroupCard
 import com.mycollege.schedule.feature.groups.ui.components.ModeSegmentedButton
 import com.mycollege.schedule.feature.groups.ui.state.GroupEvent
 import com.mycollege.schedule.feature.groups.ui.state.GroupState
 import com.mycollege.schedule.feature.groups.ui.state.GroupViewModel
 import com.mycollege.schedule.shared.ui.theme.ScheduleTheme
 import com.mycollege.schedule.shared.ui.theme.background
-import com.mycollege.schedule.shared.ui.theme.buttons
 import com.yandex.mobile.ads.banner.BannerAdSize
 import com.yandex.mobile.ads.banner.BannerAdView
 import com.yandex.mobile.ads.common.AdRequest
 import kotlinx.coroutines.launch
 import ru.rustore.sdk.remoteconfig.RemoteConfigClient
+
+@Preview
+@Composable
+fun GroupPreview() {
+
+    val pagerState = rememberPagerState(
+        initialPage = 0
+    ) { 0 }
+
+    GroupContent({}, {}, GroupState(), AppState(), GroupParserState(), pagerState, false)
+}
 
 @SuppressLint("MutableCollectionMutableState")
 @Composable
@@ -66,36 +64,47 @@ fun GroupScreen(
     viewModel: GroupViewModel = hiltViewModel(),
     pagerState: PagerState
 ) {
-    MainFrame(viewModel = viewModel, pagerState)
-}
 
-@SuppressLint("UnusedBoxWithConstraintsScope")
-@Composable
-fun MainFrame(viewModel: GroupViewModel, pagerState: PagerState) {
-    val context = LocalContext.current
     val groupState by viewModel.groupStateHolder.groupState.collectAsState()
     val appState by viewModel.appStateHolder.appState.collectAsState()
-    val scope = rememberCoroutineScope()
+    val parserState by viewModel.groupParserStateHolder.groupParserState.collectAsState()
+
     var showAds by remember { mutableStateOf(false) }
 
     RemoteConfigClient.instance
         .getRemoteConfig().addOnSuccessListener { rc -> showAds = rc.getBoolean("Advertisement")}
 
+    val handleEvent: (GroupEvent) -> Unit = {
+        viewModel.handleEvent(it)
+    }
+
+    val updateAppStateIndex: (Int) -> Unit = {
+        viewModel.appStateHolder.updateIndex(it)
+    }
+
+    GroupContent(handleEvent, updateAppStateIndex, groupState, appState, parserState, pagerState, showAds)
+}
+
+@SuppressLint("UnusedBoxWithConstraintsScope")
+@Composable
+fun GroupContent(
+    handleEvent: (GroupEvent) -> Unit,
+    updateAppStateIndex: (Int) -> Unit,
+    groupState: GroupState,
+    appState: AppState,
+    parserState: GroupParserState,
+    pagerState: PagerState,
+    showAds: Boolean
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
     ScheduleTheme {
         Scaffold(modifier = Modifier.fillMaxSize(), contentWindowInsets = WindowInsets(0), containerColor = background) { innerPadding ->
             Column(modifier = Modifier.fillMaxHeight().padding(innerPadding).padding(0.dp, 70.dp, 0.dp, 0.dp)) {
-//                Text(
-//                    context.getString(R.string.choose_group),
-//                    modifier = Modifier
-//                        .padding(innerPadding)
-//                        .fillMaxWidth()
-//                        .padding(0.dp, 70.dp, 0.dp, 0.dp),
-//                    textAlign = TextAlign.Center,
-//                    fontSize = 23.sp,
-//                    fontWeight = FontWeight.Bold
-//                )
+
                 ModeSegmentedButton(appState.studentMode) {
-                    viewModel.handleEvent(GroupEvent.ChangeStudentMode(it))
+                    handleEvent(GroupEvent.ChangeStudentMode(it))
                 }
 
                 // 480.dp is size of height when 80.dp is too big
@@ -104,15 +113,51 @@ fun MainFrame(viewModel: GroupViewModel, pagerState: PagerState) {
                     Spacer(modifier = Modifier.padding(bottom = padding))
                 }
 
-                Body(viewModel, context, groupState)
+                // body cards
+                Column {
+                    GroupCard(
+                        icon = R.drawable.study,
+                        title = LocalContext.current.getString(R.string.course),
+                        subtitle = groupState.course,
+                        onClick = {
+                            handleEvent(GroupEvent.Display)
+                            handleEvent(GroupEvent.ShowBottomSheet)
+                            handleEvent(GroupEvent.SetSelectedIndex(0))
+                        }
+                    )
+
+                    GroupCard(
+                        icon = R.drawable.books,
+                        title = LocalContext.current.getString(R.string.speciality),
+                        subtitle = groupState.level,
+                        onClick = {
+                            handleEvent(GroupEvent.Display)
+                            handleEvent(GroupEvent.ShowBottomSheet)
+                            handleEvent(GroupEvent.SetSelectedIndex(1))
+                        }
+                    )
+
+                    GroupCard(
+                        icon = R.drawable.people,
+                        title = LocalContext.current.getString(R.string.group),
+                        subtitle = groupState.group,
+                        onClick = {
+                            handleEvent(GroupEvent.Display)
+                            handleEvent(GroupEvent.ShowBottomSheet)
+                            handleEvent(GroupEvent.SetSelectedIndex(2))
+                        }
+                    )
+                }
+
+                // ---
 
                 ActionButton(
                     text = context.getString(R.string.choose),
                     icon = R.drawable.logo,
                     onClick = {
-                        viewModel.handleEvent(GroupEvent.ChooseGroup)
+                        handleEvent(GroupEvent.ChooseGroup)
                         scope.launch {
-                            viewModel.appStateHolder.updateIndex(1)
+                            updateAppStateIndex(1)
                             pagerState
                                 .animateScrollToPage(1)
                         }
@@ -134,137 +179,18 @@ fun MainFrame(viewModel: GroupViewModel, pagerState: PagerState) {
                     }
                 }
 
+                if (groupState.showBottomSheet) {
+                    BottomSheetContent(
+                        loading = parserState.loading,
+                        progress = parserState.progress,
+                        groupState,
+                        handleEvent,
+                        selectedIndex = groupState.selectedIndex,
+                        onDismiss = { handleEvent(GroupEvent.HideBottomSheet) }
+                    )
+                }
+
             }
-        }
-    }
-}
-
-@Composable
-fun Body(
-    viewModel: GroupViewModel,
-    context: Context,
-    groupState: GroupState
-) {
-    val parserState by viewModel.groupParserStateHolder.groupParserState.collectAsState()
-
-    Column {
-        CardContent(
-            icon = R.drawable.study,
-            title = context.getString(R.string.course),
-            subtitle = groupState.course,
-            onClick = {
-                viewModel.handleEvent(GroupEvent.Display)
-                viewModel.handleEvent(GroupEvent.ShowBottomSheet)
-                viewModel.handleEvent(GroupEvent.SetSelectedIndex(0))
-            }
-        )
-
-        CardContent(
-            icon = R.drawable.books,
-            title = context.getString(R.string.speciality),
-            subtitle = groupState.level,
-            onClick = {
-                viewModel.handleEvent(GroupEvent.Display)
-                viewModel.handleEvent(GroupEvent.ShowBottomSheet)
-                viewModel.handleEvent(GroupEvent.SetSelectedIndex(1))
-            }
-        )
-
-        CardContent(
-            icon = R.drawable.people,
-            title = context.getString(R.string.group),
-            subtitle = groupState.group,
-            onClick = {
-                viewModel.handleEvent(GroupEvent.Display)
-                viewModel.handleEvent(GroupEvent.ShowBottomSheet)
-                viewModel.handleEvent(GroupEvent.SetSelectedIndex(2))
-            }
-        )
-    }
-
-    if (groupState.showBottomSheet) {
-        BottomSheetContent(
-            loading = parserState.loading,
-            progress = parserState.progress,
-            viewModel = viewModel,
-            selectedIndex = groupState.selectedIndex,
-            onDismiss = { viewModel.handleEvent(GroupEvent.HideBottomSheet) }
-        )
-    }
-}
-
-@Composable
-fun CardContent(icon: Int, title: String, subtitle: String, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(20.dp, 0.dp, 20.dp, 20.dp),
-        elevation = CardDefaults.cardElevation(2.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        onClick = onClick
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(start = 20.dp, top = 5.dp, bottom = 5.dp)
-                .wrapContentHeight()
-        ) {
-            Image(
-                painter = painterResource(id = icon),
-                contentDescription = null,
-                colorFilter = ColorFilter.tint(buttons),
-                modifier = Modifier
-                    .size(40.dp)
-                    .align(Alignment.CenterVertically)
-            )
-            Spacer(modifier = Modifier.width(20.dp))
-            Column(
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-                modifier = Modifier
-                    .wrapContentHeight()
-            ) {
-                Text(
-                    text = title,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
-                Text(
-                    text = subtitle,
-                    color = Color.Gray,
-                    fontSize = 14.sp
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun ActionButton(text: String, icon: Int, onClick: () -> Unit, enabled: Boolean) {
-    Button(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(20.dp, 30.dp, 20.dp, 0.dp)
-            .size(0.dp, 65.dp),
-        shape = RoundedCornerShape(10.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = buttons, disabledContainerColor = Color.LightGray),
-        elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp),
-        enabled = enabled
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .padding(15.dp, 0.dp)
-                .fillMaxHeight()
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.notification),
-                contentDescription = null,
-                modifier = Modifier.size(35.dp),
-                colorFilter = ColorFilter.tint(Color.White),
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = text, Modifier.padding(0.dp, 7.dp), color = Color.White)
         }
     }
 }

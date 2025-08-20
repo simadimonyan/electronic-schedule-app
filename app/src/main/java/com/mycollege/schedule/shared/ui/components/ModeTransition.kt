@@ -72,7 +72,7 @@ fun ModeTransition(studentMode: Boolean) {
                     modifier = Modifier.fillMaxSize().background(Color.Transparent),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(Modifier.padding(bottom = 80.dp), horizontalAlignment = Alignment.Start) {
+                    Column(Modifier.padding(bottom = 40.dp), horizontalAlignment = Alignment.Start) {
                         Text(
                             text = "РЕЖИМ",
                             color = Color.Black,
