@@ -20,6 +20,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import com.mycollege.schedule.BuildConfig
 import com.mycollege.schedule.app.activity.ui.state.DataEvent
@@ -33,6 +34,7 @@ import com.mycollege.schedule.feature.schedule.ui.state.ScheduleViewModel
 import com.mycollege.schedule.feature.settings.ui.state.SettingsViewModel
 import com.mycollege.schedule.shared.ui.theme.background
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.ok.tracer.crash.report.TracerCrashReport
 import ru.rustore.sdk.remoteconfig.RemoteConfigClient
@@ -51,7 +53,16 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        installSplashScreen()
+        val splash = installSplashScreen()
+
+        splash.setKeepOnScreenCondition {
+            true
+        }
+
+        lifecycleScope.launch {
+            delay(1000)
+            splash.setKeepOnScreenCondition { false }
+        }
 
         groupViewModel.init()
 

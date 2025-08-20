@@ -1,4 +1,4 @@
-package com.mycollege.schedule.feature.groups.domain.usecases
+package com.mycollege.schedule.feature.groups.domain.usecases.student
 
 import androidx.compose.runtime.Immutable
 import com.mycollege.schedule.core.db.Database

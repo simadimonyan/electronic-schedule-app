@@ -15,10 +15,14 @@ import javax.inject.Singleton
 @Immutable
 data class GroupState(
 
-    // choose configuration
+    // choose configuration | student mode
     val course: String = "1 курс",
     val level: String = "Все специальности",
     val group: String = "Выбрать",
+
+    // choose configuration | teacher mode
+    val department: String = "Выбрать кафедру",
+    val teacher: String = "Выбрать преподавателя",
 
     // utils for interacting
     val showBottomSheet: Boolean = false,
@@ -29,7 +33,7 @@ data class GroupState(
     val levelsToDisplay: List<String> = ArrayList(),
     val groupsToDisplay: List<String> = ArrayList(),
 
-    )
+)
 
 @Singleton
 @Immutable
@@ -43,6 +47,14 @@ class GroupStateHolder @Inject constructor() {
 
     suspend fun sendCreateScheduleSignal() {
         _scheduleCreateSignal.emit(true)
+    }
+
+    fun updateDepartment(department: String) {
+        _groupState.update { it.copy(department = department) }
+    }
+
+    fun updateTeacher(teacher: String) {
+        _groupState.update { it.copy(teacher = teacher) }
     }
 
     fun updateCourse(course: String) {

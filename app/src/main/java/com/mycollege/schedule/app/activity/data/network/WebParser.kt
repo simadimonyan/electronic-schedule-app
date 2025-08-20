@@ -13,7 +13,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class GroupParser @Inject constructor(
+class WebParser @Inject constructor(
     private val database: Database
 ) {
 
@@ -25,12 +25,37 @@ class GroupParser @Inject constructor(
     private var groups: HashMap<String, HashMap<String, ArrayList<Schedule>>> = HashMap()
     private val STUDENT_FULL_URL = "https://imsit.ru/timetable/stud/raspisan.html"
     private var STUDENT_PATTERN_URL = "https://imsit.ru/timetable/stud/"
+    private var TEACHER_FULL_URL = "https://imsit.ru/timetable/teach/Praspisan.html"
 
     fun loadData(progress: (Int) -> Unit) {
         database.runInTransaction {
 
             // очистить все данные перед обновлением
             database.clearAllTables()
+
+            // teachers init
+
+            val department = "Не распределено"
+
+            val tDoc = Network.connect(TEACHER_FULL_URL, TIMEOUT)
+            val teachersTable: Element = tDoc.select("table")[0]
+            val teachersRows = teachersTable.select("tr")
+
+            for (row in teachersRows.drop(1)) {
+                var text = row.select("td").text()
+                val parsedTeacherRow = text.split(",")
+                val name = parsedTeacherRow[0].trim().let {
+                    if (it.matches(Regex("^[А-ЯЁ][а-яё]+ [А-ЯЁ]\\.[А-ЯЁ]\\.$"))) {
+                        it
+                    } else { // if "Докторов С.Э.." replace last '.' with ""
+                        it.replace(Regex("\\.+$"), "")
+                    }
+                }
+                if (name.isBlank()) continue
+                repository.save(Teacher(name, if (!parsedTeacherRow[1].isBlank()) parsedTeacherRow[1].trim() else department))
+            }
+
+            // groups init
 
             doc = Network.Companion.connect(STUDENT_FULL_URL, TIMEOUT)
 
@@ -151,7 +176,7 @@ class GroupParser @Inject constructor(
 
                                     // если преподавателя нет в базе
                                     if (teacherId == 0L) {
-                                        teacherId = repository.save(Teacher(teacher.toString()))
+                                        teacherId = repository.save(Teacher(teacher.toString(), department))
                                     }
 
                                     repository.save(

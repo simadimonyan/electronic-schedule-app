@@ -8,11 +8,12 @@ import com.mycollege.schedule.app.activity.domain.models.GroupParserStateHolder
 import com.mycollege.schedule.app.activity.ui.state.AppStateHolder
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.core.cache.CacheUpdater
-import com.mycollege.schedule.feature.groups.domain.usecases.GetCoursesUseCase
-import com.mycollege.schedule.feature.groups.domain.usecases.GetGroupsUseCase
-import com.mycollege.schedule.feature.groups.domain.usecases.GetLevelUseCase
+import com.mycollege.schedule.feature.groups.domain.usecases.student.GetCoursesUseCase
+import com.mycollege.schedule.feature.groups.domain.usecases.student.GetGroupsUseCase
+import com.mycollege.schedule.feature.groups.domain.usecases.student.GetLevelUseCase
 import com.mycollege.schedule.shared.resources.ResourceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

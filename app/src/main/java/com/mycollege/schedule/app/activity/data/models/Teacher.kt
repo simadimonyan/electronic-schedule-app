@@ -16,8 +16,12 @@ class Teacher {
     @ColumnInfo(name = "name")
     var name: String = ""
 
-    constructor(name: String) {
+    @ColumnInfo(name = "department")
+    var department: String = ""
+
+    constructor(name: String, department: String) {
         this.name = name
+        this.department = department
     }
 
 }

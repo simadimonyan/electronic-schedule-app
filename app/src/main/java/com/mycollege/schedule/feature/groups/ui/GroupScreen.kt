@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -44,6 +45,7 @@ import com.mycollege.schedule.shared.ui.theme.background
 import com.yandex.mobile.ads.banner.BannerAdSize
 import com.yandex.mobile.ads.banner.BannerAdView
 import com.yandex.mobile.ads.common.AdRequest
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.rustore.sdk.remoteconfig.RemoteConfigClient
 
@@ -55,7 +57,16 @@ fun GroupPreview() {
         initialPage = 0
     ) { 0 }
 
-    GroupContent({}, {}, GroupState(), AppState(), GroupParserState(), pagerState, false)
+    GroupContent(
+        {},
+        {},
+        GroupState(),
+        AppState(0, false, false),
+        GroupParserState(),
+        pagerState,
+        false,
+        false
+    )
 }
 
 @SuppressLint("MutableCollectionMutableState")
@@ -70,6 +81,12 @@ fun GroupScreen(
     val parserState by viewModel.groupParserStateHolder.groupParserState.collectAsState()
 
     var showAds by remember { mutableStateOf(false) }
+    val changeStudentModeFlag by produceState(appState.studentMode, appState.studentMode) {
+        if (value != appState.studentMode) {
+            delay(700)
+            value = appState.studentMode
+        }
+    }
 
     RemoteConfigClient.instance
         .getRemoteConfig().addOnSuccessListener { rc -> showAds = rc.getBoolean("Advertisement")}
@@ -82,7 +99,7 @@ fun GroupScreen(
         viewModel.appStateHolder.updateIndex(it)
     }
 
-    GroupContent(handleEvent, updateAppStateIndex, groupState, appState, parserState, pagerState, showAds)
+    GroupContent(handleEvent, updateAppStateIndex, groupState, appState, parserState, pagerState, showAds, changeStudentModeFlag)
 }
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
@@ -94,7 +111,8 @@ fun GroupContent(
     appState: AppState,
     parserState: GroupParserState,
     pagerState: PagerState,
-    showAds: Boolean
+    showAds: Boolean,
+    changeStudentModeFlag: Boolean
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -115,38 +133,63 @@ fun GroupContent(
 
                 // body cards
                 Column {
-                    GroupCard(
-                        icon = R.drawable.study,
-                        title = LocalContext.current.getString(R.string.course),
-                        subtitle = groupState.course,
-                        onClick = {
-                            handleEvent(GroupEvent.Display)
-                            handleEvent(GroupEvent.ShowBottomSheet)
-                            handleEvent(GroupEvent.SetSelectedIndex(0))
-                        }
-                    )
 
-                    GroupCard(
-                        icon = R.drawable.books,
-                        title = LocalContext.current.getString(R.string.speciality),
-                        subtitle = groupState.level,
-                        onClick = {
-                            handleEvent(GroupEvent.Display)
-                            handleEvent(GroupEvent.ShowBottomSheet)
-                            handleEvent(GroupEvent.SetSelectedIndex(1))
-                        }
-                    )
+                    if (changeStudentModeFlag) {
+                        GroupCard(
+                            icon = R.drawable.study,
+                            title = LocalContext.current.getString(R.string.course),
+                            subtitle = groupState.course,
+                            onClick = {
+                                handleEvent(GroupEvent.Display)
+                                handleEvent(GroupEvent.ShowBottomSheet)
+                                handleEvent(GroupEvent.SetSelectedIndex(0))
+                            }
+                        )
 
-                    GroupCard(
-                        icon = R.drawable.people,
-                        title = LocalContext.current.getString(R.string.group),
-                        subtitle = groupState.group,
-                        onClick = {
-                            handleEvent(GroupEvent.Display)
-                            handleEvent(GroupEvent.ShowBottomSheet)
-                            handleEvent(GroupEvent.SetSelectedIndex(2))
-                        }
-                    )
+                        GroupCard(
+                            icon = R.drawable.books,
+                            title = LocalContext.current.getString(R.string.speciality),
+                            subtitle = groupState.level,
+                            onClick = {
+                                handleEvent(GroupEvent.Display)
+                                handleEvent(GroupEvent.ShowBottomSheet)
+                                handleEvent(GroupEvent.SetSelectedIndex(1))
+                            }
+                        )
+
+                        GroupCard(
+                            icon = R.drawable.people,
+                            title = LocalContext.current.getString(R.string.group),
+                            subtitle = groupState.group,
+                            onClick = {
+                                handleEvent(GroupEvent.Display)
+                                handleEvent(GroupEvent.ShowBottomSheet)
+                                handleEvent(GroupEvent.SetSelectedIndex(2))
+                            }
+                        )
+                    }
+                    else {
+
+                        GroupCard(
+                            icon = R.drawable.study,
+                            title = "Кафедра",
+                            subtitle = groupState.department,
+                            onClick = {
+
+                            }
+                        )
+
+                        GroupCard(
+                            icon = R.drawable.books,
+                            title = "Преподаватель",
+                            subtitle = groupState.teacher,
+                            onClick = {
+
+                            }
+                        )
+
+                    }
+
                 }
 
                 // ---

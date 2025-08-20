@@ -22,4 +22,7 @@ interface GroupRepository {
     @Query("SELECT * FROM `groups` WHERE level = :level AND course = :course")
     fun getGroupsBy(level: String, course: String): List<Group>
 
+    @Query("SELECT teacher_id FROM teachers WHERE RTRIM(department) = RTRIM(:department) COLLATE NOCASE")
+    fun findTeachersBy(department: String): Long
+
 }

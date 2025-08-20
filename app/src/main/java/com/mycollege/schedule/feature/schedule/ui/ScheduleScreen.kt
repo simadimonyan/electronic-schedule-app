@@ -4,9 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -77,48 +79,47 @@ fun ScheduleContent(
     navigateToSettings: () -> Unit
 ) {
     ScheduleTheme {
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 20.dp)) {
+        Scaffold(modifier = Modifier.fillMaxSize(), contentWindowInsets = WindowInsets(0), containerColor = background) { innerPadding ->
+            Box(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(top = 30.dp)) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(background)
+                ) {
+                    if (parseState.loading) {
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(background)
-            ) {
-                if (parseState.loading) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(25.dp, 45.dp, 80.dp, 10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = scheduleState.todayDate,
+                                color = Color.Black,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(25.dp, 45.dp, 80.dp, 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = scheduleState.todayDate,
-                            color = Color.Black,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    DefaultLoadingUnit()
-                }
-                else {
-                    if (settingsState.fullWeekVisibility) {
-                        WeekScheduleRender(scheduleState, settingsState, handleEvent)
+                        DefaultLoadingUnit()
                     }
                     else {
-                        TodayScheduleRender(scheduleState, settingsState, handleEvent)
+                        if (settingsState.fullWeekVisibility) {
+                            WeekScheduleRender(scheduleState, settingsState, handleEvent)
+                        }
+                        else {
+                            TodayScheduleRender(scheduleState, settingsState, handleEvent)
+                        }
                     }
                 }
-            }
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(16.dp)
-            ) {
-                SettingsButton(navigateToSettings)
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(16.dp)
+                ) {
+                    SettingsButton(navigateToSettings)
+                }
             }
         }
     }
