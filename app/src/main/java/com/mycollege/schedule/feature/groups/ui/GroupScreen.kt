@@ -75,7 +75,6 @@ fun GroupScreen(
     viewModel: GroupViewModel = hiltViewModel(),
     pagerState: PagerState
 ) {
-
     val groupState by viewModel.groupStateHolder.groupState.collectAsState()
     val appState by viewModel.appStateHolder.appState.collectAsState()
     val parserState by viewModel.groupParserStateHolder.groupParserState.collectAsState()
@@ -190,7 +189,6 @@ fun GroupContent(
                                 handleEvent(GroupEvent.ShowBottomSheet)
                                 handleEvent(GroupEvent.SetSelectedIndex(4))
                             },
-                            enabled = groupState.department != "Выбрать кафедру"
                         )
 
                     }

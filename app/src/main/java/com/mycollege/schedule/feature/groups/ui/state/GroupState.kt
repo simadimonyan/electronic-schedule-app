@@ -21,7 +21,7 @@ data class GroupState(
     val group: String = "Выбрать",
 
     // choose configuration | teacher mode
-    val department: String = "Выбрать кафедру",
+    val department: String = "Все кафедры",
     val teacher: String = "Выбрать преподавателя",
 
     // utils for interacting

@@ -25,6 +25,9 @@ interface GroupRepository {
     @Query("SELECT name FROM teachers WHERE RTRIM(department) = RTRIM(:department) COLLATE NOCASE")
     fun findTeachersBy(department: String): List<String>
 
+    @Query("SELECT DISTINCT name FROM teachers")
+    fun getTeachers(): List<String>
+
     @Query("SELECT DISTINCT department FROM teachers")
     fun getDepartments(): List<String>
 

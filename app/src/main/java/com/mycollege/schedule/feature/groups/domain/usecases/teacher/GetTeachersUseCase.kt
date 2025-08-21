@@ -16,12 +16,22 @@ class GetTeachersUseCase @Inject constructor(
     suspend fun getTeachers(department: String): Set<String> {
         return withContext(Dispatchers.IO) {
             val result = mutableSetOf<String>()
-            database.groups().findTeachersBy(department).map {
-                if (!(it.contains("Вакансия") || it.contains("null"))) {
-                    result.add(it)
+            if (!department.equals("Все кафедры")) {
+                database.groups().findTeachersBy(department).map {
+                    if (!(it.contains("Вакансия") || it.contains("null"))) {
+                        result.add(it)
+                    }
                 }
+                result.toSortedSet()
             }
-            result.toSortedSet()
+            else {
+                database.groups().getTeachers().map {
+                    if (!(it.contains("Вакансия") || it.contains("null"))) {
+                        result.add(it)
+                    }
+                }
+                result.toSortedSet()
+            }
         }
     }
 
