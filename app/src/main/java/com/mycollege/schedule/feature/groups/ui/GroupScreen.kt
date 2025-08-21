@@ -171,21 +171,26 @@ fun GroupContent(
                     else {
 
                         GroupCard(
-                            icon = R.drawable.study,
+                            icon = R.drawable.department,
                             title = "Кафедра",
                             subtitle = groupState.department,
                             onClick = {
-
+                                handleEvent(GroupEvent.Display)
+                                handleEvent(GroupEvent.ShowBottomSheet)
+                                handleEvent(GroupEvent.SetSelectedIndex(3))
                             }
                         )
 
                         GroupCard(
-                            icon = R.drawable.books,
+                            icon = R.drawable.teacher,
                             title = "Преподаватель",
                             subtitle = groupState.teacher,
                             onClick = {
-
-                            }
+                                handleEvent(GroupEvent.Display)
+                                handleEvent(GroupEvent.ShowBottomSheet)
+                                handleEvent(GroupEvent.SetSelectedIndex(4))
+                            },
+                            enabled = groupState.department != "Выбрать кафедру"
                         )
 
                     }
@@ -205,7 +210,7 @@ fun GroupContent(
                                 .animateScrollToPage(1)
                         }
                     },
-                    enabled = groupState.group != "Выбрать"
+                    enabled = if (changeStudentModeFlag) groupState.group != "Выбрать" else groupState.teacher != "Выбрать преподавателя"
                 )
 
                 if (showAds) {

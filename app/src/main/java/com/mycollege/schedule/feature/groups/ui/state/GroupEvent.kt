@@ -7,10 +7,14 @@ import com.mycollege.schedule.app.activity.ui.state.DataEvent
  */
 sealed class GroupEvent {
 
-    // updating chosen Group Screen configuration fields
+    // updating chosen Group Screen configuration fields | student mode
     data class UpdateCourse(val course: String) : GroupEvent()
     data class UpdateSpeciality(val speciality: String) : GroupEvent()
     data class UpdateGroup(val group: String) : GroupEvent()
+
+    // updating chosen Group Screen configuration fields | teacher mode
+    data class UpdateDepartment(val department: String) : GroupEvent()
+    data class UpdateTeacher(val teacher: String) : GroupEvent()
 
     // interaction
     object ShowBottomSheet : GroupEvent()

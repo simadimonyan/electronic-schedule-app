@@ -32,6 +32,8 @@ data class GroupState(
     val coursesToDisplay: List<String> = ArrayList(),
     val levelsToDisplay: List<String> = ArrayList(),
     val groupsToDisplay: List<String> = ArrayList(),
+    val departmentsToDisplay: List<String> = ArrayList(),
+    val teachersToDisplay: List<String> = ArrayList(),
 
 )
 
@@ -47,6 +49,14 @@ class GroupStateHolder @Inject constructor() {
 
     suspend fun sendCreateScheduleSignal() {
         _scheduleCreateSignal.emit(true)
+    }
+
+    fun updateDepartmentToDisplay(departments: List<String>) {
+        _groupState.update { it.copy(departmentsToDisplay = departments) }
+    }
+
+    fun updateTeachersToDisplay(teachers: List<String>) {
+        _groupState.update { it.copy(teachersToDisplay = teachers) }
     }
 
     fun updateDepartment(department: String) {

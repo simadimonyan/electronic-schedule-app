@@ -19,8 +19,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -85,6 +83,8 @@ fun BottomSheetContent(
                     0 -> handleEvent(GroupEvent.UpdateCourse(newValue))
                     1 -> handleEvent(GroupEvent.UpdateSpeciality(newValue))
                     2 -> handleEvent(GroupEvent.UpdateGroup(newValue))
+                    3 -> handleEvent(GroupEvent.UpdateDepartment(newValue))
+                    4 -> handleEvent(GroupEvent.UpdateTeacher(newValue))
                 }
                 onDismiss()
             }
@@ -103,7 +103,9 @@ fun BottomSheet(
     when (groupState.selectedIndex) {
         0 -> CourseKeys(groupState.coursesToDisplay, updateValue)
         1 -> SpecialityKeys(groupState.levelsToDisplay, updateValue)
-        else -> GroupListContent(groupState.groupsToDisplay, updateValue)
+        2 -> GroupListContent(groupState.groupsToDisplay, updateValue)
+        3 -> DepartmentListContent(groupState.departmentsToDisplay, updateValue)
+        4 -> TeacherListContent(groupState.teachersToDisplay, updateValue)
     }
 }
 
@@ -187,6 +189,68 @@ fun GroupListContent(
     LazyColumn {
         itemsIndexed(groupsToDisplay, key = { _, group -> group }) { index, group ->
             group.let { nonNullGroup ->
+                if (index != 0) {
+                    HorizontalDivider(
+                        thickness = 0.5.dp,
+                        modifier = Modifier.padding(25.dp, 0.dp),
+                        color = Color.LightGray
+                    )
+                }
+
+                Text(
+                    text = nonNullGroup,
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .fillMaxWidth()
+                        .clickable { updateValue(nonNullGroup) },
+                    textAlign = TextAlign.Center,
+                    fontSize = 20.sp,
+                    color = Color.Black
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun DepartmentListContent(
+    departmentsToDisplay: List<String>,
+    updateValue: (String) -> Unit
+) {
+    LazyColumn {
+        itemsIndexed(departmentsToDisplay.sortedBy { -it.length }, key = { _, department -> department }) { index, department ->
+            department.let { nonNullGroup ->
+                if (index != 0) {
+                    HorizontalDivider(
+                        thickness = 0.5.dp,
+                        modifier = Modifier.padding(25.dp, 0.dp),
+                        color = Color.LightGray
+                    )
+                }
+
+                Text(
+                    text = nonNullGroup,
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .fillMaxWidth()
+                        .clickable { updateValue(nonNullGroup) },
+                    textAlign = TextAlign.Center,
+                    fontSize = 20.sp,
+                    color = Color.Black
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun TeacherListContent(
+    teachersToDisplay: List<String>,
+    updateValue: (String) -> Unit
+) {
+    LazyColumn {
+        itemsIndexed(teachersToDisplay, key = { _, teacher -> teacher }) { index, teacher ->
+            teacher.let { nonNullGroup ->
                 if (index != 0) {
                     HorizontalDivider(
                         thickness = 0.5.dp,

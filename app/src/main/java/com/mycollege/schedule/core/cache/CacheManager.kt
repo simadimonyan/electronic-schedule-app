@@ -27,7 +27,13 @@ class CacheManager @Inject constructor(
     private val dismissedNotificationsKey = "dismissed_notifications"
 
     @Immutable
-    data class Configuration(val course: String, val speciality: String, val group: String)
+    data class Configuration(
+        val course: String,
+        val speciality: String,
+        val group: String,
+        val department: String,
+        val teacher: String
+    )
 
     @Immutable
     data class IntentConf(val id: Int, val intent: Intent)
@@ -154,7 +160,7 @@ class CacheManager @Inject constructor(
             gson.fromJson(json, type)
         }
         catch (e: Exception) {
-            Configuration("", "", "")
+            Configuration("", "", "", "", "")
         }
 
         return value

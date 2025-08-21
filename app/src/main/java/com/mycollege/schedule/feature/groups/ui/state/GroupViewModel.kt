@@ -11,6 +11,8 @@ import com.mycollege.schedule.core.cache.CacheUpdater
 import com.mycollege.schedule.feature.groups.domain.usecases.student.GetCoursesUseCase
 import com.mycollege.schedule.feature.groups.domain.usecases.student.GetGroupsUseCase
 import com.mycollege.schedule.feature.groups.domain.usecases.student.GetLevelUseCase
+import com.mycollege.schedule.feature.groups.domain.usecases.teacher.GetDepartmentsUseCase
+import com.mycollege.schedule.feature.groups.domain.usecases.teacher.GetTeachersUseCase
 import com.mycollege.schedule.shared.resources.ResourceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -34,7 +36,9 @@ class GroupViewModel @Inject constructor(
     // use cases
     private val getCoursesUseCase: GetCoursesUseCase,
     private val getLevelUseCase: GetLevelUseCase,
-    private val getGroupsUseCase: GetGroupsUseCase
+    private val getGroupsUseCase: GetGroupsUseCase,
+    private val getTeachersUseCase: GetTeachersUseCase,
+    private val getDepartmentsUseCase: GetDepartmentsUseCase
 
 ) : ViewModel() {
 
@@ -49,6 +53,8 @@ class GroupViewModel @Inject constructor(
             is GroupEvent.ChooseGroup -> chooseGroup()
             is GroupEvent.Display -> display()
             is GroupEvent.ChangeStudentMode -> changeAppModeToggle(event.studentMode)
+            is GroupEvent.UpdateDepartment -> updateDepartment(event.department)
+            is GroupEvent.UpdateTeacher -> updateTeacher(event.teacher)
         }
     }
 
@@ -78,15 +84,25 @@ class GroupViewModel @Inject constructor(
     private fun display() {
         viewModelScope.launch {
             if (!appStateHolder.appState.value.firstStartUp) {
+
                 val groupState = groupStateHolder.groupState.value
 
-                val courses = getCoursesUseCase.getCourses()
-                val levels = getLevelUseCase.getLevels(groupState.course)
-                val groups = getGroupsUseCase.getGroups(groupState.course, groupState.level)
+                if (appStateHolder.appState.value.studentMode) {
+                    val courses = getCoursesUseCase.getCourses()
+                    val levels = getLevelUseCase.getLevels(groupState.course)
+                    val groups = getGroupsUseCase.getGroups(groupState.course, groupState.level)
 
-                groupStateHolder.updateCoursesToDisplay(courses.toList())
-                groupStateHolder.updateLevelsToDisplay(levels.toList())
-                groupStateHolder.updateGroupsToDisplay(groups.toList())
+                    groupStateHolder.updateCoursesToDisplay(courses.toList())
+                    groupStateHolder.updateLevelsToDisplay(levels.toList())
+                    groupStateHolder.updateGroupsToDisplay(groups.toList())
+                }
+                else {
+                    val departments = getDepartmentsUseCase.getDepartments()
+                    val teachers = getTeachersUseCase.getTeachers(groupState.department)
+
+                    groupStateHolder.updateDepartmentToDisplay(departments.toList())
+                    groupStateHolder.updateTeachersToDisplay(teachers.toList())
+                }
             }
         }
     }
@@ -122,6 +138,25 @@ class GroupViewModel @Inject constructor(
     }
 
     /**
+     * Обновить состояние выбора кафедры
+     */
+    private fun updateDepartment(department: String) {
+        viewModelScope.launch {
+            groupStateHolder.updateDepartment(department)
+            groupStateHolder.updateTeacher("Выбрать преподавателя")
+        }
+    }
+
+    /**
+     * Обновить состояние выбора преподавателя
+     */
+    private fun updateTeacher(teacher: String) {
+        viewModelScope.launch {
+            groupStateHolder.updateTeacher(teacher)
+        }
+    }
+
+    /**
      * Обновить состояние Pager навигации по индексу
      */
     private fun setSelectedIndex(index: Int) {
@@ -149,6 +184,8 @@ class GroupViewModel @Inject constructor(
                 groupStateHolder.updateGroup(configuration.group)
                 groupStateHolder.updateLevel(configuration.speciality)
                 groupStateHolder.updateCourse(configuration.course)
+                groupStateHolder.updateDepartment(configuration.department)
+                groupStateHolder.updateTeacher(configuration.teacher)
             }
             appStateHolder.updateStudentMode(applicationMode)
         } catch (_: Exception) {
@@ -185,7 +222,9 @@ class GroupViewModel @Inject constructor(
         val configuration = CacheManager.Configuration(
             groupStateHolder.groupState.value.course,
             groupStateHolder.groupState.value.level,
-            groupStateHolder.groupState.value.group
+            groupStateHolder.groupState.value.group,
+            groupStateHolder.groupState.value.department,
+            groupStateHolder.groupState.value.teacher
         )
         cacheManager.saveActualConfiguration(configuration)
     }

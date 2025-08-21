@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.sp
 import com.mycollege.schedule.shared.ui.theme.buttons
 
 @Composable
-fun GroupCard(icon: Int, title: String, subtitle: String, onClick: () -> Unit) {
+fun GroupCard(icon: Int, title: String, subtitle: String, onClick: () -> Unit, enabled: Boolean = true) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -33,7 +33,8 @@ fun GroupCard(icon: Int, title: String, subtitle: String, onClick: () -> Unit) {
             .padding(20.dp, 0.dp, 20.dp, 20.dp),
         elevation = CardDefaults.cardElevation(2.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        onClick = onClick
+        onClick = onClick,
+        enabled = enabled
     ) {
         Row(
             modifier = Modifier
