@@ -1,7 +1,6 @@
 package com.mycollege.schedule.feature.schedule.ui.state
 
 import androidx.compose.runtime.Immutable
-import com.mycollege.schedule.app.activity.data.models.Schedule
 import com.mycollege.schedule.feature.schedule.data.models.DataClasses
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

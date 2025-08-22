@@ -5,15 +5,33 @@ import androidx.compose.runtime.Immutable
 @Immutable
 class DataClasses {
 
-    @Immutable
-    data class Lesson(
-        val count: Int,
-        val time: String,
-        val type: String,
-        val name: String?,
-        val teacher: String?,
+    interface Lesson {
+        val count: Int
+        val time: String
+        val type: String
+        val name: String?
         val location: String?
-    )
+    }
+
+    @Immutable
+    data class GroupLesson(
+        override val count: Int,
+        override val time: String,
+        override val type: String,
+        override val name: String?,
+        val teacher: String?,
+        override val location: String?
+    ) : Lesson
+
+    @Immutable
+    data class TeacherLesson(
+        override val count: Int,
+        override val time: String,
+        override val type: String,
+        override val name: String?,
+        val group: String?,
+        override val location: String?
+    ) : Lesson
 
     @Immutable
     enum class DayWeek(val id: Int, val short: String, val long: String) {

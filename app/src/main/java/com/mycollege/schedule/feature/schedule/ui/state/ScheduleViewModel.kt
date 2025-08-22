@@ -9,6 +9,7 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mycollege.schedule.app.activity.domain.models.GroupParserStateHolder
+import com.mycollege.schedule.app.activity.ui.state.AppStateHolder
 import com.mycollege.schedule.app.notifications.NotificationReceiver
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.core.db.Database
@@ -42,6 +43,7 @@ class ScheduleViewModel @Inject constructor(
     private val resources: ResourceManager,
 
     // state
+    val appStateHolder: AppStateHolder,
     val groupStateHolder: GroupStateHolder,
     val scheduleStateHolder: ScheduleStateHolder,
     val settingsStateHolder: SettingsStateHolder,
@@ -84,14 +86,23 @@ class ScheduleViewModel @Inject constructor(
     private fun getWeekLessons() {
         viewModelScope.launch {
             var chosenGroup = getChosenGroupUseCase.getByName(groupStateHolder.groupState.value.group)
+            val chosenTeacher = groupStateHolder.groupState.value.teacher
             var count = if (settingsStateHolder.settingsState.value.weekCount) 0 else 1
 
             if (settingsStateHolder.settingsState.value.weekCount)
                 count = if (count == 1) 0 else 1 // if change week event is executed
 
-            if (chosenGroup != null) {
-                scheduleStateHolder.showWeekLessons(getWeekScheduleUseCase.getWeekSchedule(chosenGroup, count))
-                scheduleStateHolder.updateWeekDates(getCurrentWeekDate())
+            if (appStateHolder.appState.value.studentMode) {
+                if (chosenGroup != null) {
+                    scheduleStateHolder.showWeekLessons(getWeekScheduleUseCase.getWeekSchedule(chosenGroup, count))
+                    scheduleStateHolder.updateWeekDates(getCurrentWeekDate())
+                }
+            }
+            else {
+                if (!chosenTeacher.equals("Выбрать преподавателя")) {
+                    scheduleStateHolder.showWeekLessons(getWeekScheduleUseCase.getWeekTeacherSchedule(chosenTeacher, count))
+                    scheduleStateHolder.updateWeekDates(getCurrentWeekDate())
+                }
             }
         }
     }
@@ -102,11 +113,23 @@ class ScheduleViewModel @Inject constructor(
     private fun getTodayLessons() {
         viewModelScope.launch {
 
-            val today = getTodayScheduleUseCase.getTodaySchedule(
-                getChosenGroupUseCase.getByName(groupStateHolder.groupState.value.group)!!,
-                DayWeek.findById(LocalDate.now().dayOfWeek.value)?.long ?: "Понедельник",
-                if (settingsStateHolder.settingsState.value.weekCount) 0 else 1
-            )
+            val today: ArrayList<DataClasses.Lesson> = ArrayList()
+
+            if (appStateHolder.appState.value.studentMode) {
+                val lessons = getTodayScheduleUseCase.getTodaySchedule(
+                    getChosenGroupUseCase.getByName(groupStateHolder.groupState.value.group)!!,
+                    DayWeek.findById(LocalDate.now().dayOfWeek.value)?.long ?: "Понедельник",
+                    if (settingsStateHolder.settingsState.value.weekCount) 0 else 1
+                )
+                today.addAll(lessons)
+            } else {
+                val lessons = getTodayScheduleUseCase.getTodayTeacherSchedule(
+                    groupStateHolder.groupState.value.teacher,
+                    DayWeek.findById(LocalDate.now().dayOfWeek.value)?.long ?: "Понедельник",
+                    if (settingsStateHolder.settingsState.value.weekCount) 0 else 1
+                )
+                today.addAll(lessons)
+            }
 
             // clear all of the alarms
             val alarmManager = resources.getContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -129,7 +152,7 @@ class ScheduleViewModel @Inject constructor(
 
             // set new alarms
             val intents = ArrayList<CacheManager.IntentConf>()
-            for ((i, lesson) in (today as ArrayList<DataClasses.Lesson>).withIndex()) {
+            for ((i, lesson) in today.withIndex()) {
                 val intent = setNotificationForLesson(resources.getContext(), lesson, i)
                 if (intent != null) intents.add(CacheManager.IntentConf(i, intent))
             }

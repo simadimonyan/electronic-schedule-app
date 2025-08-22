@@ -47,6 +47,9 @@ fun ScheduleUnit(lesson: DataClasses.Lesson) {
 
 @Composable
 private fun ScheduleUnitContent(lesson: DataClasses.Lesson) {
+
+    val studentMode = lesson is DataClasses.GroupLesson
+
     Column(modifier = Modifier.padding(20.dp, 5.dp, 20.dp, 5.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -80,7 +83,7 @@ private fun ScheduleUnitContent(lesson: DataClasses.Lesson) {
             fontWeight = FontWeight.Bold
         )
         Text(
-            text =  (if (lesson.teacher.equals("null")) "" else lesson.teacher).toString(),
+            text =  if (studentMode) (if (lesson.teacher.equals("null")) "" else lesson.teacher).toString() else (if ((lesson as DataClasses.TeacherLesson).group.equals("null")) "" else lesson.group).toString(),
             color = Color.Black,
             fontSize = 15.sp,
             fontStyle = FontStyle.Italic

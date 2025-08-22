@@ -10,7 +10,13 @@ interface ScheduleRepository {
     @Query("SELECT * FROM schedule WHERE group_id = :id AND day_week = :dayWeek AND week_count = :weekCount")
     fun getDaySchedule(id: String, dayWeek: String, weekCount: Int): List<Schedule>
 
+    @Query("SELECT * FROM schedule WHERE teacher_id = :id AND day_week = :dayWeek AND week_count = :weekCount")
+    fun getDayTeacherSchedule(id: String, dayWeek: String, weekCount: Int): List<Schedule>
+
     @Query("SELECT * FROM schedule WHERE group_id = :id AND week_count = :weekCount")
     fun getWeekSchedule(id: String, weekCount: Int): List<Schedule>
+
+    @Query("SELECT * FROM schedule WHERE teacher_id = :id AND week_count = :weekCount")
+    fun getWeekTeacherSchedule(id: String, weekCount: Int): List<Schedule>
 
 }

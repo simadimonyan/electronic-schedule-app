@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mycollege.schedule.app.activity.ui.state.AppState
 import com.mycollege.schedule.feature.schedule.ui.components.schedule.ScheduleUnit
 import com.mycollege.schedule.feature.schedule.ui.components.schedule.WeekendUnit
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleEvent
@@ -29,6 +30,7 @@ import kotlin.collections.forEach
 @SuppressLint("MutableCollectionMutableState")
 @Composable
 fun WeekScheduleRender(
+    appState: AppState,
     scheduleState: ScheduleState,
     settingsState: SettingsState,
     handleEvent: (ScheduleEvent) -> Unit
@@ -90,7 +92,7 @@ fun WeekScheduleRender(
                             WeekendUnit()
                         }
 
-                        lessons.forEach { lesson ->
+                        lessons.sortedBy { it.count }.forEach { lesson ->
                             ScheduleUnit(lesson)
                             Spacer(modifier = Modifier.height(8.dp))
                         }
@@ -108,6 +110,7 @@ fun WeekScheduleRender(
 
 @Composable
 fun TodayScheduleRender(
+    appState: AppState,
     scheduleState: ScheduleState,
     settingsState: SettingsState,
     handleEvent: (ScheduleEvent) -> Unit
@@ -140,8 +143,14 @@ fun TodayScheduleRender(
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            itemsIndexed(scheduleState.todayLessons) { _, lesson ->
+            itemsIndexed(scheduleState.todayLessons.sortedBy { it.count }) { _, lesson ->
                 ScheduleUnit(lesson)
+            }
+
+            if (scheduleState.todayLessons.size > 3) {
+                item {
+                    Spacer(modifier = Modifier.height(120.dp))
+                }
             }
         }
     }

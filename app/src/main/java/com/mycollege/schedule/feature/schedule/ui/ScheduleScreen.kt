@@ -24,6 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.mycollege.schedule.app.activity.domain.models.GroupParserState
+import com.mycollege.schedule.app.activity.ui.state.AppState
 import com.mycollege.schedule.app.navigation.Settings
 import com.mycollege.schedule.feature.schedule.ui.components.schedule.DefaultLoadingUnit
 import com.mycollege.schedule.feature.schedule.ui.components.settings.SettingsButton
@@ -39,7 +40,7 @@ import com.mycollege.schedule.shared.ui.theme.background
 @Preview
 @Composable
 fun SchedulePreview() {
-    ScheduleContent(SettingsState(), ScheduleState(), GroupParserState(), {}, {})
+    ScheduleContent(SettingsState(), AppState(), ScheduleState(), GroupParserState(), {}) {}
 }
 
 @Composable
@@ -48,6 +49,7 @@ fun ScheduleScreen(
     globalGraph: NavHostController
 ) {
 
+    val appState by viewModel.appStateHolder.appState.collectAsState()
     val settingsState by viewModel.settingsStateHolder.settingsState.collectAsState()
     val scheduleState by viewModel.scheduleStateHolder.scheduleState.collectAsState()
     val parseState by viewModel.parserStateHolder.groupParserState.collectAsState()
@@ -67,12 +69,13 @@ fun ScheduleScreen(
         }
     }
 
-    ScheduleContent(settingsState, scheduleState, parseState, handleEvent, navigateToSettings)
+    ScheduleContent(settingsState, appState, scheduleState, parseState, handleEvent, navigateToSettings)
 }
 
 @Composable
 fun ScheduleContent(
     settingsState: SettingsState,
+    appState: AppState,
     scheduleState: ScheduleState,
     parseState: GroupParserState,
     handleEvent: (ScheduleEvent) -> Unit,
@@ -106,10 +109,10 @@ fun ScheduleContent(
                     }
                     else {
                         if (settingsState.fullWeekVisibility) {
-                            WeekScheduleRender(scheduleState, settingsState, handleEvent)
+                            WeekScheduleRender(appState, scheduleState, settingsState, handleEvent)
                         }
                         else {
-                            TodayScheduleRender(scheduleState, settingsState, handleEvent)
+                            TodayScheduleRender(appState, scheduleState, settingsState, handleEvent)
                         }
                     }
                 }
