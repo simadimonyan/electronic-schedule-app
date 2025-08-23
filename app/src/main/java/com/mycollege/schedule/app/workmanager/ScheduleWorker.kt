@@ -18,6 +18,8 @@ import com.mycollege.schedule.feature.schedule.domain.usecase.GetTodayScheduleUs
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.LocalTime
@@ -34,44 +36,47 @@ class ScheduleWorker @AssistedInject constructor(
     private val getTodayScheduleUseCase: GetTodayScheduleUseCase
 ) : CoroutineWorker(context, workerParams) {
 
+    private val monitor = Mutex()
+
     /**
      * Установка отложенных уведомлений
      */
     override suspend fun doWork(): Result {
         return try {
-            Log.i("ScheduleWorker", "Starting")
-            val appContext = applicationContext
+            monitor.withLock {
+                Log.i("ScheduleWorker", "Starting")
+                val appContext = applicationContext
 
-            val todayLessons = getTodayLessons()
+                val todayLessons = getTodayLessons()
 
-            // clear all of the alarms
-            val alarmManager = appContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                // clear all of the alarms
+                val alarmManager = appContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-            val alarms = cacheManager.loadAlarms()
+                val alarms = cacheManager.loadAlarms()
 
-            if (alarms.isNotEmpty()) {
-                for (alarm in alarms) {
+                if (alarms.isNotEmpty()) {
+                    for (alarm in alarms) {
 
-                    val pendingIntent = PendingIntent.getBroadcast(
-                        appContext,
-                        alarm.id,
-                        alarm.intent,
-                        PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                    )
+                        val pendingIntent = PendingIntent.getBroadcast(
+                            appContext,
+                            alarm.id,
+                            alarm.intent,
+                            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                        )
 
-                    alarmManager.cancel(pendingIntent)
+                        alarmManager.cancel(pendingIntent)
+                    }
                 }
-            }
 
-            // creating new alarms
-            val intents = ArrayList<CacheManager.IntentConf>()
-            for ((i, lesson) in todayLessons.withIndex()) {
-                Log.i("ScheduleWorker", "setting alarms...")
-                val intent = setNotificationForLesson(applicationContext, lesson, i)
-                if (intent != null) intents.add(CacheManager.IntentConf(i, intent))
+                // creating new alarms
+                val intents = ArrayList<CacheManager.IntentConf>()
+                for ((i, lesson) in todayLessons.withIndex()) {
+                    Log.i("ScheduleWorker", "setting alarms...")
+                    val intent = setNotificationForLesson(applicationContext, lesson, i)
+                    if (intent != null) intents.add(CacheManager.IntentConf(i, intent))
+                }
+                cacheManager.saveAlarms(intents)
             }
-            cacheManager.saveAlarms(intents)
-
             Result.success()
         } catch (e: Exception) {
             Log.e("ScheduleWorker", "Error in worker", e)

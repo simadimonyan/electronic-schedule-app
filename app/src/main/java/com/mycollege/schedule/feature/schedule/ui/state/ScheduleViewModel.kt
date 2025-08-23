@@ -24,6 +24,8 @@ import com.mycollege.schedule.shared.resources.ResourceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -58,6 +60,8 @@ class ScheduleViewModel @Inject constructor(
     private val database: Database
 
 ) : ViewModel() {
+
+    private val monitor = Mutex()
 
     fun handleEvent(event: ScheduleEvent) {
         when(event) {
@@ -112,53 +116,54 @@ class ScheduleViewModel @Inject constructor(
      */
     private fun getTodayLessons() {
         viewModelScope.launch {
+            monitor.withLock {
+                val today: ArrayList<DataClasses.Lesson> = ArrayList()
 
-            val today: ArrayList<DataClasses.Lesson> = ArrayList()
-
-            if (appStateHolder.appState.value.studentMode) {
-                val lessons = getTodayScheduleUseCase.getTodaySchedule(
-                    getChosenGroupUseCase.getByName(groupStateHolder.groupState.value.group)!!,
-                    DayWeek.findById(LocalDate.now().dayOfWeek.value)?.long ?: "Понедельник",
-                    if (settingsStateHolder.settingsState.value.weekCount) 0 else 1
-                )
-                today.addAll(lessons)
-            } else {
-                val lessons = getTodayScheduleUseCase.getTodayTeacherSchedule(
-                    groupStateHolder.groupState.value.teacher,
-                    DayWeek.findById(LocalDate.now().dayOfWeek.value)?.long ?: "Понедельник",
-                    if (settingsStateHolder.settingsState.value.weekCount) 0 else 1
-                )
-                today.addAll(lessons)
-            }
-
-            // clear all of the alarms
-            val alarmManager = resources.getContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-            val alarms = cacheManager.loadAlarms()
-
-            if (alarms != null && alarms.isNotEmpty()) {
-                for (alarm in alarms) {
-
-                    val pendingIntent = PendingIntent.getBroadcast(
-                        resources.getContext(),
-                        alarm.id,
-                        alarm.intent,
-                        PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                if (appStateHolder.appState.value.studentMode) {
+                    val lessons = getTodayScheduleUseCase.getTodaySchedule(
+                        getChosenGroupUseCase.getByName(groupStateHolder.groupState.value.group)!!,
+                        DayWeek.findById(LocalDate.now().dayOfWeek.value)?.long ?: "Понедельник",
+                        if (settingsStateHolder.settingsState.value.weekCount) 0 else 1
                     )
-
-                    alarmManager.cancel(pendingIntent)
+                    today.addAll(lessons)
+                } else {
+                    val lessons = getTodayScheduleUseCase.getTodayTeacherSchedule(
+                        groupStateHolder.groupState.value.teacher,
+                        DayWeek.findById(LocalDate.now().dayOfWeek.value)?.long ?: "Понедельник",
+                        if (settingsStateHolder.settingsState.value.weekCount) 0 else 1
+                    )
+                    today.addAll(lessons)
                 }
-            }
 
-            // set new alarms
-            val intents = ArrayList<CacheManager.IntentConf>()
-            for ((i, lesson) in today.withIndex()) {
-                val intent = setNotificationForLesson(resources.getContext(), lesson, i)
-                if (intent != null) intents.add(CacheManager.IntentConf(i, intent))
-            }
-            cacheManager.saveAlarms(intents)
+                // clear all of the alarms
+                val alarmManager = resources.getContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-            scheduleStateHolder.showTodayLessons(today)
+                val alarms = cacheManager.loadAlarms()
+
+                if (alarms != null && alarms.isNotEmpty()) {
+                    for (alarm in alarms) {
+
+                        val pendingIntent = PendingIntent.getBroadcast(
+                            resources.getContext(),
+                            alarm.id,
+                            alarm.intent,
+                            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                        )
+
+                        alarmManager.cancel(pendingIntent)
+                    }
+                }
+
+                // set new alarms
+                val intents = ArrayList<CacheManager.IntentConf>()
+                for ((i, lesson) in today.withIndex()) {
+                    val intent = setNotificationForLesson(resources.getContext(), lesson, i)
+                    if (intent != null) intents.add(CacheManager.IntentConf(i, intent))
+                }
+                cacheManager.saveAlarms(intents)
+
+                scheduleStateHolder.showTodayLessons(today)
+            }
         }
     }
 
