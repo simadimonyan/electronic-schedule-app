@@ -69,7 +69,7 @@ fun SegmentedButton(checkedState: Boolean, onChanged: (Boolean) -> Unit) {
                         activeContentColor = contentColor
                     )
                 ) {
-                    Text(text = option, fontSize = 18.sp, fontWeight = FontWeight.Normal)
+                    Text(text = option, fontSize = 18.sp, fontWeight = FontWeight.Normal, color = contentColor)
                 }
             }
         }

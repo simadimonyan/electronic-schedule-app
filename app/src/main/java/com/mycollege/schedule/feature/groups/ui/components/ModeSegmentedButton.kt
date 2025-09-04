@@ -70,7 +70,7 @@ fun ModeSegmentedButton(studentMode: Boolean, onChanged: (Boolean) -> Unit) {
                         activeContentColor = contentColor
                     )
                 ) {
-                    Text(text = option, fontSize = 15.sp, fontWeight = FontWeight.Normal)
+                    Text(text = option, fontSize = 15.sp, fontWeight = FontWeight.Normal, color = contentColor)
                 }
             }
         }
