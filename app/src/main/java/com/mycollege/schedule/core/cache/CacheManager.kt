@@ -23,7 +23,8 @@ class CacheManager @Inject constructor(
     private val firstStartUp = "first_startup"
     private val studentModeKey = "student_mode"
     private val alarmsKey = "alarms"
-    private val rustoreConfigKey = "rustore_config"
+    private val scheduleServerConfiguration = "server_config"
+    private val serverNetworkLastRequest = "server_last_request"
     private val dismissedNotificationsKey = "dismissed_notifications"
 
     @Immutable
@@ -39,7 +40,49 @@ class CacheManager @Inject constructor(
     data class IntentConf(val id: Int, val intent: Intent)
 
     @Immutable
-    data class RuStoreConfig(val pushToken: String, val sentToServer: Boolean)
+    data class ScheduleServerConfiguration(val serverUrl: String, val accessToken: String)
+
+    data class ServerNetworkLastRequest(val weekParitySynchronization: Long)
+
+    fun loadServerNetworkLastRequest(): ServerNetworkLastRequest {
+        val json = preferences.getString(serverNetworkLastRequest, null)
+
+        val type = object : TypeToken<ServerNetworkLastRequest>() {}.type
+
+        val value = try {
+            gson.fromJson(json, type)
+        }
+        catch (e: Exception) {
+            ServerNetworkLastRequest(-1)
+        }
+
+        return value
+    }
+
+    fun saveServerNetworkLastRequest(request: ServerNetworkLastRequest) {
+        val json = gson.toJson(request)
+        preferences.edit() { putString(serverNetworkLastRequest, json) }
+    }
+
+    fun loadScheduleServerConfiguration(): ScheduleServerConfiguration {
+        val json = preferences.getString(scheduleServerConfiguration, null)
+
+        val type = object : TypeToken<ScheduleServerConfiguration>() {}.type
+
+        val value = try {
+            gson.fromJson(json, type)
+        }
+        catch (e: Exception) {
+            ScheduleServerConfiguration("", "")
+        }
+
+        return value
+    }
+
+    fun saveScheduleServerConfiguration(configuration: ScheduleServerConfiguration) {
+        val json = gson.toJson(configuration)
+        preferences.edit() { putString(scheduleServerConfiguration, json) }
+    }
 
     fun loadStudentMode(): Boolean {
         return preferences.getBoolean(studentModeKey, false)
@@ -81,26 +124,6 @@ class CacheManager @Inject constructor(
     fun clearDismissedNotifications() {
         preferences.edit { remove(dismissedNotificationsKey) }
         Log.d("CacheManager", "Список смахнутых уведомлений очищен")
-    }
-
-    fun loadLastRuStoreConfig(): RuStoreConfig? {
-        val json = preferences.getString(rustoreConfigKey, null)
-
-        val type = object : TypeToken<RuStoreConfig>() {}.type
-
-        val value = try {
-            gson.fromJson(json, type)
-        }
-        catch (e: Exception) {
-            RuStoreConfig("", false)
-        }
-
-        return value
-    }
-
-    fun saveActualRuStoreConfig(configuration: RuStoreConfig) {
-        val json = gson.toJson(configuration)
-        preferences.edit() { putString(rustoreConfigKey, json) }
     }
 
     fun loadAlarms(): ArrayList<IntentConf> {

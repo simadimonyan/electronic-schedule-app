@@ -54,9 +54,6 @@ fun AddNavGraph(
 
     val appState by mainViewModel.appStateHolder.appState.collectAsState()
     val startViewModel: StartViewModel = hiltViewModel()
-
-    // restore cache event
-    startViewModel.init()
     
     NavHost(navController = navController, startDestination = if (appState.firstStartUp) Onboarding else Start) {
         composable<Onboarding>(

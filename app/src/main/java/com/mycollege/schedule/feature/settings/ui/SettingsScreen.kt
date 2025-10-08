@@ -146,7 +146,7 @@ fun SettingsContent(
                     .padding(innerPadding)
             ) {
 
-                SegmentedButton(settingsState.weekCount) {
+                SegmentedButton(settingsState.weekCount, !settingsState.synchronizeWeekParity) {
                     handleEvent(SettingsEvent.MakeWeekCountDifferent(it))
                     handleEvent(SettingsEvent.SaveSettings)
                 }
@@ -161,21 +161,28 @@ fun SettingsContent(
                     elevation = CardDefaults.cardElevation(2.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
-                    Column(modifier = Modifier.padding(20.dp, 0.dp)) {
+                    Column(modifier = Modifier.padding(10.dp, 0.dp)) {
 
+                        CardSettings(title = "Синхронизировать неделю", checkedState = settingsState.synchronizeWeekParity) {
+                            handleEvent(SettingsEvent.SynchronizeWeekParity(it))
+                            handleEvent(SettingsEvent.SaveSettings)
+                        }
+
+                        HorizontalDivider(Modifier.padding(10.dp, 0.dp))
+                        
                         CardSettings(title = "Уведомления", checkedState = settingsState.notificationsEnabled) {
                             handleEvent(SettingsEvent.MakeNotificationsEnabled(it))
                             handleEvent(SettingsEvent.SaveSettings)
                         }
 
-                        HorizontalDivider()
+                        HorizontalDivider(Modifier.padding(10.dp, 0.dp))
 
                         CardSettings(title = "Показать неделю", checkedState = settingsState.fullWeekVisibility) {
                             handleEvent(SettingsEvent.MakeScheduleWeekFull(it))
                             handleEvent(SettingsEvent.SaveSettings)
                         }
 
-                        HorizontalDivider()
+                        HorizontalDivider(Modifier.padding(10.dp, 0.dp))
 
                         CardSettings(title = "Скрыть навигацию", checkedState = settingsState.navigationVisibility) {
                             handleEvent(SettingsEvent.MakeNavigationInvisible(it))
@@ -209,7 +216,7 @@ fun SettingsContent(
                         Spacer(modifier = Modifier.width(20.dp))
                         Text(
                             text = "Авторские права",
-                            fontSize = 18.sp
+                            fontSize = 16.sp
                         )
                     }
 
@@ -229,7 +236,7 @@ fun SettingsContent(
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             text = "О приложении",
-                            fontSize = 18.sp
+                            fontSize = 16.sp
                         )
                     }
                 }

@@ -19,6 +19,7 @@ import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.core.network.remote.RemoteConfigListener
 import com.mycollege.schedule.feature.schedule.domain.usecase.GetChosenGroupUseCase
 import com.mycollege.schedule.feature.schedule.domain.usecase.GetTodayScheduleUseCase
+import com.mycollege.schedule.feature.settings.domain.usecase.GetWeekParityUseCase
 import com.yandex.mobile.ads.common.MobileAds
 import dagger.hilt.android.HiltAndroidApp
 import ru.ok.tracer.HasTracerConfiguration
@@ -151,7 +152,8 @@ class CustomWorkerFactory @Inject constructor(
     private val cacheManager: CacheManager,
     private var getScheduleUseCase: GetScheduleUseCase,
     private val getChosenGroupUseCase: GetChosenGroupUseCase,
-    private val getTodayScheduleUseCase: GetTodayScheduleUseCase
+    private val getTodayScheduleUseCase: GetTodayScheduleUseCase,
+    private val getWeekParityUseCase: GetWeekParityUseCase
 ) : WorkerFactory() {
 
     override fun createWorker(
@@ -161,7 +163,7 @@ class CustomWorkerFactory @Inject constructor(
     ): ListenableWorker? {
         return when(workerClassName) {
             GroupSyncWorker::class.java.name -> GroupSyncWorker(appContext, workerParameters, cacheManager, getScheduleUseCase)
-            ScheduleWorker::class.java.name -> ScheduleWorker(appContext, workerParameters, cacheManager, getChosenGroupUseCase, getTodayScheduleUseCase)
+            ScheduleWorker::class.java.name -> ScheduleWorker(appContext, workerParameters, cacheManager, getChosenGroupUseCase, getTodayScheduleUseCase, getWeekParityUseCase)
             WeekChangeWorker::class.java.name -> WeekChangeWorker(appContext, workerParameters, cacheManager)
             else -> null
         }

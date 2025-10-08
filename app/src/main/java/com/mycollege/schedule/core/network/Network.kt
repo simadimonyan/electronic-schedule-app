@@ -2,7 +2,9 @@ package com.mycollege.schedule.core.network
 
 import androidx.compose.runtime.Immutable
 import com.google.gson.GsonBuilder
-import com.mycollege.schedule.core.network.api.LedgerAPI
+import com.mycollege.schedule.core.network.api.configs.ConfigsApi
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import retrofit2.Retrofit
@@ -27,13 +29,13 @@ class Network {
 @Immutable
 class RetrofitClient(private val urlString: String) {
 
-//    private val logging = HttpLoggingInterceptor().apply {
-//        level = HttpLoggingInterceptor.Level.BODY
-//    }
-//
-//    private val client = OkHttpClient.Builder()
-//        .addInterceptor(logging)
-//        .build()
+    private val logging = HttpLoggingInterceptor().apply { // --debug only
+        level = HttpLoggingInterceptor.Level.BODY
+    }
+
+    private val client = OkHttpClient.Builder() // --debug only
+        .addInterceptor(logging)
+        .build()
 
     private val gson = GsonBuilder()
         .setLenient()  // "bad" json process
@@ -42,13 +44,13 @@ class RetrofitClient(private val urlString: String) {
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(urlString)
-           // .client(client) // --debug only
+            .client(client) // --debug only
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }
 
-    val ledgerApi: LedgerAPI by lazy {
-        retrofit.create(LedgerAPI::class.java)
+    val configsApi: ConfigsApi by lazy {
+        retrofit.create(ConfigsApi::class.java)
     }
 
 }

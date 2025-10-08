@@ -68,7 +68,8 @@ fun ModeSegmentedButton(studentMode: Boolean, onChanged: (Boolean) -> Unit) {
                         inactiveBorderColor = Color.Transparent,
                         inactiveContainerColor = Color.White,
                         activeContentColor = contentColor
-                    )
+                    ),
+                    icon = {}
                 ) {
                     Text(text = option, fontSize = 15.sp, fontWeight = FontWeight.Normal, color = contentColor)
                 }

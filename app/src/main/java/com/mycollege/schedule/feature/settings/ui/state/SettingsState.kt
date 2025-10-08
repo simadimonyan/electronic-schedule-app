@@ -26,9 +26,19 @@ data class SettingsState(
     val fullWeekVisibility: Boolean = false,
 
     /**
-     * Четность недели (false - нечетная)
+     * Синхронизация четности недели с сервером
      */
-    val weekCount: Boolean = false
+    val synchronizeWeekParity: Boolean = true,
+
+    /**
+     * Четность недели локальная (false - нечетная)
+     */
+    val weekCount: Boolean = false,
+
+    /**
+     * Четность недели с сервера (false - нечетная)
+     */
+    val synchronizedWeekCount: Boolean = false
 
 )
 
@@ -57,6 +67,14 @@ class SettingsStateHolder @Inject constructor() {
 
     fun updateNavInvisibility(isVisible: Boolean) {
         _settingsState.update { it.copy(navigationVisibility = isVisible) }
+    }
+
+    fun updateSynchronizationWeekParity(isSynchronized: Boolean) {
+        _settingsState.update { it.copy(synchronizeWeekParity = isSynchronized) }
+    }
+
+    fun updateSynchronizedWeekCount(weekCount: Boolean) {
+        _settingsState.update { it.copy(synchronizedWeekCount = weekCount) }
     }
 
 }

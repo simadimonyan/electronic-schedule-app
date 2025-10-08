@@ -7,6 +7,7 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.mycollege.schedule.core.cache.CacheManager
+import com.mycollege.schedule.feature.settings.domain.usecase.GetWeekParityUseCase
 import com.mycollege.schedule.feature.settings.ui.state.SettingsState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -16,16 +17,26 @@ import dagger.assisted.AssistedInject
 class WeekChangeWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted workerParams: WorkerParameters,
-    private var cacheManager: CacheManager,
+    private val cacheManager: CacheManager
 ) : CoroutineWorker(context, workerParams) {
 
     /**
-     * Смена недели
+     * Смена недели при выключенной синхронизации недели
      */
     override suspend fun doWork(): Result {
         return try {
-            val settings = cacheManager.loadLastSettings()
-            cacheManager.saveActualSettings(settings)
+            var settings = cacheManager.loadLastSettings()
+            // если настройка синхронизации с сервером выключена
+            if (!settings.synchronizeWeekParity) {
+                settings = SettingsState(
+                    settings.navigationVisibility,
+                    settings.notificationsEnabled,
+                    settings.fullWeekVisibility,
+                    settings.synchronizeWeekParity,
+                    !settings.weekCount
+                )
+                cacheManager.saveActualSettings(settings)
+            }
             cacheManager.clearDismissedNotifications()
             Log.e("WeekChangerWorker", "Week auto-changing executed!")
             Result.success()

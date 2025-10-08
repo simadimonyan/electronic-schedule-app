@@ -12,3 +12,6 @@ val Pink40 = Color(0xFF7D5260)
 
 val background = Color(0xfff3f2f7)
 val buttons = Color(0xff0d80ff)
+
+val disabledWhite = Color(0x7CF3F2F7)
+val disabledBlue = Color(0x790D80FF)

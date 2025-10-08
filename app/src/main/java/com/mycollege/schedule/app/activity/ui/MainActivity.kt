@@ -1,8 +1,13 @@
 package com.mycollege.schedule.app.activity.ui
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.app.AlarmManager
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -16,19 +21,19 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
-import com.mycollege.schedule.BuildConfig
 import com.mycollege.schedule.app.activity.ui.state.DataEvent
 import com.mycollege.schedule.app.activity.ui.state.MainViewModel
 import com.mycollege.schedule.app.navigation.AddNavGraph
 import com.mycollege.schedule.core.cache.CacheManager
-import com.mycollege.schedule.core.network.RetrofitClient
-import com.mycollege.schedule.core.network.dto.PushTokenRequest
 import com.mycollege.schedule.feature.groups.ui.state.GroupViewModel
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleViewModel
 import com.mycollege.schedule.feature.settings.ui.state.SettingsViewModel
@@ -68,6 +73,7 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
+
             Box(modifier = Modifier.Companion.fillMaxSize().background(background)) {
 
                 val scope = rememberCoroutineScope()
@@ -75,6 +81,9 @@ class MainActivity : ComponentActivity() {
 
                 // true - only once | does not start when recomposes
                 LaunchedEffect(true) {
+
+                    requestPermissionsIfNeeded()
+
                     scope.launch {
                         mainViewModel.handleEvent(DataEvent.RestoreCache)
                         mainViewModel.handleEvent(DataEvent.FetchData)
@@ -84,72 +93,24 @@ class MainActivity : ComponentActivity() {
                     RemoteConfigClient.Companion.instance
                         .getRemoteConfig().addOnSuccessListener { rc ->
 
-                            // IP address
-                            val server = rc.getString("PushServer")
-                            val pushApproval = rc.getBoolean("PushApproval")
-                            val accessToken = BuildConfig.ACCESS_TOKEN
+                            try {
 
-                            if (server.isNotEmpty() && pushApproval) {
+                                val server = rc.getString("ScheduleServer")
+                                val accessToken = rc.getString("ScheduleServiceAccessToken")
 
-                                scope.launch {
-                                    try {
-                                        val config =
-                                            mainViewModel.cacheManager.loadLastRuStoreConfig()
+                                mainViewModel.cacheManager.saveScheduleServerConfiguration(
+                                    CacheManager.ScheduleServerConfiguration(server, "Bearer $accessToken")
+                                )
 
-                                        if (config != null && !config.sentToServer) {
-
-                                            Log.d("RuStoreMessagingService", "Отправка запроса")
-
-                                            try {
-                                                val response =
-                                                    RetrofitClient(server).ledgerApi.pullTokenUp(
-                                                        PushTokenRequest(
-                                                            Settings.Secure.getString(
-                                                                applicationContext.contentResolver,
-                                                                Settings.Secure.ANDROID_ID
-                                                            ),
-                                                            Build.MODEL,
-                                                            config.pushToken,
-                                                            accessToken
-                                                        )
-                                                    )
-
-                                                Log.d(
-                                                    "RuStoreMessagingService",
-                                                    "Ответ сервера: ${response}"
-                                                )
-
-                                            } catch (e: Exception) {
-                                                Log.w(
-                                                    "RuStoreMessagingService",
-                                                    "Ошибка парсинга JSON: ${e.message}"
-                                                )
-                                            }
-
-                                            // token has sent
-                                            mainViewModel.cacheManager.saveActualRuStoreConfig(
-                                                CacheManager.RuStoreConfig(config.pushToken, true)
-                                            )
-
-                                        }
-                                    } catch (e: Exception) {
-                                        Log.e(
-                                            "RuStoreMessagingService",
-                                            "Ошибка запроса: ${e.message}",
-                                            e
-                                        )
-                                    }
-                                }
-
+                            }
+                            catch (e: Exception) {
+                                TracerCrashReport.report(e, issueKey = "RUSTORE_REMOTE_CONFIG")
+                                Log.e("RemoteConfigService", "Ошибка конфигурации: ${e.message}", e)
                             }
                         }
                         .addOnFailureListener { e ->
                             TracerCrashReport.report(e, issueKey = "RUSTORE_REMOTE_CONFIG")
-                            Log.e(
-                                "RuStoreMessagingService",
-                                "RemoteConfig fetch failed: ${e.message}",
-                                e
-                            )
+                            Log.e("RuStoreMessagingService", "RemoteConfig fetch failed: ${e.message}", e)
                         }
 
                 }
@@ -170,6 +131,41 @@ class MainActivity : ComponentActivity() {
                 )
 
             }
+        }
+    }
+
+    @SuppressLint("BatteryLife")
+    private fun requestPermissionsIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    1001
+                )
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = getSystemService(AlarmManager::class.java)
+            if (!alarmManager.canScheduleExactAlarms()) {
+                val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                    data = "package:$packageName".toUri()
+                }
+                startActivity(intent)
+            }
+        }
+
+        val pm = getSystemService(PowerManager::class.java)
+        if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+            val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                data = "package:$packageName".toUri()
+            }
+            startActivity(intent)
         }
     }
 

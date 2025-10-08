@@ -8,9 +8,9 @@ import androidx.lifecycle.viewModelScope
 import com.mycollege.schedule.R
 import com.mycollege.schedule.app.activity.domain.models.GroupParserStateHolder
 import com.mycollege.schedule.app.activity.domain.usecases.GetScheduleUseCase
+import com.mycollege.schedule.app.notifications.NotificationsManager
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.core.cache.CacheUpdater
-import com.mycollege.schedule.app.notifications.NotificationsManager
 import com.mycollege.schedule.feature.groups.ui.state.GroupStateHolder
 import com.mycollege.schedule.feature.settings.ui.state.SettingsStateHolder
 import com.mycollege.schedule.shared.resources.ResourceManager
@@ -32,7 +32,7 @@ class MainViewModel @Inject constructor(
     val appStateHolder: AppStateHolder,
     val groupParserStateHolder: GroupParserStateHolder,
     val settingsStateHolder: SettingsStateHolder,
-    val groupStateHolder: GroupStateHolder
+    val groupStateHolder: GroupStateHolder,
 ) : ViewModel() {
 
     private var fetchDataJob: Job? = null
@@ -83,8 +83,10 @@ class MainViewModel @Inject constructor(
                     }
                     cacheManager.saveLastUpdatedTime(System.currentTimeMillis())
 
+
                     notificationsManager.cancelNotification(2, context)
                     groupParserStateHolder.updateLoading(false)
+
                 }
 
             } catch (e: Exception) {

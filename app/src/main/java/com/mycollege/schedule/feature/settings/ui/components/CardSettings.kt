@@ -30,18 +30,19 @@ fun CardSettings(title: String, checkedState: Boolean, onChanged: (Boolean) -> U
         Row(
             modifier = Modifier
                 .fillMaxHeight()
-                .padding(horizontal = 20.dp),
+                .padding(horizontal = 15.dp)
+                .padding(end = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = title,
-                fontSize = 18.sp
+                fontSize = 16.sp
             )
             Spacer(modifier = Modifier.weight(1f))
             Switch(
                 checked = checkedState,
                 onCheckedChange = onChanged,
-                modifier = Modifier.padding(10.dp),
+                modifier = Modifier.padding(10.dp).size(15.dp),
                 colors = SwitchDefaults.colors(
                     checkedTrackColor = buttons,
                     uncheckedTrackColor = Color.LightGray,

@@ -32,14 +32,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service
-            android:name=".app.notifications.RuStoreMessagingService"
-            android:exported="true"
-            tools:ignore="ExportedService">
-            <intent-filter>
-                <action android:name="ru.rustore.sdk.pushclient.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
 
         <!-- Для work-manager - удаление дефолтной фабрики  -->
         <provider

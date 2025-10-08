@@ -1,7 +1,6 @@
 package com.mycollege.schedule.app.notifications
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -18,17 +17,9 @@ import androidx.core.app.NotificationManagerCompat
 import com.mycollege.schedule.R
 import com.mycollege.schedule.core.cache.CacheManager
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import ru.ok.tracer.crash.report.TracerCrashReport
-import ru.rustore.sdk.pushclient.messaging.exception.RuStorePushClientException
-import ru.rustore.sdk.pushclient.messaging.model.RemoteMessage
-import ru.rustore.sdk.pushclient.messaging.service.RuStoreMessagingService
 import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 
 @Immutable
 class NotificationsManager {
@@ -168,42 +159,4 @@ class NotificationDismissReceiver : BroadcastReceiver() {
             Log.e("NotificationDismissReceiver", "Неверные данные: lesson=$lesson, date=$date, notificationId=$notificationId")
         }
     }
-}
-
-@Immutable
-@AndroidEntryPoint
-class RuStoreMessagingService : RuStoreMessagingService(), CoroutineScope {
-
-    @Inject lateinit var cacheManager: CacheManager
-
-    private val job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + job
-
-    @SuppressLint("HardwareIds")
-    override fun onNewToken(token: String) {
-        super.onNewToken(token)
-        Log.d("App", "onNewToken token = $token")
-
-        val config = cacheManager.loadLastRuStoreConfig()
-
-        if (config == null || config.pushToken != token) {
-            Log.d("App", "New token cached")
-            cacheManager.saveActualRuStoreConfig(CacheManager.RuStoreConfig(token, false))
-        }
-    }
-
-    override fun onMessageReceived(message: RemoteMessage) {
-        super.onMessageReceived(message)
-        Log.i("MESSAGE", "RuStore Message Service: got 1 message")
-    }
-
-    override fun onError(errors: List<RuStorePushClientException>) {
-        super.onError(errors)
-        errors.forEach { error ->
-            error.printStackTrace()
-            TracerCrashReport.report(error, issueKey = "RUSTORE_PUSH_SERVICE")
-        }
-    }
-
 }

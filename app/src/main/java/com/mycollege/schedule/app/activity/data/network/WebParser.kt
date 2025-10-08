@@ -13,6 +13,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+@Deprecated("server migration")
 class WebParser @Inject constructor(
     private val database: Database
 ) {

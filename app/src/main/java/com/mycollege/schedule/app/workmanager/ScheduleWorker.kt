@@ -1,5 +1,6 @@
 package com.mycollege.schedule.app.workmanager
 
+import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
@@ -15,6 +16,8 @@ import com.mycollege.schedule.feature.schedule.data.models.DataClasses
 import com.mycollege.schedule.feature.schedule.data.models.DataClasses.DayWeek
 import com.mycollege.schedule.feature.schedule.domain.usecase.GetChosenGroupUseCase
 import com.mycollege.schedule.feature.schedule.domain.usecase.GetTodayScheduleUseCase
+import com.mycollege.schedule.feature.settings.domain.usecase.GetWeekParityUseCase
+import com.mycollege.schedule.feature.settings.ui.state.SettingsState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +36,8 @@ class ScheduleWorker @AssistedInject constructor(
     @Assisted workerParams: WorkerParameters,
     private var cacheManager: CacheManager,
     private val getChosenGroupUseCase: GetChosenGroupUseCase,
-    private val getTodayScheduleUseCase: GetTodayScheduleUseCase
+    private val getTodayScheduleUseCase: GetTodayScheduleUseCase,
+    private val getWeekParityUseCase: GetWeekParityUseCase
 ) : CoroutineWorker(context, workerParams) {
 
     private val monitor = Mutex()
@@ -76,6 +80,29 @@ class ScheduleWorker @AssistedInject constructor(
                     if (intent != null) intents.add(CacheManager.IntentConf(i, intent))
                 }
                 cacheManager.saveAlarms(intents)
+
+
+                // СИНХРОНИЗАЦИЯ НЕДЕЛИ (если включена)
+
+                var settings = cacheManager.loadLastSettings()
+
+                // если настройка синхронизации с сервером выключена
+                if (settings.synchronizeWeekParity) {
+                    val parity = getWeekParityUseCase.getWeekParity()
+
+                    settings = SettingsState(
+                        settings.navigationVisibility,
+                        settings.notificationsEnabled,
+                        settings.fullWeekVisibility,
+                        settings.synchronizeWeekParity,
+                        settings.weekCount,
+                        parity == 2 // false - нечетная
+                    )
+                    cacheManager.saveServerNetworkLastRequest(CacheManager.ServerNetworkLastRequest(
+                        System.currentTimeMillis()))
+                    cacheManager.saveActualSettings(settings)
+                }
+
             }
             Result.success()
         } catch (e: Exception) {
@@ -88,6 +115,7 @@ class ScheduleWorker @AssistedInject constructor(
     /**
      * Установить отложенное уведомление на пару
      */
+    @SuppressLint("ScheduleExactAlarm")
     private fun setNotificationForLesson(context: Context, lesson: DataClasses.Lesson, id: Int): Intent? {
         val lessonName = lesson.name
         val lessonCount = lesson.count

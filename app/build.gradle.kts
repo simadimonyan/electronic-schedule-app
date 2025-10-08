@@ -1,5 +1,3 @@
-import java.util.Properties
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -11,8 +9,6 @@ plugins {
     id("ru.ok.tracer").version("1.0.1")
     id("com.google.devtools.ksp")
 }
-
-val properties = Properties().apply { load(File(rootProject.rootDir, "gradle.properties").inputStream()) }
 
 val pushServerAccessToken = properties["pushserver.accessToken"] as String
 val remoteConfigAppId = properties["remoteconfig.appId"] as String
@@ -46,9 +42,10 @@ android {
 
     defaultConfig {
         applicationId = "com.mycollege.schedule"
+        targetSdk = 34
         minSdk = 29
-        versionCode = 12
-        versionName = "1.4"
+        versionCode = 14
+        versionName = "1.4.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -81,11 +78,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -115,7 +112,6 @@ dependencies {
     implementation(libs.dagger.compiler)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    annotationProcessor(libs.androidx.room.room.compiler)
     ksp(libs.androidx.room.room.compiler)
 
     implementation(libs.mobileads)
