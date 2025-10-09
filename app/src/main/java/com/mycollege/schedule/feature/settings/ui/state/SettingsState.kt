@@ -1,8 +1,10 @@
 package com.mycollege.schedule.feature.settings.ui.state
 
 import androidx.compose.runtime.Immutable
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -11,9 +13,9 @@ import javax.inject.Singleton
 data class SettingsState(
 
     /**
-     * Видимость панели навигации
+     * Невидимость панели навигации
      */
-    val navigationVisibility: Boolean = false,
+    val navigationInvisibility: Boolean = false,
 
     /**
      * Уведомления включены
@@ -49,6 +51,13 @@ class SettingsStateHolder @Inject constructor() {
     private val _settingsState = MutableStateFlow(SettingsState())
     val settingsState: StateFlow<SettingsState> = _settingsState
 
+    private val _networkSynchronizationIssues = MutableSharedFlow<Boolean>()
+    val networkSynchronizationIssues = _networkSynchronizationIssues.asSharedFlow()
+
+    suspend fun sendNetworkIssue() {
+        _networkSynchronizationIssues.emit(true)
+    }
+
     fun updateSettingsState(state: SettingsState) {
         _settingsState.update { state }
     }
@@ -66,7 +75,7 @@ class SettingsStateHolder @Inject constructor() {
     }
 
     fun updateNavInvisibility(isVisible: Boolean) {
-        _settingsState.update { it.copy(navigationVisibility = isVisible) }
+        _settingsState.update { it.copy(navigationInvisibility = isVisible) }
     }
 
     fun updateSynchronizationWeekParity(isSynchronized: Boolean) {

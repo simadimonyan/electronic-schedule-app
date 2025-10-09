@@ -17,7 +17,7 @@ data class GroupState(
 
     // choose configuration | student mode
     val course: String = "1 курс",
-    val level: String = "Все специальности",
+    val level: String = "Все уровни",
     val group: String = "Выбрать",
 
     // choose configuration | teacher mode

@@ -1,6 +1,5 @@
 package com.mycollege.schedule.app.activity.ui.state
 
-import java.util.concurrent.TimeUnit
 import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
@@ -11,7 +10,7 @@ import com.mycollege.schedule.feature.settings.ui.state.SettingsState
 import com.mycollege.schedule.feature.settings.ui.state.SettingsStateHolder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import ru.ok.tracer.crash.report.TracerCrashReport
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @Stable
@@ -30,78 +29,124 @@ class StartViewModel @Inject constructor(
 
             if (settings != null) {
                 // UI Screen Index
-                if (settings.navigationVisibility) {
+                if (settings.navigationInvisibility) {
                     appStateHolder.updateIndex(1)
                 }
 
                 // Settings
                 //settingsStateHolder.updateSettingsState(settings)
                 settingsStateHolder.updateFullWeek(settings.fullWeekVisibility)
-                settingsStateHolder.updateNavInvisibility(settings.navigationVisibility)
+                settingsStateHolder.updateNavInvisibility(settings.navigationInvisibility)
                 settingsStateHolder.updateWeekChangeMode(settings.weekCount)
                 settingsStateHolder.updateNotificationsEnabled(settings.notificationsEnabled)
             }
 
             viewModelScope.launch {
 
-                val lastRequest = cacheManager.loadServerNetworkLastRequest()
+                try {
 
-                // первый запуск или нет
-                if (settings != null) {
+                    val lastRequest = cacheManager.loadServerNetworkLastRequest()
 
-                    // если синхронизация включена
-                    if (settings.synchronizeWeekParity) {
+                    // первый запуск или нет
+                    if (settings != null) {
 
-                        // проверка последнего запроса синхронизации недели (в случае если )
-                        if (lastRequest == null
-                            || lastRequest.weekParitySynchronization == -1L
-                            || (System.currentTimeMillis() - lastRequest.weekParitySynchronization) >= TimeUnit.DAYS.toMillis(1)
-                        ) {
-                            // week parity setting
-                            val parity = getWeekParityUseCase.getWeekParity()
-                            settingsStateHolder.updateWeekChangeMode(parity == 2) // false - нечетная
-                            settingsStateHolder.updateSynchronizedWeekCount(parity == 2) // false нечетная
+                        // если синхронизация включена
+                        if (settings.synchronizeWeekParity) {
 
-                            cacheManager.saveActualSettings(SettingsState(
-                                settings.navigationVisibility,
-                                settings.notificationsEnabled,
-                                settings.fullWeekVisibility,
-                                settings.synchronizeWeekParity,
-                                parity == 2
-                            ))
-                            cacheManager.saveServerNetworkLastRequest(CacheManager.ServerNetworkLastRequest(
-                                System.currentTimeMillis()))
-                            Log.i("StartViewModel", "Cинхронизация недели c сервером: weekCount - $parity")
+                            // проверка последнего запроса синхронизации недели (в случае если )
+                            if (lastRequest == null
+                                || lastRequest.weekParitySynchronization == -1L
+                                || (System.currentTimeMillis() - lastRequest.weekParitySynchronization) >= TimeUnit.DAYS.toMillis(1)
+                            ) {
+                                // week parity setting
+                                val parity = getWeekParityUseCase.getWeekParity()
+                                settingsStateHolder.updateWeekChangeMode(parity == 2) // false - нечетная
+                                settingsStateHolder.updateSynchronizedWeekCount(parity == 2) // false нечетная
+
+                                cacheManager.saveActualSettings(SettingsState(
+                                    settings.navigationInvisibility,
+                                    settings.notificationsEnabled,
+                                    settings.fullWeekVisibility,
+                                    settings.synchronizeWeekParity,
+                                    parity == 2
+                                ))
+                                val lastRequest = cacheManager.loadServerNetworkLastRequest()
+                                if (lastRequest != null) {
+                                    cacheManager.saveServerNetworkLastRequest(CacheManager.ServerNetworkLastRequest(
+                                        System.currentTimeMillis(),
+                                        lastRequest.groupChooseConfiguration,
+                                        lastRequest.teacherChooseConfiguration,
+                                        lastRequest.groupScheduleSynchronization,
+                                        lastRequest.teacherScheduleSynchronization
+                                    ))
+                                }
+                                else
+                                    cacheManager.saveServerNetworkLastRequest(CacheManager.ServerNetworkLastRequest(
+                                        weekParitySynchronization = System.currentTimeMillis()))
+                                Log.i("StartViewModel", "Cинхронизация недели c сервером: weekCount - $parity")
+                            }
+                            else { // берет последную синхронизованную четность недели
+                                Log.i("StartViewModel", "Week parity daily request")
+                                val parity = cacheManager.loadLastSettings()
+                                settingsStateHolder.updateWeekChangeMode(parity.synchronizedWeekCount)
+                            }
+
                         }
-                        else { // берет последную синхронизованную четность недели
-                            Log.i("StartViewModel", "Week parity daily request")
+                        else { // берет локальную четность недели (тк выключена синхронизация)
                             val parity = cacheManager.loadLastSettings()
-                            settingsStateHolder.updateWeekChangeMode(parity.synchronizedWeekCount)
+                            settingsStateHolder.updateWeekChangeMode(parity.weekCount)
                         }
 
                     }
-                    else { // берет локальную четность недели (тк выключена синхронизация)
-                        val parity = cacheManager.loadLastSettings()
-                        settingsStateHolder.updateWeekChangeMode(parity.weekCount)
+                    else {
+                        // week parity setting
+                        val parity = getWeekParityUseCase.getWeekParity()
+                        settingsStateHolder.updateWeekChangeMode(parity == 2) // false - нечетная
+                        settingsStateHolder.updateSynchronizedWeekCount(parity == 2) // false нечетная
+
+                        cacheManager.saveActualSettings(SettingsState(weekCount = parity == 2))
+                        val lastRequest = cacheManager.loadServerNetworkLastRequest()
+                        if (lastRequest != null) {
+                            cacheManager.saveServerNetworkLastRequest(CacheManager.ServerNetworkLastRequest(
+                                System.currentTimeMillis(),
+                                lastRequest.groupChooseConfiguration,
+                                lastRequest.teacherChooseConfiguration,
+                                lastRequest.groupScheduleSynchronization,
+                                lastRequest.teacherScheduleSynchronization
+                            ))
+                        }
+                        else
+                            cacheManager.saveServerNetworkLastRequest(CacheManager.ServerNetworkLastRequest(
+                                weekParitySynchronization = System.currentTimeMillis()))
+                        Log.i("StartViewModel", "Первая синхронизация недели c сервером: weekCount - $parity")
                     }
+
+                    // сохранение состояния инициализации
+                    cacheManager.saveActualSettings(settingsStateHolder.settingsState.value)
 
                 }
-                else {
-                    // week parity setting
-                    val parity = getWeekParityUseCase.getWeekParity()
-                    settingsStateHolder.updateWeekChangeMode(parity == 2) // false - нечетная
-                    settingsStateHolder.updateSynchronizedWeekCount(parity == 2) // false нечетная
+                catch (e: Exception) { // проблемы с интернетом
+                    Log.e("StartViewModel", "В корутине: $e")
 
-                    cacheManager.saveActualSettings(SettingsState(weekCount = parity == 2))
-                    cacheManager.saveServerNetworkLastRequest(CacheManager.ServerNetworkLastRequest(
-                        System.currentTimeMillis()))
-                    Log.i("StartViewModel", "Первая синхронизация недели c сервером: weekCount - $parity")
+                    // отключение функции синхронизации
+                    settingsStateHolder.updateSynchronizationWeekParity(false)
+                    if (settings != null) {
+                        cacheManager.saveActualSettings(SettingsState(
+                            settings.navigationInvisibility,
+                            settings.notificationsEnabled,
+                            settings.fullWeekVisibility,
+                            false,
+                            settings.weekCount,
+                            settings.synchronizedWeekCount
+                        ))
+                    }
+                    else
+                        cacheManager.saveActualSettings(SettingsState(synchronizeWeekParity = false))
                 }
 
             }
         }
         catch (e: Exception) {
-            TracerCrashReport.report(e, issueKey = "StartViewModel")
             Log.e("StartViewModel", e.toString())
         }
 

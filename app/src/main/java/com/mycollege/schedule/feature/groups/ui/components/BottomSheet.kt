@@ -80,7 +80,7 @@ fun BottomSheetContent(
 
             BottomSheet(groupState) { newValue ->
                 when (selectedIndex) {
-                    0 -> handleEvent(GroupEvent.UpdateCourse(newValue))
+                    0 -> handleEvent(GroupEvent.UpdateCourse("$newValue курс"))
                     1 -> handleEvent(GroupEvent.UpdateSpeciality(newValue))
                     2 -> handleEvent(GroupEvent.UpdateGroup(newValue))
                     3 -> handleEvent(GroupEvent.UpdateDepartment(newValue))
@@ -126,7 +126,7 @@ fun CourseKeys(
         }
 
         Text(
-            text = key,
+            text = "$key курс",
             modifier = Modifier
                 .padding(10.dp)
                 .fillMaxWidth()
@@ -174,7 +174,7 @@ fun SpecialityKeys(
         modifier = Modifier
             .padding(10.dp)
             .fillMaxWidth()
-            .clickable { updateValue("Все специальности") },
+            .clickable { updateValue("Все уровни") },
         textAlign = TextAlign.Center,
         fontSize = 20.sp,
         color = Color.Black
@@ -219,25 +219,29 @@ fun DepartmentListContent(
 ) {
     LazyColumn {
         itemsIndexed(departmentsToDisplay.sortedBy { -it.length }, key = { _, department -> department }) { index, department ->
-            department.let { nonNullGroup ->
-                if (index != 0) {
-                    HorizontalDivider(
-                        thickness = 0.5.dp,
-                        modifier = Modifier.padding(25.dp, 0.dp),
-                        color = Color.LightGray
-                    )
-                }
+            department.let { department ->
+                if (!department.equals("null")) {
 
-                Text(
-                    text = nonNullGroup,
-                    modifier = Modifier
-                        .padding(10.dp)
-                        .fillMaxWidth()
-                        .clickable { updateValue(nonNullGroup) },
-                    textAlign = TextAlign.Center,
-                    fontSize = 20.sp,
-                    color = Color.Black
-                )
+                    if (index != 0) {
+                        HorizontalDivider(
+                            thickness = 0.5.dp,
+                            modifier = Modifier.padding(25.dp, 0.dp),
+                            color = Color.LightGray
+                        )
+                    }
+
+                    Text(
+                        text = department,
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .fillMaxWidth()
+                            .clickable { updateValue(department) },
+                        textAlign = TextAlign.Center,
+                        fontSize = 20.sp,
+                        color = Color.Black
+                    )
+
+                }
             }
         }
     }

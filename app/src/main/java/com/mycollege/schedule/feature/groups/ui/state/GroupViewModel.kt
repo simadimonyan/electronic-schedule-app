@@ -1,10 +1,11 @@
 package com.mycollege.schedule.feature.groups.ui.state
 
+import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mycollege.schedule.R
-import com.mycollege.schedule.app.activity.domain.models.GroupParserStateHolder
+import com.mycollege.schedule.app.activity.domain.models.LoadingStateHolder
 import com.mycollege.schedule.app.activity.ui.state.AppStateHolder
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.core.cache.CacheUpdater
@@ -15,8 +16,8 @@ import com.mycollege.schedule.feature.groups.domain.usecases.teacher.GetDepartme
 import com.mycollege.schedule.feature.groups.domain.usecases.teacher.GetTeachersUseCase
 import com.mycollege.schedule.shared.resources.ResourceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @Stable
@@ -31,7 +32,8 @@ class GroupViewModel @Inject constructor(
     // state
     val appStateHolder: AppStateHolder,
     val groupStateHolder: GroupStateHolder,
-    val groupParserStateHolder: GroupParserStateHolder,
+    val groupParserStateHolder: LoadingStateHolder,
+    val loadingStateHolder: LoadingStateHolder,
 
     // use cases
     private val getCoursesUseCase: GetCoursesUseCase,
@@ -79,30 +81,179 @@ class GroupViewModel @Inject constructor(
     }
 
     /**
-     * Отображение состояние выбора данных группы
+     * Отображение и подгрузка состояние выбора данных группы
      */
     private fun display() {
         viewModelScope.launch {
-            if (!appStateHolder.appState.value.firstStartUp) {
 
-                val groupState = groupStateHolder.groupState.value
+            val groupState = groupStateHolder.groupState.value
+
+            try {
+
+                val lastRequest = cacheManager.loadServerNetworkLastRequest()
+
+                // если приложение уже запускалось ранее
+                if (lastRequest != null) {
+
+                    // запрос на сервер
+                    if (appStateHolder.appState.value.studentMode) {
+
+                        // если конфигурация не обновлялась в течение дня
+                        if ((System.currentTimeMillis() - lastRequest.groupChooseConfiguration) >= TimeUnit.MINUTES.toMillis(1)) {
+
+                            Log.i("GroupViewModel", "Отправляем запрос на получение конфигурации групп")
+
+                            loadingStateHolder.updateLoading(true)
+
+                            val courses = getCoursesUseCase.getServerCourses()
+                            val levels = getLevelUseCase.getServerLevels(groupState.course.split(" ")[0])
+                            val groups = getGroupsUseCase.getServerGroups(groupState.course.split(" ")[0], courses.max()) {
+                                loadingStateHolder.updateProgress(it)
+                            }
+
+                            groupStateHolder.updateCoursesToDisplay(courses.toList())
+                            groupStateHolder.updateLevelsToDisplay(levels.toList())
+                            groupStateHolder.updateGroupsToDisplay(groups.toList())
+
+                            loadingStateHolder.updateLoading(false)
+                            loadingStateHolder.updateProgress(0)
+
+                        }
+                        else { // если обновлялось в течение дня то берем из бд
+
+                            Log.i("GroupViewModel", "Debounce конфигурации групп: частота запроса выше порога - 1 день")
+
+                            val courses = getCoursesUseCase.getRoomCourses()
+                            val levels = getLevelUseCase.getRoomLevels(groupState.course.split(" ")[0])
+                            val groups = getGroupsUseCase.getRoomGroups(groupState.course.split(" ")[0], groupState.level)
+
+                            groupStateHolder.updateCoursesToDisplay(courses.toList())
+                            groupStateHolder.updateLevelsToDisplay(levels.toList())
+                            groupStateHolder.updateGroupsToDisplay(groups.toList())
+
+                        }
+
+                    }
+                    else {
+
+                        // если конфигурация не обновлялась в течение дня
+                        if ((System.currentTimeMillis() - lastRequest.teacherChooseConfiguration) >= TimeUnit.MINUTES.toMillis(1)) {
+
+                            Log.i("GroupViewModel", "Отправляем запрос на получение конфигурации преподавателей")
+
+                            loadingStateHolder.updateLoading(true)
+
+                            val departments = getDepartmentsUseCase.getRoomDepartments()
+                            val teachers = getTeachersUseCase.getServerTeachers {
+                                loadingStateHolder.updateProgress(it)
+                            }
+
+                            groupStateHolder.updateDepartmentToDisplay(departments.toList())
+                            groupStateHolder.updateTeachersToDisplay(teachers.toList())
+
+                            loadingStateHolder.updateLoading(false)
+                            loadingStateHolder.updateProgress(0)
+
+                        }
+                        else { // если обновлялось в течение дня то берем из бд
+
+                            Log.i("GroupViewModel", "Debounce конфигурации преподавателей: частота запроса выше порога - 1 день")
+
+                            val departments = getDepartmentsUseCase.getRoomDepartments()
+                            val teachers = getTeachersUseCase.getRoomTeachers(groupState.department)
+
+                            groupStateHolder.updateDepartmentToDisplay(departments.toList())
+                            groupStateHolder.updateTeachersToDisplay(teachers.toList())
+
+                        }
+
+                    }
+
+                }
+                else { // делаем запрос на сервер при первом запуске
+
+                    // запрос на сервер
+                    if (appStateHolder.appState.value.studentMode) {
+
+                        Log.i("GroupViewModel", "Первый запрос конфигурации групп")
+
+                        loadingStateHolder.updateLoading(true)
+
+                        val courses = getCoursesUseCase.getServerCourses()
+                        val levels = getLevelUseCase.getServerLevels(groupState.course.split(" ")[0])
+                        val groups = getGroupsUseCase.getServerGroups(groupState.course.split(" ")[0], courses.max()) {
+                            loadingStateHolder.updateProgress(it)
+                        }
+
+                        groupStateHolder.updateCoursesToDisplay(courses.toList())
+                        groupStateHolder.updateLevelsToDisplay(levels.toList())
+                        groupStateHolder.updateGroupsToDisplay(groups.toList())
+
+                        loadingStateHolder.updateLoading(false)
+                        loadingStateHolder.updateProgress(0)
+
+                    }
+                    else {
+
+                        Log.i("GroupViewModel", "Первый запрос конфигурации преподавателей")
+
+                        loadingStateHolder.updateLoading(true)
+
+                        val departments = getDepartmentsUseCase.getRoomDepartments()
+                        val teachers = getTeachersUseCase.getServerTeachers {
+                            loadingStateHolder.updateProgress(it)
+                        }
+
+                        groupStateHolder.updateDepartmentToDisplay(departments.toList())
+                        groupStateHolder.updateTeachersToDisplay(teachers.toList())
+
+                        loadingStateHolder.updateLoading(false)
+                        loadingStateHolder.updateProgress(0)
+
+                    }
+
+                }
+
+            }
+            catch (e: Exception) {
+
+                // в том числе проблемы с сетью
+                Log.e("GroupViewModel", "Ошибка при получении данных - $e")
 
                 if (appStateHolder.appState.value.studentMode) {
-                    val courses = getCoursesUseCase.getCourses()
-                    val levels = getLevelUseCase.getLevels(groupState.course)
-                    val groups = getGroupsUseCase.getGroups(groupState.course, groupState.level)
 
-                    groupStateHolder.updateCoursesToDisplay(courses.toList())
-                    groupStateHolder.updateLevelsToDisplay(levels.toList())
-                    groupStateHolder.updateGroupsToDisplay(groups.toList())
+                    val courses = getCoursesUseCase.getRoomCourses()
+                    val levels = getLevelUseCase.getRoomLevels(groupState.course.split(" ")[0])
+                    val groups = getGroupsUseCase.getRoomGroups(groupState.course.split(" ")[0], groupState.level)
+
+                    // берем данные из базы
+                    if (courses.isNotEmpty()) {
+                        groupStateHolder.updateCoursesToDisplay(courses.toList())
+                        groupStateHolder.updateLevelsToDisplay(levels.toList())
+                        groupStateHolder.updateGroupsToDisplay(groups.toList())
+                    }
+                    else {// если в базе нет данных - бесконечная загрузка
+                        loadingStateHolder.updateLoading(true)
+                        loadingStateHolder.updateProgress(10)
+                    }
+
                 }
                 else {
-                    val departments = getDepartmentsUseCase.getDepartments()
-                    val teachers = getTeachersUseCase.getTeachers(groupState.department)
 
-                    groupStateHolder.updateDepartmentToDisplay(departments.toList())
-                    groupStateHolder.updateTeachersToDisplay(teachers.toList())
+                    val departments = getDepartmentsUseCase.getRoomDepartments()
+                    val teachers = getTeachersUseCase.getRoomTeachers(groupState.department)
+
+                    // берем данные из базы
+                    if (teachers.isNotEmpty()) {
+                        groupStateHolder.updateDepartmentToDisplay(departments.toList())
+                        groupStateHolder.updateTeachersToDisplay(teachers.toList())
+                    }
+                    else {// если в базе нет данных - бесконечная загрузка
+                        loadingStateHolder.updateLoading(true)
+                        loadingStateHolder.updateProgress(10)
+                    }
                 }
+
             }
         }
     }

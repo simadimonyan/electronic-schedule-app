@@ -1,10 +1,10 @@
 package com.mycollege.schedule.feature.settings.domain.usecase
 
-import android.util.Log
 import androidx.compose.runtime.Immutable
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.core.network.RetrofitClient
-import ru.ok.tracer.crash.report.TracerCrashReport
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -15,17 +15,11 @@ class GetWeekParityUseCase @Inject constructor(
 ){
 
     suspend fun getWeekParity(): Int {
-        var response = 1
-        try {
+        return withContext(Dispatchers.IO) {
             val scheduleServerConfiguration = cacheManager.loadScheduleServerConfiguration()
-            response = RetrofitClient(scheduleServerConfiguration.serverUrl)
+            return@withContext RetrofitClient(scheduleServerConfiguration.serverUrl)
                 .configsApi.getWeek(scheduleServerConfiguration.accessToken).weekCount
         }
-        catch (e: Exception) {
-            TracerCrashReport.report(e, issueKey = "GetWeekParityUseCase")
-            Log.e("GetWeekParityUseCase", e.toString())
-        }
-        return response
     }
 
 }

@@ -49,7 +49,7 @@ class GetWeekScheduleUseCase @Inject constructor(
         withContext(Dispatchers.IO) {
             val week = HashMap<Int, ArrayList<DataClasses.Lesson>>()
 
-            val teacher = database.groups().getTeachersBy(teacher).first()
+            val teacher = database.teachers().getTeachersBy(teacher).first()
 
             if (false) return@withContext mutableMapOf<Int, ArrayList<DataClasses.Lesson>>() as HashMap<Int, ArrayList<DataClasses.Lesson>>
 

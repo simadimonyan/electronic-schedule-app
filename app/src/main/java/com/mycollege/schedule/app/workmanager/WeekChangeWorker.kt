@@ -7,7 +7,6 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.mycollege.schedule.core.cache.CacheManager
-import com.mycollege.schedule.feature.settings.domain.usecase.GetWeekParityUseCase
 import com.mycollege.schedule.feature.settings.ui.state.SettingsState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -29,7 +28,7 @@ class WeekChangeWorker @AssistedInject constructor(
             // если настройка синхронизации с сервером выключена
             if (!settings.synchronizeWeekParity) {
                 settings = SettingsState(
-                    settings.navigationVisibility,
+                    settings.navigationInvisibility,
                     settings.notificationsEnabled,
                     settings.fullWeekVisibility,
                     settings.synchronizeWeekParity,

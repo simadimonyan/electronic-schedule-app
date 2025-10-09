@@ -5,8 +5,7 @@ import android.content.Context
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mycollege.schedule.R
-import com.mycollege.schedule.app.activity.domain.models.GroupParserStateHolder
+import com.mycollege.schedule.app.activity.domain.models.LoadingStateHolder
 import com.mycollege.schedule.app.activity.domain.usecases.GetScheduleUseCase
 import com.mycollege.schedule.app.notifications.NotificationsManager
 import com.mycollege.schedule.core.cache.CacheManager
@@ -15,10 +14,8 @@ import com.mycollege.schedule.feature.groups.ui.state.GroupStateHolder
 import com.mycollege.schedule.feature.settings.ui.state.SettingsStateHolder
 import com.mycollege.schedule.shared.resources.ResourceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import ru.ok.tracer.crash.report.TracerCrashReport
 import javax.inject.Inject
 
@@ -30,7 +27,7 @@ class MainViewModel @Inject constructor(
     private val getScheduleUseCase: GetScheduleUseCase,
     val cacheManager: CacheManager,
     val appStateHolder: AppStateHolder,
-    val groupParserStateHolder: GroupParserStateHolder,
+    val groupParserStateHolder: LoadingStateHolder,
     val settingsStateHolder: SettingsStateHolder,
     val groupStateHolder: GroupStateHolder,
 ) : ViewModel() {
@@ -65,27 +62,27 @@ class MainViewModel @Inject constructor(
             try {
                 notificationsManager.createNotificationChannel(context)
                 if (cacheManager.shouldUpdateCache()) {
-                    groupParserStateHolder.updateLoading(true)
-
-                    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                    val notification = notificationsManager.createNotification(context, context.getString(
-                        R.string.get_data))
-                    notificationManager.notify(2, notification)
-
-                    withContext(Dispatchers.IO) {
-                        getScheduleUseCase.getSchedule { newProgress ->
-                            groupParserStateHolder.updateProgress(newProgress)
-                            notificationsManager.updateProgressNotification(
-                                2, context,
-                                newProgress
-                            )
-                        }
-                    }
-                    cacheManager.saveLastUpdatedTime(System.currentTimeMillis())
-
-
-                    notificationsManager.cancelNotification(2, context)
-                    groupParserStateHolder.updateLoading(false)
+//                    groupParserStateHolder.updateLoading(true)
+//
+//                    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+//                    val notification = notificationsManager.createNotification(context, context.getString(
+//                        R.string.get_data))
+//                    notificationManager.notify(2, notification)
+//
+//                    withContext(Dispatchers.IO) {
+//                        getScheduleUseCase.getSchedule { newProgress ->
+//                            groupParserStateHolder.updateProgress(newProgress)
+//                            notificationsManager.updateProgressNotification(
+//                                2, context,
+//                                newProgress
+//                            )
+//                        }
+//                    }
+//                    cacheManager.saveLastUpdatedTime(System.currentTimeMillis())
+//
+//
+//                    notificationsManager.cancelNotification(2, context)
+//                    groupParserStateHolder.updateLoading(false)
 
                 }
 

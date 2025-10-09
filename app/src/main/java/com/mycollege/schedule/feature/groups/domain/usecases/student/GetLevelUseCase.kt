@@ -1,7 +1,9 @@
 package com.mycollege.schedule.feature.groups.domain.usecases.student
 
 import androidx.compose.runtime.Immutable
+import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.core.db.Database
+import com.mycollege.schedule.core.network.RetrofitClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -10,14 +12,24 @@ import javax.inject.Singleton
 @Singleton
 @Immutable
 class GetLevelUseCase @Inject constructor(
-    private val database: Database
+    private val database: Database,
+    private val cacheManager: CacheManager
 ) {
 
-    suspend fun getLevels(course: String): Set<String> {
+    suspend fun getRoomLevels(course: String): Set<String> {
         return withContext(Dispatchers.IO) {
             return@withContext database.groups().getLevelsBy(course).toSortedSet { level1, level2 ->
                 level1.length.compareTo(level2.length) // сортировка по возрастанию длины
             }
+        }
+    }
+
+    suspend fun getServerLevels(course: String): Set<String> {
+        return withContext(Dispatchers.IO) {
+            val scheduleServerConfiguration = cacheManager.loadScheduleServerConfiguration()
+            return@withContext RetrofitClient(scheduleServerConfiguration.serverUrl).groupsApi
+                .levels(scheduleServerConfiguration.accessToken, Integer.parseInt(course)).levels
+                    .toSortedSet( compareBy { it.length })
         }
     }
 

@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import com.mycollege.schedule.app.activity.domain.models.GroupParserState
+import com.mycollege.schedule.app.activity.domain.models.LoadingState
 import com.mycollege.schedule.app.activity.ui.state.AppState
 import com.mycollege.schedule.app.navigation.Settings
 import com.mycollege.schedule.feature.schedule.ui.components.schedule.DefaultLoadingUnit
@@ -40,7 +40,7 @@ import com.mycollege.schedule.shared.ui.theme.background
 @Preview
 @Composable
 fun SchedulePreview() {
-    ScheduleContent(SettingsState(), AppState(), ScheduleState(), GroupParserState(), {}) {}
+    ScheduleContent(SettingsState(), AppState(), ScheduleState(), LoadingState(), {}) {}
 }
 
 @Composable
@@ -52,7 +52,7 @@ fun ScheduleScreen(
     val appState by viewModel.appStateHolder.appState.collectAsState()
     val settingsState by viewModel.settingsStateHolder.settingsState.collectAsState()
     val scheduleState by viewModel.scheduleStateHolder.scheduleState.collectAsState()
-    val parseState by viewModel.parserStateHolder.groupParserState.collectAsState()
+    val parseState by viewModel.parserStateHolder.loadingState.collectAsState()
 
     val handleEvent: (ScheduleEvent) -> Unit = { event ->
         viewModel.handleEvent(event)
@@ -77,7 +77,7 @@ fun ScheduleContent(
     settingsState: SettingsState,
     appState: AppState,
     scheduleState: ScheduleState,
-    parseState: GroupParserState,
+    parseState: LoadingState,
     handleEvent: (ScheduleEvent) -> Unit,
     navigateToSettings: () -> Unit
 ) {

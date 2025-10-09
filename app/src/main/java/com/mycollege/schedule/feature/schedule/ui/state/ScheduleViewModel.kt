@@ -8,7 +8,7 @@ import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mycollege.schedule.app.activity.domain.models.GroupParserStateHolder
+import com.mycollege.schedule.app.activity.domain.models.LoadingStateHolder
 import com.mycollege.schedule.app.activity.ui.state.AppStateHolder
 import com.mycollege.schedule.app.notifications.NotificationReceiver
 import com.mycollege.schedule.core.cache.CacheManager
@@ -49,7 +49,7 @@ class ScheduleViewModel @Inject constructor(
     val groupStateHolder: GroupStateHolder,
     val scheduleStateHolder: ScheduleStateHolder,
     val settingsStateHolder: SettingsStateHolder,
-    val parserStateHolder: GroupParserStateHolder,
+    val parserStateHolder: LoadingStateHolder,
 
     // use cases
     private val getChosenGroupUseCase: GetChosenGroupUseCase,

@@ -8,7 +8,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Immutable
-data class GroupParserState(
+data class LoadingState(
 
     /**
      * Процесс обновления расписания
@@ -24,17 +24,17 @@ data class GroupParserState(
 
 @Singleton
 @Immutable
-class GroupParserStateHolder @Inject constructor() {
+class LoadingStateHolder @Inject constructor() {
 
-    private val _groupParserState = MutableStateFlow(GroupParserState())
-    val groupParserState: StateFlow<GroupParserState> = _groupParserState
+    private val _loadingState = MutableStateFlow(LoadingState())
+    val loadingState: StateFlow<LoadingState> = _loadingState
 
     fun updateLoading(isLoading: Boolean) {
-        _groupParserState.update { it.copy(loading = isLoading) }
+        _loadingState.update { it.copy(loading = isLoading) }
     }
 
     fun updateProgress(progress: Int) {
-        _groupParserState.update { it.copy(progress = progress) }
+        _loadingState.update { it.copy(progress = progress) }
     }
 
 }

@@ -32,10 +32,6 @@ fun StartScreen(
     val settingsState by viewModel.settingsStateHolder.settingsState.collectAsState()
     val appState by viewModel.appStateHolder.appState.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.settingsInit()
-    }
-
     var previousMode by remember { mutableStateOf(appState.studentMode) }
     var transitionModeFlag by remember { mutableStateOf(false) }
 
@@ -61,7 +57,7 @@ fun StartScreen(
         }
     }
 
-    if (!settingsState.navigationVisibility) {
+    if (!settingsState.navigationInvisibility) {
         CustomAppBar(groupsViewModel, pagerState)
     }
 

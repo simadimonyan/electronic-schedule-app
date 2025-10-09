@@ -84,12 +84,6 @@ class MainActivity : ComponentActivity() {
 
                     requestPermissionsIfNeeded()
 
-                    scope.launch {
-                        mainViewModel.handleEvent(DataEvent.RestoreCache)
-                        mainViewModel.handleEvent(DataEvent.FetchData)
-                        mainViewModel.handleEvent(DataEvent.SetupCacheUpdater)
-                    }
-
                     RemoteConfigClient.Companion.instance
                         .getRemoteConfig().addOnSuccessListener { rc ->
 
@@ -112,6 +106,12 @@ class MainActivity : ComponentActivity() {
                             TracerCrashReport.report(e, issueKey = "RUSTORE_REMOTE_CONFIG")
                             Log.e("RuStoreMessagingService", "RemoteConfig fetch failed: ${e.message}", e)
                         }
+
+                    scope.launch {
+                        mainViewModel.handleEvent(DataEvent.RestoreCache)
+                        mainViewModel.handleEvent(DataEvent.FetchData)
+                        mainViewModel.handleEvent(DataEvent.SetupCacheUpdater)
+                    }
 
                 }
 

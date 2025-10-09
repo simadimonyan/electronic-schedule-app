@@ -13,9 +13,9 @@ class GetDepartmentsUseCase @Inject constructor(
     private val database: Database
 ) {
 
-    suspend fun getDepartments(): Set<String> {
+    suspend fun getRoomDepartments(): Set<String> {
         return withContext(Dispatchers.IO) {
-            val result = database.groups().getDepartments().toMutableSet()
+            val result = database.teachers().getDepartments().toMutableSet()
             result.add("Все кафедры")
             result.toSortedSet()
         }

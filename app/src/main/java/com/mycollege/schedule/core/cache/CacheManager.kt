@@ -42,7 +42,13 @@ class CacheManager @Inject constructor(
     @Immutable
     data class ScheduleServerConfiguration(val serverUrl: String, val accessToken: String)
 
-    data class ServerNetworkLastRequest(val weekParitySynchronization: Long)
+    data class ServerNetworkLastRequest(
+        val weekParitySynchronization: Long = -1,
+        val groupChooseConfiguration: Long = -1,
+        val teacherChooseConfiguration: Long = -1,
+        val groupScheduleSynchronization: Long = -1,
+        val teacherScheduleSynchronization: Long = -1,
+    )
 
     fun loadServerNetworkLastRequest(): ServerNetworkLastRequest {
         val json = preferences.getString(serverNetworkLastRequest, null)
@@ -53,7 +59,7 @@ class CacheManager @Inject constructor(
             gson.fromJson(json, type)
         }
         catch (e: Exception) {
-            ServerNetworkLastRequest(-1)
+            ServerNetworkLastRequest()
         }
 
         return value

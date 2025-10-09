@@ -1,6 +1,7 @@
 package com.mycollege.schedule.feature.groups.ui
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,7 +32,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.mycollege.schedule.BuildConfig
 import com.mycollege.schedule.R
-import com.mycollege.schedule.app.activity.domain.models.GroupParserState
+import com.mycollege.schedule.app.activity.domain.models.LoadingState
 import com.mycollege.schedule.app.activity.ui.state.AppState
 import com.mycollege.schedule.core.ads.YandexAdsListener
 import com.mycollege.schedule.feature.groups.ui.components.ActionButton
@@ -62,7 +64,7 @@ fun GroupPreview() {
         {},
         GroupState(),
         AppState(0, false, false),
-        GroupParserState(),
+        LoadingState(),
         pagerState,
         false,
         false
@@ -75,9 +77,10 @@ fun GroupScreen(
     viewModel: GroupViewModel = hiltViewModel(),
     pagerState: PagerState
 ) {
+    val context = LocalContext.current
     val groupState by viewModel.groupStateHolder.groupState.collectAsState()
     val appState by viewModel.appStateHolder.appState.collectAsState()
-    val parserState by viewModel.groupParserStateHolder.groupParserState.collectAsState()
+    val parserState by viewModel.groupParserStateHolder.loadingState.collectAsState()
 
     var showAds by remember { mutableStateOf(false) }
     val changeStudentModeFlag by produceState(appState.studentMode, appState.studentMode) {
@@ -108,7 +111,7 @@ fun GroupContent(
     updateAppStateIndex: (Int) -> Unit,
     groupState: GroupState,
     appState: AppState,
-    parserState: GroupParserState,
+    parserState: LoadingState,
     pagerState: PagerState,
     showAds: Boolean,
     changeStudentModeFlag: Boolean

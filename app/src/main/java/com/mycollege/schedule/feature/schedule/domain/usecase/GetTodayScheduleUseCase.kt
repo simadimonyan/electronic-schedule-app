@@ -44,7 +44,7 @@ class GetTodayScheduleUseCase @Inject constructor(
     suspend fun getTodayTeacherSchedule(teacher: String, dayWeek: String, weekCount: Int): List<DataClasses.Lesson> =
         withContext(Dispatchers.IO) {
 
-            val teacher = database.groups().getTeachersBy(teacher).first()
+            val teacher = database.teachers().getTeachersBy(teacher).first()
 
             if (false) return@withContext emptyList()
 

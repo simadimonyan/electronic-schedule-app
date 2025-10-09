@@ -32,7 +32,6 @@ class SettingsViewModel @Inject constructor(
 
     private fun changeWeekCountMode(toChange: Boolean) {
         settingsStateHolder.updateWeekChangeMode(toChange)
-        //saveSettings()
     }
 
     private fun saveSettings() {
@@ -45,17 +44,14 @@ class SettingsViewModel @Inject constructor(
 
     private fun makeNotificationsEnabled(isEnabled: Boolean) {
         settingsStateHolder.updateNotificationsEnabled(isEnabled)
-        //saveSettings()
     }
 
     private fun makeScheduleFullWeek(isFull: Boolean) {
         settingsStateHolder.updateFullWeek(isFull)
-        //saveSettings()
     }
 
     private fun makeNavInvisible(isVisible: Boolean) {
         settingsStateHolder.updateNavInvisibility(isVisible)
-        //saveSettings()
     }
 
     private fun makeWeekParitySynchronization(isSynchronized: Boolean) {
@@ -71,27 +67,39 @@ class SettingsViewModel @Inject constructor(
                     Log.i("SYSTEM", System.currentTimeMillis().toString())
                     Log.i("LAST", lastRequest.weekParitySynchronization.toString())
                     Log.i("DIFF", (System.currentTimeMillis() - lastRequest.weekParitySynchronization).toString())
-                    Log.i("MINUTE", TimeUnit.MINUTES.toMillis(1).toString())
+                    Log.i("MINUTE", TimeUnit.MINUTES.toMillis(5).toString())
 
                     // debounce
-                    if ((System.currentTimeMillis() - lastRequest.weekParitySynchronization) >= TimeUnit.MINUTES.toMillis(1)) {
+                    if ((System.currentTimeMillis() - lastRequest.weekParitySynchronization) >= TimeUnit.MINUTES.toMillis(5)) {
                         val parity = getWeekParityUseCase.getWeekParity()
                         changeWeekCountMode(parity == 2) // локальная четность - false нечетная
                         settingsStateHolder.updateSynchronizedWeekCount(parity == 2) // серверная четность - false нечетная
 
                         // последний запрос был отправлен ...
-                        cacheManager.saveServerNetworkLastRequest(CacheManager.ServerNetworkLastRequest(
-                            System.currentTimeMillis()))
+                        val lastRequest = cacheManager.loadServerNetworkLastRequest()
+                        if (lastRequest != null) {
+                            cacheManager.saveServerNetworkLastRequest(CacheManager.ServerNetworkLastRequest(
+                                System.currentTimeMillis(),
+                                lastRequest.groupChooseConfiguration,
+                                lastRequest.teacherChooseConfiguration,
+                                lastRequest.groupScheduleSynchronization,
+                                lastRequest.teacherScheduleSynchronization
+                            ))
+                        }
+                        else
+                            cacheManager.saveServerNetworkLastRequest(CacheManager.ServerNetworkLastRequest(
+                                weekParitySynchronization = System.currentTimeMillis()))
                         saveSettings()
                     }
                     else {
-                        Log.i("SettingsViewModel", "Debounce режим для синхронизации недели: частота запросов превышает порог 1 минуты")
+                        Log.i("SettingsViewModel", "Debounce режим для синхронизации недели: частота запросов превышает порог 5 минут")
                         changeWeekCountMode(cacheManager.loadLastSettings().synchronizedWeekCount)
                     }
 
                 } // в случае если приложение запускается без интернета
                 catch (e: Exception) {
                     Log.e("SettingsViewModel", e.toString())
+                    settingsStateHolder.sendNetworkIssue()
                 }
 
             }

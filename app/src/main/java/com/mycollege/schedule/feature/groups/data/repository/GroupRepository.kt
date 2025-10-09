@@ -26,16 +26,7 @@ interface GroupRepository {
     @Query("SELECT * FROM `groups` WHERE level = :level AND course = :course")
     fun getGroupsBy(level: String, course: String): List<Group>
 
-    @Query("SELECT name FROM teachers WHERE RTRIM(department) = RTRIM(:department) COLLATE NOCASE")
-    fun findTeachersBy(department: String): List<String>
-
-    @Query("SELECT * FROM teachers WHERE name = :name")
-    fun getTeachersBy(name: String): List<Teacher>
-
-    @Query("SELECT DISTINCT name FROM teachers")
-    fun getTeachers(): List<String>
-
-    @Query("SELECT DISTINCT department FROM teachers")
-    fun getDepartments(): List<String>
+    @Query("DELETE FROM `groups`")
+    fun clearTable()
 
 }

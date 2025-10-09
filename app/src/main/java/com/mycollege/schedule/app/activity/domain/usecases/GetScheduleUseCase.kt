@@ -11,6 +11,7 @@ class GetScheduleUseCase @Inject constructor(
     private val webParser: WebParser
 ) {
 
+    @Deprecated("server migration")
     fun getSchedule(progress: (Int) -> Unit) {
         webParser.loadData(progress)
     }

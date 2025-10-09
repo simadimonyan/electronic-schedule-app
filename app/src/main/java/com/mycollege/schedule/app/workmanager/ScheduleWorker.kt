@@ -91,15 +91,26 @@ class ScheduleWorker @AssistedInject constructor(
                     val parity = getWeekParityUseCase.getWeekParity()
 
                     settings = SettingsState(
-                        settings.navigationVisibility,
+                        settings.navigationInvisibility,
                         settings.notificationsEnabled,
                         settings.fullWeekVisibility,
                         settings.synchronizeWeekParity,
                         settings.weekCount,
                         parity == 2 // false - нечетная
                     )
-                    cacheManager.saveServerNetworkLastRequest(CacheManager.ServerNetworkLastRequest(
-                        System.currentTimeMillis()))
+                    val lastRequest = cacheManager.loadServerNetworkLastRequest()
+                    if (lastRequest != null) {
+                        cacheManager.saveServerNetworkLastRequest(CacheManager.ServerNetworkLastRequest(
+                            System.currentTimeMillis(),
+                            lastRequest.groupChooseConfiguration,
+                            lastRequest.teacherChooseConfiguration,
+                            lastRequest.groupScheduleSynchronization,
+                            lastRequest.teacherScheduleSynchronization
+                        ))
+                    }
+                    else
+                        cacheManager.saveServerNetworkLastRequest(CacheManager.ServerNetworkLastRequest(
+                            weekParitySynchronization = System.currentTimeMillis()))
                     cacheManager.saveActualSettings(settings)
                 }
 
