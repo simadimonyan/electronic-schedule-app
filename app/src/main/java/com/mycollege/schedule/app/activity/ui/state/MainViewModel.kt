@@ -24,7 +24,6 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val resources: ResourceManager,
     private val cacheUpdater: CacheUpdater,
-    private val getScheduleUseCase: GetScheduleUseCase,
     val cacheManager: CacheManager,
     val appStateHolder: AppStateHolder,
     val groupParserStateHolder: LoadingStateHolder,

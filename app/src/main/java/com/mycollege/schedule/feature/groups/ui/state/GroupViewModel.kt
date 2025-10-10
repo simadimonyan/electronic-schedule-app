@@ -99,7 +99,7 @@ class GroupViewModel @Inject constructor(
                     if (appStateHolder.appState.value.studentMode) {
 
                         // если конфигурация не обновлялась в течение дня
-                        if ((System.currentTimeMillis() - lastRequest.groupChooseConfiguration) >= TimeUnit.MINUTES.toMillis(1)) {
+                        if ((System.currentTimeMillis() - lastRequest.groupChooseConfiguration) >= TimeUnit.DAYS.toMillis(1)) {
 
                             Log.i("GroupViewModel", "Отправляем запрос на получение конфигурации групп")
 
@@ -137,7 +137,7 @@ class GroupViewModel @Inject constructor(
                     else {
 
                         // если конфигурация не обновлялась в течение дня
-                        if ((System.currentTimeMillis() - lastRequest.teacherChooseConfiguration) >= TimeUnit.MINUTES.toMillis(1)) {
+                        if ((System.currentTimeMillis() - lastRequest.teacherChooseConfiguration) >= TimeUnit.DAYS.toMillis(1)) {
 
                             Log.i("GroupViewModel", "Отправляем запрос на получение конфигурации преподавателей")
 

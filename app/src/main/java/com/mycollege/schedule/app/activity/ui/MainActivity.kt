@@ -32,6 +32,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import com.mycollege.schedule.app.activity.ui.state.DataEvent
 import com.mycollege.schedule.app.activity.ui.state.MainViewModel
+import com.mycollege.schedule.app.activity.ui.state.StartViewModel
 import com.mycollege.schedule.app.navigation.AddNavGraph
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.feature.groups.ui.state.GroupViewModel
@@ -53,6 +54,7 @@ class MainActivity : ComponentActivity() {
     private val groupViewModel: GroupViewModel by viewModels()
     private val scheduleViewModel: ScheduleViewModel by viewModels()
     private val settingsViewModel: SettingsViewModel by viewModels()
+    private val startViewModel: StartViewModel by viewModels()
 
     @SuppressLint("HardwareIds")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,6 +86,12 @@ class MainActivity : ComponentActivity() {
 
                     requestPermissionsIfNeeded()
 
+                    scope.launch {
+                        mainViewModel.handleEvent(DataEvent.RestoreCache)
+                        mainViewModel.handleEvent(DataEvent.FetchData)
+                        mainViewModel.handleEvent(DataEvent.SetupCacheUpdater)
+                    }
+
                     RemoteConfigClient.Companion.instance
                         .getRemoteConfig().addOnSuccessListener { rc ->
 
@@ -96,6 +104,8 @@ class MainActivity : ComponentActivity() {
                                     CacheManager.ScheduleServerConfiguration(server, "Bearer $accessToken")
                                 )
 
+                                Log.i("MainActivity", "Конфигурация сервера получена")
+
                             }
                             catch (e: Exception) {
                                 TracerCrashReport.report(e, issueKey = "RUSTORE_REMOTE_CONFIG")
@@ -107,13 +117,10 @@ class MainActivity : ComponentActivity() {
                             Log.e("RuStoreMessagingService", "RemoteConfig fetch failed: ${e.message}", e)
                         }
 
-                    scope.launch {
-                        mainViewModel.handleEvent(DataEvent.RestoreCache)
-                        mainViewModel.handleEvent(DataEvent.FetchData)
-                        mainViewModel.handleEvent(DataEvent.SetupCacheUpdater)
-                    }
-
                 }
+
+                // базовые настройки
+                startViewModel.settingsInit()
 
                 // hide system ui navigation panel
                 WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -125,6 +132,7 @@ class MainActivity : ComponentActivity() {
                 AddNavGraph(
                     navController = navController,
                     mainViewModel = mainViewModel,
+                    startViewModel = startViewModel,
                     groupViewModel = groupViewModel,
                     scheduleViewModel = scheduleViewModel,
                     settingsViewModel = settingsViewModel

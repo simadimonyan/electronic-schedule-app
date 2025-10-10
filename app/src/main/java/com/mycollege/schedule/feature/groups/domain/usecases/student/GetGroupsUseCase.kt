@@ -32,16 +32,18 @@ class GetGroupsUseCase @Inject constructor(
         return withContext(Dispatchers.IO) {
             val scheduleServerConfiguration = cacheManager.loadScheduleServerConfiguration()
 
+            progress(10)
+
             var response = Groups(emptyList())
 
             // очистка групп
             database.groups().clearTable()
 
-            progress(10)
-
             val maxCourses = Integer.parseInt(maxCourse)
-            var progressValue = 10
-            val progressRatio = maxCourses / 90
+            var progressValue = 50
+            val progressRatio = maxCourses / 50
+
+            progress(50)
 
             // собрать все группы
             for (course in 1..maxCourses) {

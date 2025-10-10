@@ -77,18 +77,13 @@ class SettingsViewModel @Inject constructor(
 
                         // последний запрос был отправлен ...
                         val lastRequest = cacheManager.loadServerNetworkLastRequest()
-                        if (lastRequest != null) {
-                            cacheManager.saveServerNetworkLastRequest(CacheManager.ServerNetworkLastRequest(
-                                System.currentTimeMillis(),
-                                lastRequest.groupChooseConfiguration,
-                                lastRequest.teacherChooseConfiguration,
-                                lastRequest.groupScheduleSynchronization,
-                                lastRequest.teacherScheduleSynchronization
-                            ))
-                        }
-                        else
-                            cacheManager.saveServerNetworkLastRequest(CacheManager.ServerNetworkLastRequest(
-                                weekParitySynchronization = System.currentTimeMillis()))
+                        cacheManager.saveServerNetworkLastRequest(CacheManager.ServerNetworkLastRequest(
+                            System.currentTimeMillis(),
+                            lastRequest.groupChooseConfiguration,
+                            lastRequest.teacherChooseConfiguration,
+                            lastRequest.groupScheduleSynchronization,
+                            lastRequest.teacherScheduleSynchronization
+                        ))
                         saveSettings()
                     }
                     else {

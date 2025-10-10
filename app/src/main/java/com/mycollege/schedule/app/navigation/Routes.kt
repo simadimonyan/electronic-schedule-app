@@ -47,15 +47,13 @@ fun AppPager(
 fun AddNavGraph(
     navController: NavHostController,
     mainViewModel: MainViewModel,
+    startViewModel: StartViewModel,
     groupViewModel: GroupViewModel,
     scheduleViewModel: ScheduleViewModel,
     settingsViewModel: SettingsViewModel
 ) {
 
     val appState by mainViewModel.appStateHolder.appState.collectAsState()
-    val startViewModel: StartViewModel = hiltViewModel()
-
-    startViewModel.settingsInit()
     
     NavHost(navController = navController, startDestination = if (appState.firstStartUp) Onboarding else Start) {
         composable<Onboarding>(

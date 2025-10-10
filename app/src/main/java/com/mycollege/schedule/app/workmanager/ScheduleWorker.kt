@@ -95,7 +95,7 @@ class ScheduleWorker @AssistedInject constructor(
                         settings.notificationsEnabled,
                         settings.fullWeekVisibility,
                         settings.synchronizeWeekParity,
-                        settings.weekCount,
+                        parity == 2, // false - нечетная
                         parity == 2 // false - нечетная
                     )
                     val lastRequest = cacheManager.loadServerNetworkLastRequest()
