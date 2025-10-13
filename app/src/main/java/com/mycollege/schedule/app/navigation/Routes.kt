@@ -55,7 +55,7 @@ fun AddNavGraph(
 
     val appState by mainViewModel.appStateHolder.appState.collectAsState()
     
-    NavHost(navController = navController, startDestination = if (appState.firstStartUp) Onboarding else Start) {
+    NavHost(navController = navController, startDestination = Start) { // if (appState.firstStartUp) Onboarding else Start
         composable<Onboarding>(
         ) {
             OnboardingScreen(hiltViewModel())

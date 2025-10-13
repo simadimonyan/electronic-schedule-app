@@ -1,5 +1,6 @@
 package com.mycollege.schedule.feature.schedule.ui.state
 
+import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
@@ -68,20 +69,37 @@ class ScheduleViewModel @Inject constructor(
             is ScheduleEvent.WeekCountChanged -> changedWeekCountEvent()
             is ScheduleEvent.ShowTodaySchedule -> getTodayLessons()
             is ScheduleEvent.ShowWeekSchedule -> getWeekLessons()
+            is ScheduleEvent.ShowIfCachedSchedule -> showScheduleIfCached()
+        }
+    }
+
+    init {
+        viewModelScope.launch {
+            scheduleStateHolder.showDateToday(getTodayDate())
         }
     }
 
     /**
-     * Обновить расписание по четности недели
+     * Обновить расписание по четности недели (в последних версиях используется как единая точка обновления расписания)
      */
     private fun changedWeekCountEvent() {
-        viewModelScope.launch { // при условии, что группа выбрана
-            scheduleStateHolder.showDateToday(getTodayDate())
-            if (cacheManager.loadLastConfiguration() != null && cacheManager.loadLastConfiguration().group != "Выбрать") {
-                getTodayLessons()
-                if (settingsStateHolder.settingsState.value.fullWeekVisibility) getWeekLessons()
-            }
+        viewModelScope.launch {
+            getTodayLessons()
+            if (settingsStateHolder.settingsState.value.fullWeekVisibility) getWeekLessons()
         }
+    }
+
+    /**
+     * Показать расписание, если оно кешированное
+     */
+    private fun showScheduleIfCached() {
+        if (appStateHolder.appState.value.studentMode) {
+            if (cacheManager.loadServerNetworkLastRequest().groupScheduleSynchronization.keys.contains(groupStateHolder.groupState.value.group))
+                scheduleStateHolder.updateBuildScheduleGroupModeFlag(true)
+        }
+        else
+            if (cacheManager.loadServerNetworkLastRequest().teacherScheduleSynchronization.keys.contains(groupStateHolder.groupState.value.teacher))
+                scheduleStateHolder.updateBuildScheduleTeacherModeFlag(true)
     }
 
     /**
@@ -91,10 +109,10 @@ class ScheduleViewModel @Inject constructor(
         viewModelScope.launch {
             var chosenGroup = getChosenGroupUseCase.getByName(groupStateHolder.groupState.value.group)
             val chosenTeacher = groupStateHolder.groupState.value.teacher
-            var count = if (settingsStateHolder.settingsState.value.weekCount) 0 else 1
+            var count = if (settingsStateHolder.settingsState.value.weekCount) 2 else 1
 
-            if (settingsStateHolder.settingsState.value.weekCount)
-                count = if (count == 1) 0 else 1 // if change week event is executed
+//            if (settingsStateHolder.settingsState.value.weekCount)
+//                count = if (count == 1) 2 else 1 // if change week event is executed
 
             if (appStateHolder.appState.value.studentMode) {
                 if (chosenGroup != null) {
@@ -123,14 +141,14 @@ class ScheduleViewModel @Inject constructor(
                     val lessons = getTodayScheduleUseCase.getTodaySchedule(
                         getChosenGroupUseCase.getByName(groupStateHolder.groupState.value.group)!!,
                         DayWeek.findById(LocalDate.now().dayOfWeek.value)?.long ?: "Понедельник",
-                        if (settingsStateHolder.settingsState.value.weekCount) 0 else 1
+                        if (settingsStateHolder.settingsState.value.weekCount) 2 else 1
                     )
                     today.addAll(lessons)
                 } else {
                     val lessons = getTodayScheduleUseCase.getTodayTeacherSchedule(
                         groupStateHolder.groupState.value.teacher,
                         DayWeek.findById(LocalDate.now().dayOfWeek.value)?.long ?: "Понедельник",
-                        if (settingsStateHolder.settingsState.value.weekCount) 0 else 1
+                        if (settingsStateHolder.settingsState.value.weekCount) 2 else 1
                     )
                     today.addAll(lessons)
                 }
@@ -176,7 +194,7 @@ class ScheduleViewModel @Inject constructor(
 
             val today = LocalDate.now()
             val startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-            val formatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM", Locale("RU"))
+            val formatter = DateTimeFormatter.ofPattern("EEEE", Locale("RU")) //EEEE, dd MMMM (с датами)
 
             for (i in 0..7) {
                 val dayOfWeek = startOfWeek.plusDays(i.toLong())
@@ -190,6 +208,7 @@ class ScheduleViewModel @Inject constructor(
     /**
      * Установка отложенного уведомления для одной пары
      */
+    @SuppressLint("ScheduleExactAlarm")
     private suspend fun setNotificationForLesson(context: Context, lesson: DataClasses.Lesson, id: Int): Intent? {
         return withContext(Dispatchers.IO) {
             val lessonName = lesson.name

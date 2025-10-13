@@ -1,13 +1,16 @@
 package com.mycollege.schedule.feature.schedule.ui.components.schedule
 
 import android.content.Context
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -15,10 +18,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mycollege.schedule.R
 import com.mycollege.schedule.feature.schedule.ui.components.utils.Loader
+import com.mycollege.schedule.feature.schedule.ui.state.ScheduleState
 
 @Composable
-fun DefaultLoadingUnit() {
+fun DefaultLoadingUnit(scheduleState: ScheduleState) {
     val context: Context = LocalContext.current
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(25.dp, 45.dp, 80.dp, 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = scheduleState.todayDate,
+            color = Color.Black,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
 
     Text(
         context.getString(R.string.empty_screen),

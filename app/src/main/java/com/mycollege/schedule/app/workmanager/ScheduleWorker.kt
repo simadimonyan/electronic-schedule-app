@@ -183,7 +183,7 @@ class ScheduleWorker @AssistedInject constructor(
             val today = getTodayScheduleUseCase.getTodaySchedule(
                 getChosenGroupUseCase.getByName(cacheManager.loadLastConfiguration().group)!!,
                 DayWeek.findById(LocalDate.now().dayOfWeek.value)?.long ?: "Понедельник",
-                if (settings == null) 0 else { if (settings.weekCount) 0 else 1 }
+                if (settings == null) 1 else { if (settings.weekCount) 2 else 1 }
             )
             return@withContext today as ArrayList<DataClasses.Lesson>
         }

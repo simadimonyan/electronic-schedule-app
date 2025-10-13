@@ -20,7 +20,11 @@ data class ScheduleState(
 
     // schedule params
     val todayLessons: ArrayList<DataClasses.Lesson> = ArrayList(),
-    val weekLessons: HashMap<Int, ArrayList<DataClasses.Lesson>> = HashMap()
+    val weekLessons: HashMap<Int, ArrayList<DataClasses.Lesson>> = HashMap(),
+
+    // build schedule flags
+    val buildScheduleGroupModeFlag: Boolean = false,
+    val buildScheduleTeacherModeFlag: Boolean = false
 
 )
 
@@ -45,6 +49,14 @@ class ScheduleStateHolder @Inject constructor() {
 
     fun showWeekLessons(week: HashMap<Int, ArrayList<DataClasses.Lesson>>) {
         _scheduleState.update { it.copy(weekLessons = week) }
+    }
+
+    fun updateBuildScheduleGroupModeFlag(toBuild: Boolean) {
+        _scheduleState.update { it.copy(buildScheduleGroupModeFlag = toBuild) }
+    }
+
+    fun updateBuildScheduleTeacherModeFlag(toBuild: Boolean) {
+        _scheduleState.update { it.copy(buildScheduleTeacherModeFlag = toBuild) }
     }
 
 }

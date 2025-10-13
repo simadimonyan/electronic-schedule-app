@@ -7,7 +7,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import com.mycollege.schedule.app.workmanager.GroupSyncWorker
+import com.mycollege.schedule.app.workmanager.ScheduleSyncWorker
 import com.mycollege.schedule.app.workmanager.ScheduleWorker
 import com.mycollege.schedule.app.workmanager.WeekChangeWorker
 import java.time.DayOfWeek
@@ -76,7 +76,7 @@ class CacheUpdater @Inject constructor(
 
         val delay = calculateDelayUntilNextUpdate(last)
 
-        val periodicWorkRequest = PeriodicWorkRequestBuilder<GroupSyncWorker>(1, TimeUnit.DAYS)
+        val periodicWorkRequest = PeriodicWorkRequestBuilder<ScheduleSyncWorker>(1, TimeUnit.DAYS)
             .setInitialDelay(delay, TimeUnit.MILLISECONDS)
             .setConstraints(
                 Constraints.Builder()
@@ -90,7 +90,7 @@ class CacheUpdater @Inject constructor(
             .build()
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-            "GroupSyncWorker",
+            "ScheduleSyncWorker",
             ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
             periodicWorkRequest
         )

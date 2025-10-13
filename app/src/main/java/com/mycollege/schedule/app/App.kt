@@ -11,12 +11,15 @@ import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
 import com.mycollege.schedule.BuildConfig
-import com.mycollege.schedule.app.activity.domain.usecases.GetScheduleUseCase
-import com.mycollege.schedule.app.workmanager.GroupSyncWorker
+import com.mycollege.schedule.app.activity.ui.state.AppStateHolder
+import com.mycollege.schedule.app.workmanager.ScheduleSyncWorker
 import com.mycollege.schedule.app.workmanager.ScheduleWorker
 import com.mycollege.schedule.app.workmanager.WeekChangeWorker
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.core.network.remote.RemoteConfigListener
+import com.mycollege.schedule.feature.groups.domain.usecases.student.GetGroupScheduleUseCase
+import com.mycollege.schedule.feature.groups.domain.usecases.teacher.GetTeacherScheduleUseCase
+import com.mycollege.schedule.feature.groups.ui.state.GroupStateHolder
 import com.mycollege.schedule.feature.schedule.domain.usecase.GetChosenGroupUseCase
 import com.mycollege.schedule.feature.schedule.domain.usecase.GetTodayScheduleUseCase
 import com.mycollege.schedule.feature.settings.domain.usecase.GetWeekParityUseCase
@@ -150,7 +153,11 @@ class App : Application(), HasTracerConfiguration, Configuration.Provider {
 
 class CustomWorkerFactory @Inject constructor(
     private val cacheManager: CacheManager,
-    private var getScheduleUseCase: GetScheduleUseCase,
+    //private var getScheduleUseCase: GetScheduleUseCase,
+    private val getGroupScheduleUseCase: GetGroupScheduleUseCase,
+    private val getTeacherScheduleUseCase: GetTeacherScheduleUseCase,
+    private val appStateHolder: AppStateHolder,
+    private val groupStateHolder: GroupStateHolder,
     private val getChosenGroupUseCase: GetChosenGroupUseCase,
     private val getTodayScheduleUseCase: GetTodayScheduleUseCase,
     private val getWeekParityUseCase: GetWeekParityUseCase
@@ -162,7 +169,7 @@ class CustomWorkerFactory @Inject constructor(
         workerParameters: WorkerParameters
     ): ListenableWorker? {
         return when(workerClassName) {
-            GroupSyncWorker::class.java.name -> GroupSyncWorker(appContext, workerParameters, cacheManager, getScheduleUseCase)
+            ScheduleSyncWorker::class.java.name -> ScheduleSyncWorker(appContext, workerParameters, cacheManager, appStateHolder, groupStateHolder, getGroupScheduleUseCase, getTeacherScheduleUseCase)
             ScheduleWorker::class.java.name -> ScheduleWorker(appContext, workerParameters, cacheManager, getChosenGroupUseCase, getTodayScheduleUseCase, getWeekParityUseCase)
             WeekChangeWorker::class.java.name -> WeekChangeWorker(appContext, workerParameters, cacheManager)
             else -> null

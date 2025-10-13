@@ -6,7 +6,6 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mycollege.schedule.app.activity.domain.models.LoadingStateHolder
-import com.mycollege.schedule.app.activity.domain.usecases.GetScheduleUseCase
 import com.mycollege.schedule.app.notifications.NotificationsManager
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.core.cache.CacheUpdater
@@ -49,7 +48,7 @@ class MainViewModel @Inject constructor(
     }
 
     init {
-        appStateHolder.updatingFirstStartup(cacheManager.isFirstStartup())
+        //appStateHolder.updatingFirstStartup(cacheManager.isFirstStartup())
     }
 
     private fun fetchData() {
@@ -86,7 +85,7 @@ class MainViewModel @Inject constructor(
                 }
 
             } catch (e: Exception) {
-                groupParserStateHolder.updateLoading(true)
+                groupParserStateHolder.updateChooseConfigurationLoading(true)
                 e.printStackTrace()
                 TracerCrashReport.report(e, issueKey = "NETWORK")
             }

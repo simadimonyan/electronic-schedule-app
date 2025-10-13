@@ -4,12 +4,16 @@ import androidx.room.Dao
 import androidx.room.Query
 import com.mycollege.schedule.app.activity.data.models.Group
 import com.mycollege.schedule.app.activity.data.models.Teacher
+import com.mycollege.schedule.core.network.dto.groups.Groups
 
 @Dao
 interface GroupRepository {
 
     @Query("SELECT * FROM `groups` WHERE group_id = :id")
     fun getGroupById(id: String): List<Group>
+
+    @Query("SELECT * FROM `groups` WHERE `groups`.name = :name")
+    fun getGroupByName(name: String): Group
 
     @Query("SELECT course FROM `groups`")
     fun getCourses(): List<String>

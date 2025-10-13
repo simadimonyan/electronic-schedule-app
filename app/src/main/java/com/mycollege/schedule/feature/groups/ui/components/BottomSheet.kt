@@ -3,10 +3,13 @@ package com.mycollege.schedule.feature.groups.ui.components
 import android.content.Context
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -19,6 +22,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -39,7 +43,9 @@ fun BottomSheetContent(
     groupState: GroupState,
     handleEvent: (GroupEvent) -> Unit,
     selectedIndex: Int,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    cachedGroups: Map<String, Long>,
+    cachedTeachers: Map<String, Long>
 ) {
     val context: Context = LocalContext.current
     val animatedProgress = animateFloatAsState(targetValue = progress / 100f, label = "progress")
@@ -78,7 +84,7 @@ fun BottomSheetContent(
             // отобразить данные по окончанию загрузки
             handleEvent(GroupEvent.Display)
 
-            BottomSheet(groupState) { newValue ->
+            BottomSheet(groupState, cachedGroups, cachedTeachers) { newValue ->
                 when (selectedIndex) {
                     0 -> handleEvent(GroupEvent.UpdateCourse("$newValue курс"))
                     1 -> handleEvent(GroupEvent.UpdateSpeciality(newValue))
@@ -98,14 +104,16 @@ fun BottomSheetContent(
 @Composable
 fun BottomSheet(
     groupState: GroupState,
+    cachedGroups: Map<String, Long>,
+    cachedTeachers: Map<String, Long>,
     updateValue: (String) -> Unit,
 ) {
     when (groupState.selectedIndex) {
         0 -> CourseKeys(groupState.coursesToDisplay, updateValue)
         1 -> SpecialityKeys(groupState.levelsToDisplay, updateValue)
-        2 -> GroupListContent(groupState.groupsToDisplay, updateValue)
+        2 -> GroupListContent(groupState.groupsToDisplay, updateValue, cachedGroups)
         3 -> DepartmentListContent(groupState.departmentsToDisplay, updateValue)
-        4 -> TeacherListContent(groupState.teachersToDisplay, updateValue)
+        4 -> TeacherListContent(groupState.teachersToDisplay, updateValue, cachedTeachers)
     }
 }
 
@@ -184,11 +192,12 @@ fun SpecialityKeys(
 @Composable
 fun GroupListContent(
     groupsToDisplay: List<String>,
-    updateValue: (String) -> Unit
+    updateValue: (String) -> Unit,
+    cachedGroups: Map<String, Long>
 ) {
     LazyColumn {
         itemsIndexed(groupsToDisplay, key = { _, group -> group }) { index, group ->
-            group.let { nonNullGroup ->
+            group.let { groupName ->
                 if (index != 0) {
                     HorizontalDivider(
                         thickness = 0.5.dp,
@@ -197,16 +206,33 @@ fun GroupListContent(
                     )
                 }
 
-                Text(
-                    text = nonNullGroup,
-                    modifier = Modifier
-                        .padding(10.dp)
-                        .fillMaxWidth()
-                        .clickable { updateValue(nonNullGroup) },
-                    textAlign = TextAlign.Center,
-                    fontSize = 20.sp,
-                    color = Color.Black
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Text(
+                        text = groupName,
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .clickable { updateValue(groupName) },
+                        textAlign = TextAlign.Center,
+                        fontSize = 20.sp,
+                        color = Color.Black
+                    )
+
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.CenterEnd
+                    ) {
+                        if (cachedGroups.keys.contains(groupName)) {
+                            CachedMark(Modifier.padding(end = 25.dp))
+                        }
+                    }
+
+                }
             }
         }
     }
@@ -250,11 +276,12 @@ fun DepartmentListContent(
 @Composable
 fun TeacherListContent(
     teachersToDisplay: List<String>,
-    updateValue: (String) -> Unit
+    updateValue: (String) -> Unit,
+    cachedTeachers: Map<String, Long>
 ) {
     LazyColumn {
         itemsIndexed(teachersToDisplay, key = { _, teacher -> teacher }) { index, teacher ->
-            teacher.let { nonNullGroup ->
+            teacher.let { teacherLabel ->
                 if (index != 0) {
                     HorizontalDivider(
                         thickness = 0.5.dp,
@@ -263,16 +290,34 @@ fun TeacherListContent(
                     )
                 }
 
-                Text(
-                    text = nonNullGroup,
-                    modifier = Modifier
-                        .padding(10.dp)
-                        .fillMaxWidth()
-                        .clickable { updateValue(nonNullGroup) },
-                    textAlign = TextAlign.Center,
-                    fontSize = 20.sp,
-                    color = Color.Black
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Text(
+                        text = teacherLabel,
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .clickable { updateValue(teacherLabel) },
+                        textAlign = TextAlign.Center,
+                        fontSize = 20.sp,
+                        color = Color.Black
+                    )
+
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.CenterEnd
+                    ) {
+                        if (cachedTeachers.keys.contains(teacherLabel)) {
+                            CachedMark(Modifier.padding(end = 25.dp))
+                        }
+                    }
+
+                }
+
             }
         }
     }

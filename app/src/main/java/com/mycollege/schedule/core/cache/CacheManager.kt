@@ -5,12 +5,16 @@ import android.content.SharedPreferences
 import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import androidx.core.content.edit
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import javax.inject.Inject
-import androidx.core.content.edit
-import com.mycollege.schedule.feature.groups.ui.state.GroupEvent
 import com.mycollege.schedule.feature.settings.ui.state.SettingsState
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 @Stable
 class CacheManager @Inject constructor(
@@ -46,9 +50,36 @@ class CacheManager @Inject constructor(
         val weekParitySynchronization: Long = -1,
         val groupChooseConfiguration: Long = -1,
         val teacherChooseConfiguration: Long = -1,
-        val groupScheduleSynchronization: Long = -1,
-        val teacherScheduleSynchronization: Long = -1,
+        val groupScheduleSynchronization: MutableMap<String, Long> = mutableMapOf<String, Long>(),
+        val teacherScheduleSynchronization: MutableMap<String, Long> = mutableMapOf<String, Long>(),
     )
+
+    private fun getServerNetworkLastRequestFlow(): Flow<ServerNetworkLastRequest> = callbackFlow {
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == serverNetworkLastRequest) {
+                trySend(loadServerNetworkLastRequest())
+            }
+        }
+
+        preferences.registerOnSharedPreferenceChangeListener(listener)
+
+        trySend(loadServerNetworkLastRequest())
+
+        awaitClose {
+            preferences.unregisterOnSharedPreferenceChangeListener(listener)
+        }
+    }
+
+    fun getGroupScheduleSyncFlow(): Flow<Map<String, Long>> =
+        getServerNetworkLastRequestFlow()
+            .map { it.groupScheduleSynchronization }
+            .distinctUntilChanged()
+
+    fun getTeacherScheduleSyncFlow(): Flow<Map<String, Long>> =
+        getServerNetworkLastRequestFlow()
+            .map { it.teacherScheduleSynchronization }
+            .distinctUntilChanged()
+
 
     fun loadServerNetworkLastRequest(): ServerNetworkLastRequest {
         val json = preferences.getString(serverNetworkLastRequest, null)

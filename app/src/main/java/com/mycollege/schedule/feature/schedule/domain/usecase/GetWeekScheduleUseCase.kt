@@ -28,7 +28,9 @@ class GetWeekScheduleUseCase @Inject constructor(
                 val result = ArrayList<DataClasses.Lesson>()
 
                 for (lesson in lessons) {
-                    val teacherName = getTeacherUseCase.getTeacherBy(lesson.teacher)?.name
+                    val teacherName = if (lesson.teacher != null)
+                        getTeacherUseCase.getTeacherBy(lesson.teacher!!)?.name
+                    else "null"
 
                     result.add(DataClasses.GroupLesson(
                         lesson.lessonCount,

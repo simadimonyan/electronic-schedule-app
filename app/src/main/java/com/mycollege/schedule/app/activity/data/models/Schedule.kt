@@ -31,8 +31,8 @@ class Schedule {
     var id: Long = 0
 
     // связь с преподавателем
-    @ColumnInfo(name = "teacher_id")
-    var teacher: Long = 0
+    @ColumnInfo(name = "teacher_id", defaultValue = "NULL")
+    var teacher: Long?
 
     // связь с группой
     @ColumnInfo(name = "group_id")
@@ -66,7 +66,7 @@ class Schedule {
     var location: String = ""
 
     constructor(
-        teacher: Long,
+        teacher: Long?,
         group: Long,
         dayWeek: String,
         weekCount: Int,

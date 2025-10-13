@@ -11,14 +11,24 @@ import javax.inject.Singleton
 data class LoadingState(
 
     /**
-     * Процесс обновления расписания
+     * Процесс обновления конфигурации для выбора групп / преподавателя
      */
-    val loading: Boolean = false,
+    val chooseConfigurationLoading: Boolean = false,
 
     /**
-     * Прогресс статуса обновления
+     * Прогресс статуса обновления конфигурации для выбора групп / преподавателя
      */
-    val progress: Int = 0
+    val chooseConfigurationProgress: Int = 0,
+
+    /**
+     * Процесс обновления расписания
+     */
+    val scheduleLoading: Boolean = false,
+
+    /**
+     * Прогресс статуса обновления расписания
+     */
+    val scheduleProgress: Int = 0
 
 )
 
@@ -29,12 +39,20 @@ class LoadingStateHolder @Inject constructor() {
     private val _loadingState = MutableStateFlow(LoadingState())
     val loadingState: StateFlow<LoadingState> = _loadingState
 
-    fun updateLoading(isLoading: Boolean) {
-        _loadingState.update { it.copy(loading = isLoading) }
+    fun updateChooseConfigurationLoading(isLoading: Boolean) {
+        _loadingState.update { it.copy(chooseConfigurationLoading = isLoading) }
     }
 
-    fun updateProgress(progress: Int) {
-        _loadingState.update { it.copy(progress = progress) }
+    fun updateChooseConfigurationProgress(progress: Int) {
+        _loadingState.update { it.copy(chooseConfigurationProgress = progress) }
+    }
+
+    fun updateScheduleLoading(isLoading: Boolean) {
+        _loadingState.update { it.copy(scheduleLoading = isLoading) }
+    }
+
+    fun updateScheduleProgress(progress: Int) {
+        _loadingState.update { it.copy(scheduleProgress = progress) }
     }
 
 }

@@ -1,7 +1,6 @@
 package com.mycollege.schedule.feature.groups.ui
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -16,7 +15,6 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -67,7 +65,9 @@ fun GroupPreview() {
         LoadingState(),
         pagerState,
         false,
-        false
+        false,
+        emptyMap(),
+        emptyMap()
     )
 }
 
@@ -81,6 +81,9 @@ fun GroupScreen(
     val groupState by viewModel.groupStateHolder.groupState.collectAsState()
     val appState by viewModel.appStateHolder.appState.collectAsState()
     val parserState by viewModel.groupParserStateHolder.loadingState.collectAsState()
+
+    val cachedGroups by viewModel.cacheManager.getGroupScheduleSyncFlow().collectAsState(emptyMap())
+    val cachedTeachers by viewModel.cacheManager.getTeacherScheduleSyncFlow().collectAsState(emptyMap())
 
     var showAds by remember { mutableStateOf(false) }
     val changeStudentModeFlag by produceState(appState.studentMode, appState.studentMode) {
@@ -101,7 +104,7 @@ fun GroupScreen(
         viewModel.appStateHolder.updateIndex(it)
     }
 
-    GroupContent(handleEvent, updateAppStateIndex, groupState, appState, parserState, pagerState, showAds, changeStudentModeFlag)
+    GroupContent(handleEvent, updateAppStateIndex, groupState, appState, parserState, pagerState, showAds, changeStudentModeFlag, cachedGroups, cachedTeachers)
 }
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
@@ -114,7 +117,9 @@ fun GroupContent(
     parserState: LoadingState,
     pagerState: PagerState,
     showAds: Boolean,
-    changeStudentModeFlag: Boolean
+    changeStudentModeFlag: Boolean,
+    cachedGroups: Map<String, Long>,
+    cachedTeachers: Map<String, Long>
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -230,12 +235,14 @@ fun GroupContent(
 
                 if (groupState.showBottomSheet) {
                     BottomSheetContent(
-                        loading = parserState.loading,
-                        progress = parserState.progress,
+                        loading = parserState.chooseConfigurationLoading,
+                        progress = parserState.chooseConfigurationProgress,
                         groupState,
                         handleEvent,
                         selectedIndex = groupState.selectedIndex,
-                        onDismiss = { handleEvent(GroupEvent.HideBottomSheet) }
+                        onDismiss = { handleEvent(GroupEvent.HideBottomSheet) },
+                        cachedGroups,
+                        cachedTeachers
                     )
                 }
 

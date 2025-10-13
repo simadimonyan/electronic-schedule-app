@@ -10,10 +10,13 @@ import com.mycollege.schedule.app.activity.ui.state.AppStateHolder
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.core.cache.CacheUpdater
 import com.mycollege.schedule.feature.groups.domain.usecases.student.GetCoursesUseCase
+import com.mycollege.schedule.feature.groups.domain.usecases.student.GetGroupScheduleUseCase
 import com.mycollege.schedule.feature.groups.domain.usecases.student.GetGroupsUseCase
 import com.mycollege.schedule.feature.groups.domain.usecases.student.GetLevelUseCase
 import com.mycollege.schedule.feature.groups.domain.usecases.teacher.GetDepartmentsUseCase
+import com.mycollege.schedule.feature.groups.domain.usecases.teacher.GetTeacherScheduleUseCase
 import com.mycollege.schedule.feature.groups.domain.usecases.teacher.GetTeachersUseCase
+import com.mycollege.schedule.feature.schedule.ui.state.ScheduleStateHolder
 import com.mycollege.schedule.shared.resources.ResourceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -26,13 +29,14 @@ class GroupViewModel @Inject constructor(
 
     // cache & resources
     private val resources: ResourceManager,
-    private val cacheManager: CacheManager,
+    val cacheManager: CacheManager,
     private val cacheUpdater: CacheUpdater,
 
     // state
     val appStateHolder: AppStateHolder,
     val groupStateHolder: GroupStateHolder,
     val groupParserStateHolder: LoadingStateHolder,
+    val scheduleStateHolder: ScheduleStateHolder,
     val loadingStateHolder: LoadingStateHolder,
 
     // use cases
@@ -40,7 +44,9 @@ class GroupViewModel @Inject constructor(
     private val getLevelUseCase: GetLevelUseCase,
     private val getGroupsUseCase: GetGroupsUseCase,
     private val getTeachersUseCase: GetTeachersUseCase,
-    private val getDepartmentsUseCase: GetDepartmentsUseCase
+    private val getDepartmentsUseCase: GetDepartmentsUseCase,
+    private val getGroupScheduleUseCase: GetGroupScheduleUseCase,
+    private val getTeacherScheduleUseCase: GetTeacherScheduleUseCase
 
 ) : ViewModel() {
 
@@ -77,6 +83,7 @@ class GroupViewModel @Inject constructor(
         viewModelScope.launch {
             appStateHolder.updateStudentMode(studentMode)
             cacheManager.saveStudentMode(studentMode)
+            loadingStateHolder.updateScheduleLoading(false)
         }
     }
 
@@ -103,20 +110,20 @@ class GroupViewModel @Inject constructor(
 
                             Log.i("GroupViewModel", "Отправляем запрос на получение конфигурации групп")
 
-                            loadingStateHolder.updateLoading(true)
+                            loadingStateHolder.updateChooseConfigurationLoading(true)
 
                             val courses = getCoursesUseCase.getServerCourses()
                             val levels = getLevelUseCase.getServerLevels(groupState.course.split(" ")[0])
                             val groups = getGroupsUseCase.getServerGroups(groupState.course.split(" ")[0], courses.max()) {
-                                loadingStateHolder.updateProgress(it)
+                                loadingStateHolder.updateChooseConfigurationProgress(it)
                             }
 
                             groupStateHolder.updateCoursesToDisplay(courses.toList())
                             groupStateHolder.updateLevelsToDisplay(levels.toList())
                             groupStateHolder.updateGroupsToDisplay(groups.toList())
 
-                            loadingStateHolder.updateLoading(false)
-                            loadingStateHolder.updateProgress(0)
+                            loadingStateHolder.updateChooseConfigurationLoading(false)
+                            loadingStateHolder.updateChooseConfigurationProgress(0)
 
                         }
                         else { // если обновлялось в течение дня то берем из бд
@@ -141,18 +148,18 @@ class GroupViewModel @Inject constructor(
 
                             Log.i("GroupViewModel", "Отправляем запрос на получение конфигурации преподавателей")
 
-                            loadingStateHolder.updateLoading(true)
+                            loadingStateHolder.updateChooseConfigurationLoading(true)
 
                             val departments = getDepartmentsUseCase.getRoomDepartments()
                             val teachers = getTeachersUseCase.getServerTeachers {
-                                loadingStateHolder.updateProgress(it)
+                                loadingStateHolder.updateChooseConfigurationProgress(it)
                             }
 
                             groupStateHolder.updateDepartmentToDisplay(departments.toList())
                             groupStateHolder.updateTeachersToDisplay(teachers.toList())
 
-                            loadingStateHolder.updateLoading(false)
-                            loadingStateHolder.updateProgress(0)
+                            loadingStateHolder.updateChooseConfigurationLoading(false)
+                            loadingStateHolder.updateChooseConfigurationProgress(0)
 
                         }
                         else { // если обновлялось в течение дня то берем из бд
@@ -177,38 +184,38 @@ class GroupViewModel @Inject constructor(
 
                         Log.i("GroupViewModel", "Первый запрос конфигурации групп")
 
-                        loadingStateHolder.updateLoading(true)
+                        loadingStateHolder.updateChooseConfigurationLoading(true)
 
                         val courses = getCoursesUseCase.getServerCourses()
                         val levels = getLevelUseCase.getServerLevels(groupState.course.split(" ")[0])
                         val groups = getGroupsUseCase.getServerGroups(groupState.course.split(" ")[0], courses.max()) {
-                            loadingStateHolder.updateProgress(it)
+                            loadingStateHolder.updateChooseConfigurationProgress(it)
                         }
 
                         groupStateHolder.updateCoursesToDisplay(courses.toList())
                         groupStateHolder.updateLevelsToDisplay(levels.toList())
                         groupStateHolder.updateGroupsToDisplay(groups.toList())
 
-                        loadingStateHolder.updateLoading(false)
-                        loadingStateHolder.updateProgress(0)
+                        loadingStateHolder.updateChooseConfigurationLoading(false)
+                        loadingStateHolder.updateChooseConfigurationProgress(0)
 
                     }
                     else {
 
                         Log.i("GroupViewModel", "Первый запрос конфигурации преподавателей")
 
-                        loadingStateHolder.updateLoading(true)
+                        loadingStateHolder.updateChooseConfigurationLoading(true)
 
                         val departments = getDepartmentsUseCase.getRoomDepartments()
                         val teachers = getTeachersUseCase.getServerTeachers {
-                            loadingStateHolder.updateProgress(it)
+                            loadingStateHolder.updateChooseConfigurationProgress(it)
                         }
 
                         groupStateHolder.updateDepartmentToDisplay(departments.toList())
                         groupStateHolder.updateTeachersToDisplay(teachers.toList())
 
-                        loadingStateHolder.updateLoading(false)
-                        loadingStateHolder.updateProgress(0)
+                        loadingStateHolder.updateChooseConfigurationLoading(false)
+                        loadingStateHolder.updateChooseConfigurationProgress(0)
 
                     }
 
@@ -233,8 +240,8 @@ class GroupViewModel @Inject constructor(
                         groupStateHolder.updateGroupsToDisplay(groups.toList())
                     }
                     else {// если в базе нет данных - бесконечная загрузка
-                        loadingStateHolder.updateLoading(true)
-                        loadingStateHolder.updateProgress(10)
+                        loadingStateHolder.updateChooseConfigurationLoading(true)
+                        loadingStateHolder.updateChooseConfigurationProgress(10)
                     }
 
                 }
@@ -249,8 +256,8 @@ class GroupViewModel @Inject constructor(
                         groupStateHolder.updateTeachersToDisplay(teachers.toList())
                     }
                     else {// если в базе нет данных - бесконечная загрузка
-                        loadingStateHolder.updateLoading(true)
-                        loadingStateHolder.updateProgress(10)
+                        loadingStateHolder.updateChooseConfigurationLoading(true)
+                        loadingStateHolder.updateChooseConfigurationProgress(10)
                     }
                 }
 
@@ -285,6 +292,8 @@ class GroupViewModel @Inject constructor(
     private fun updateGroup(group: String) {
         viewModelScope.launch {
             groupStateHolder.updateGroup(group)
+            scheduleStateHolder.updateBuildScheduleGroupModeFlag(false)
+            loadingStateHolder.updateScheduleLoading(false)
         }
     }
 
@@ -304,6 +313,8 @@ class GroupViewModel @Inject constructor(
     private fun updateTeacher(teacher: String) {
         viewModelScope.launch {
             groupStateHolder.updateTeacher(teacher)
+            scheduleStateHolder.updateBuildScheduleTeacherModeFlag(false)
+            loadingStateHolder.updateScheduleLoading(false)
         }
     }
 
@@ -357,9 +368,117 @@ class GroupViewModel @Inject constructor(
             // send signal to create schedule
             viewModelScope.launch {
 
-                // work-manager lessons schedule
-                cacheUpdater.setupPeriodicScheduleWork(context)
-                groupStateHolder.sendCreateScheduleSignal()
+                try {
+
+                    val lastRequest = cacheManager.loadServerNetworkLastRequest()
+
+                    if (lastRequest != null) {
+
+                        if (appStateHolder.appState.value.studentMode) {
+
+                            if (lastRequest.groupScheduleSynchronization.isEmpty()
+                                || lastRequest.groupScheduleSynchronization[groupStateHolder.groupState.value.group] == null
+                                || System.currentTimeMillis() - lastRequest.groupScheduleSynchronization[groupStateHolder.groupState.value.group]!!.toLong()
+                                    >= TimeUnit.MINUTES.toMillis(10)
+                            ) {
+                                loadingStateHolder.updateScheduleLoading(true)
+
+                                Log.i("GroupViewModel", "Отправляем запрос на получение расписания группы")
+
+                                getGroupScheduleUseCase.getServerGroupSchedule(groupStateHolder.groupState.value.group)
+                                cacheUpdater.setupPeriodicScheduleWork(context)
+
+                                loadingStateHolder.updateScheduleLoading(false)
+                            }
+                            else
+                                Log.i("GroupViewModel", "Debounce подгрузки расписания группы: частота запроса выше порога - 10 минут")
+
+                            // сигнал для сборки расписания
+                            scheduleStateHolder.updateBuildScheduleGroupModeFlag(true)
+                        }
+                        else {
+
+                            if (lastRequest.teacherScheduleSynchronization.isEmpty()
+                                || lastRequest.teacherScheduleSynchronization[groupStateHolder.groupState.value.teacher] == null
+                                || System.currentTimeMillis() - lastRequest.teacherScheduleSynchronization[groupStateHolder.groupState.value.teacher]!!.toLong()
+                                >= TimeUnit.MINUTES.toMillis(10)
+                            ) {
+                                loadingStateHolder.updateScheduleLoading(true)
+
+                                Log.i("GroupViewModel", "Отправляем запрос на получение расписания преподавателя")
+
+                                getTeacherScheduleUseCase.getServerTeacherSchedule(groupStateHolder.groupState.value.teacher)
+                                cacheUpdater.setupPeriodicScheduleWork(context)
+
+                                loadingStateHolder.updateScheduleLoading(false)
+                            }
+                            else
+                                Log.i("GroupViewModel", "Debounce подгрузки расписания преподавателя: частота запроса выше порога - 10 минут")
+
+                            // сигнал для сборки расписания
+                            scheduleStateHolder.updateBuildScheduleTeacherModeFlag(true)
+                        }
+
+                    }
+                    else {
+
+                        Log.i("GroupViewModel", "Первый запрос расписания")
+
+                        // начало процесса загрузки
+                        loadingStateHolder.updateScheduleLoading(true)
+
+                        // отправить запрос на загрузку расписания
+                        if (appStateHolder.appState.value.studentMode) {
+                            getGroupScheduleUseCase.getServerGroupSchedule(groupStateHolder.groupState.value.group)
+                        }
+                        else
+                            getTeacherScheduleUseCase.getServerTeacherSchedule(groupStateHolder.groupState.value.teacher)
+
+                        // work-manager lessons schedule
+                        cacheUpdater.setupPeriodicScheduleWork(context)
+
+                        // отправка сигнала для сборки расписания
+                        loadingStateHolder.updateScheduleLoading(false)
+                        //groupStateHolder.sendCreateScheduleSignal()
+                        if (appStateHolder.appState.value.studentMode) scheduleStateHolder.updateBuildScheduleGroupModeFlag(true)
+                        else scheduleStateHolder.updateBuildScheduleTeacherModeFlag(true)
+
+                    }
+
+                }
+                catch (e: Exception) { // проблемы с интернетом
+                    Log.e("GroupViewModel", "Сборка расписания: $e")
+
+                    val lastRequest = cacheManager.loadServerNetworkLastRequest()
+
+                    if (lastRequest != null) {
+
+                        if (appStateHolder.appState.value.studentMode) {
+
+                            // если при отсутствии интернета есть кеш группы - собираем расписание
+                            if (lastRequest.groupScheduleSynchronization.isNotEmpty()
+                                && lastRequest.groupScheduleSynchronization[groupStateHolder.groupState.value.group] != null) {
+                                Log.i("GroupViewModel", "Проблемы с интернетом - собираем расписание группы из кеша")
+                                loadingStateHolder.updateScheduleLoading(false)
+                                scheduleStateHolder.updateBuildScheduleGroupModeFlag(true)
+                            }
+
+                        }
+                        else {
+
+                            // если при отсутствии интернета есть кеш преподавателя - собираем расписание
+                            if (lastRequest.teacherScheduleSynchronization.isNotEmpty()
+                                && lastRequest.teacherScheduleSynchronization[groupStateHolder.groupState.value.teacher] != null) {
+                                Log.i("GroupViewModel", "Проблемы с интернетом - собираем расписание преподавателя из кеша")
+                                loadingStateHolder.updateScheduleLoading(false)
+                                scheduleStateHolder.updateBuildScheduleTeacherModeFlag(true)
+                            }
+
+                        }
+
+                    }
+                }
+
             }
             return true
         }

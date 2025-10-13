@@ -25,7 +25,6 @@ import com.mycollege.schedule.feature.schedule.ui.components.schedule.WeekendUni
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleEvent
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleState
 import com.mycollege.schedule.feature.settings.ui.state.SettingsState
-import kotlin.collections.forEach
 
 @SuppressLint("MutableCollectionMutableState")
 @Composable

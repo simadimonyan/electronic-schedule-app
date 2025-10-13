@@ -17,4 +17,9 @@ sealed class ScheduleEvent {
      */
     object ShowWeekSchedule : ScheduleEvent()
 
+    /**
+     * Показать расписание, если оно кешированное
+     */
+    object ShowIfCachedSchedule : ScheduleEvent()
+
 }
