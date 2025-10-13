@@ -3,13 +3,16 @@ package com.mycollege.schedule.feature.groups.ui.components
 import android.content.Context
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -19,9 +22,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,6 +43,7 @@ import com.mycollege.schedule.feature.groups.ui.state.GroupEvent
 import com.mycollege.schedule.feature.groups.ui.state.GroupState
 import com.mycollege.schedule.shared.ui.theme.background
 import com.mycollege.schedule.shared.ui.theme.buttons
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,9 +60,13 @@ fun BottomSheetContent(
     val context: Context = LocalContext.current
     val animatedProgress = animateFloatAsState(targetValue = progress / 100f, label = "progress")
 
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
     ModalBottomSheet(
-        modifier = Modifier.wrapContentHeight().padding(10.dp, 30.dp, 10.dp, 15.dp),
-        sheetState = rememberModalBottomSheetState(),
+        modifier = Modifier.wrapContentHeight()
+            .padding(10.dp, 30.dp, 10.dp, 15.dp)
+            .imePadding(),
+        sheetState = sheetState,
         shape = RoundedCornerShape(17.dp),
         contentColor = Color.White,
         containerColor = Color.White,
@@ -84,7 +98,7 @@ fun BottomSheetContent(
             // отобразить данные по окончанию загрузки
             handleEvent(GroupEvent.Display)
 
-            BottomSheet(groupState, cachedGroups, cachedTeachers) { newValue ->
+            BottomSheet(groupState, cachedGroups, cachedTeachers, sheetState) { newValue ->
                 when (selectedIndex) {
                     0 -> handleEvent(GroupEvent.UpdateCourse("$newValue курс"))
                     1 -> handleEvent(GroupEvent.UpdateSpeciality(newValue))
@@ -101,19 +115,21 @@ fun BottomSheetContent(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomSheet(
     groupState: GroupState,
     cachedGroups: Map<String, Long>,
     cachedTeachers: Map<String, Long>,
+    sheetState: SheetState,
     updateValue: (String) -> Unit,
 ) {
     when (groupState.selectedIndex) {
         0 -> CourseKeys(groupState.coursesToDisplay, updateValue)
         1 -> SpecialityKeys(groupState.levelsToDisplay, updateValue)
-        2 -> GroupListContent(groupState.groupsToDisplay, updateValue, cachedGroups)
+        2 -> GroupListContent(groupState.groupsToDisplay, updateValue, cachedGroups, sheetState)
         3 -> DepartmentListContent(groupState.departmentsToDisplay, updateValue)
-        4 -> TeacherListContent(groupState.teachersToDisplay, updateValue, cachedTeachers)
+        4 -> TeacherListContent(groupState.teachersToDisplay, updateValue, cachedTeachers, sheetState)
     }
 }
 
@@ -189,14 +205,64 @@ fun SpecialityKeys(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupListContent(
     groupsToDisplay: List<String>,
     updateValue: (String) -> Unit,
-    cachedGroups: Map<String, Long>
+    cachedGroups: Map<String, Long>,
+    sheetState: SheetState
 ) {
-    LazyColumn {
-        itemsIndexed(groupsToDisplay, key = { _, group -> group }) { index, group ->
+
+    val scope = rememberCoroutineScope()
+    var searchQuery by remember { mutableStateOf("") }
+    val filteredGroups = remember(groupsToDisplay, searchQuery) {
+        if (searchQuery.isBlank()) {
+            groupsToDisplay
+        } else {
+            groupsToDisplay.filter { group ->
+                group.contains(searchQuery, ignoreCase = true)
+            }
+        }
+    }
+
+    SearchField("Поиск группы", {
+        searchQuery = it
+    }) {
+        if (it) {
+            scope.launch {
+                sheetState.expand()
+            }
+        }
+    }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .imePadding()
+    ) {
+
+        item {
+            if (filteredGroups.isEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Список пуст",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(vertical = 100.dp),
+                        textAlign = TextAlign.Center,
+                        fontSize = 20.sp,
+                        color = Color.Black
+                    )
+                }
+            }
+        }
+
+        itemsIndexed(filteredGroups, key = { _, group -> group }) { index, group ->
             group.let { groupName ->
                 if (index != 0) {
                     HorizontalDivider(
@@ -246,7 +312,7 @@ fun DepartmentListContent(
     LazyColumn {
         itemsIndexed(departmentsToDisplay.sortedBy { -it.length }, key = { _, department -> department }) { index, department ->
             department.let { department ->
-                if (!department.equals("null")) {
+                if (department != "null") {
 
                     if (index != 0) {
                         HorizontalDivider(
@@ -273,14 +339,64 @@ fun DepartmentListContent(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TeacherListContent(
     teachersToDisplay: List<String>,
     updateValue: (String) -> Unit,
-    cachedTeachers: Map<String, Long>
+    cachedTeachers: Map<String, Long>,
+    sheetState: SheetState
 ) {
-    LazyColumn {
-        itemsIndexed(teachersToDisplay, key = { _, teacher -> teacher }) { index, teacher ->
+
+    val scope = rememberCoroutineScope()
+    var searchQuery by remember { mutableStateOf("") }
+    val filteredTeachers = remember(teachersToDisplay, searchQuery) {
+        if (searchQuery.isBlank()) {
+            teachersToDisplay
+        } else {
+            teachersToDisplay.filter { teacher ->
+                teacher.contains(searchQuery, ignoreCase = true)
+            }
+        }
+    }
+
+    SearchField("Поиск преподавателя", {
+        searchQuery = it
+    }) {
+        if (it) {
+            scope.launch {
+                sheetState.expand()
+            }
+        }
+    }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .imePadding()
+    ) {
+
+        item {
+            if (filteredTeachers.isEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Список пуст",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(vertical = 100.dp),
+                        textAlign = TextAlign.Center,
+                        fontSize = 20.sp,
+                        color = Color.Black
+                    )
+                }
+            }
+        }
+
+        itemsIndexed(filteredTeachers, key = { _, teacher -> teacher }) { index, teacher ->
             teacher.let { teacherLabel ->
                 if (index != 0) {
                     HorizontalDivider(
