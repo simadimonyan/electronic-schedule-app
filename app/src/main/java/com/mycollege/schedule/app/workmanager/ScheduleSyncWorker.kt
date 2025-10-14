@@ -55,11 +55,23 @@ class ScheduleSyncWorker @AssistedInject constructor(
 //            }
 
             // отправить запрос на обновление расписания
-            if (appStateHolder.appState.value.studentMode) {
-                getGroupScheduleUseCase.getServerGroupSchedule(groupStateHolder.groupState.value.group)
+
+            val settings = cacheManager.loadLastSettings()
+
+            if (settings != null) {
+
+                if (appStateHolder.appState.value.studentMode) {
+                    if (groupStateHolder.groupState.value.group != "Выбрать") {
+                        getGroupScheduleUseCase.getServerGroupSchedule(groupStateHolder.groupState.value.group)
+                    }
+                }
+                else {
+                    if (groupStateHolder.groupState.value.teacher != "Выбрать") {
+                        getTeacherScheduleUseCase.getServerTeacherSchedule(groupStateHolder.groupState.value.teacher)
+                    }
+                }
+
             }
-            else
-                getTeacherScheduleUseCase.getServerTeacherSchedule(groupStateHolder.groupState.value.teacher)
 
             Result.success()
         } catch (e: Exception) {

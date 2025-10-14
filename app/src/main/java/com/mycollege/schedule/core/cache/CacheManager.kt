@@ -57,13 +57,23 @@ class CacheManager @Inject constructor(
     private fun getServerNetworkLastRequestFlow(): Flow<ServerNetworkLastRequest> = callbackFlow {
         val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             if (key == serverNetworkLastRequest) {
-                trySend(loadServerNetworkLastRequest())
+                val result = runCatching {
+                    loadServerNetworkLastRequest()
+                }.getOrDefault(ServerNetworkLastRequest())
+
+                val safeResult = result ?: ServerNetworkLastRequest()
+                trySend(safeResult)
             }
         }
 
         preferences.registerOnSharedPreferenceChangeListener(listener)
 
-        trySend(loadServerNetworkLastRequest())
+        val initialValue = runCatching {
+            loadServerNetworkLastRequest()
+        }.getOrDefault(ServerNetworkLastRequest())
+
+        val safeInitialValue = initialValue ?: ServerNetworkLastRequest()
+        trySend(safeInitialValue)
 
         awaitClose {
             preferences.unregisterOnSharedPreferenceChangeListener(listener)
@@ -72,12 +82,12 @@ class CacheManager @Inject constructor(
 
     fun getGroupScheduleSyncFlow(): Flow<Map<String, Long>> =
         getServerNetworkLastRequestFlow()
-            .map { it.groupScheduleSynchronization }
+            .map { it.groupScheduleSynchronization ?: emptyMap() }
             .distinctUntilChanged()
 
     fun getTeacherScheduleSyncFlow(): Flow<Map<String, Long>> =
         getServerNetworkLastRequestFlow()
-            .map { it.teacherScheduleSynchronization }
+            .map { it.teacherScheduleSynchronization ?: emptyMap() }
             .distinctUntilChanged()
 
 
@@ -122,7 +132,7 @@ class CacheManager @Inject constructor(
     }
 
     fun loadStudentMode(): Boolean {
-        return preferences.getBoolean(studentModeKey, false)
+        return preferences.getBoolean(studentModeKey, true)
     }
 
     fun saveStudentMode(studentMode: Boolean) {

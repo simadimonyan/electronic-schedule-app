@@ -93,13 +93,18 @@ class ScheduleViewModel @Inject constructor(
      * Показать расписание, если оно кешированное
      */
     private fun showScheduleIfCached() {
-        if (appStateHolder.appState.value.studentMode) {
-            if (cacheManager.loadServerNetworkLastRequest().groupScheduleSynchronization.keys.contains(groupStateHolder.groupState.value.group))
-                scheduleStateHolder.updateBuildScheduleGroupModeFlag(true)
+        val settings = cacheManager.loadLastSettings()
+        val lastRequest = cacheManager.loadServerNetworkLastRequest()
+
+        if (settings != null && lastRequest != null) {
+            if (appStateHolder.appState.value.studentMode) {
+                if (cacheManager.loadServerNetworkLastRequest().groupScheduleSynchronization.keys.contains(groupStateHolder.groupState.value.group))
+                    scheduleStateHolder.updateBuildScheduleGroupModeFlag(true)
+            }
+            else
+                if (cacheManager.loadServerNetworkLastRequest().teacherScheduleSynchronization.keys.contains(groupStateHolder.groupState.value.teacher))
+                    scheduleStateHolder.updateBuildScheduleTeacherModeFlag(true)
         }
-        else
-            if (cacheManager.loadServerNetworkLastRequest().teacherScheduleSynchronization.keys.contains(groupStateHolder.groupState.value.teacher))
-                scheduleStateHolder.updateBuildScheduleTeacherModeFlag(true)
     }
 
     /**
