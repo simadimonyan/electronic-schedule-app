@@ -17,10 +17,13 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
@@ -76,73 +79,84 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
 
-            Box(modifier = Modifier.Companion.fillMaxSize().background(background)) {
+            val originalDensity = LocalDensity.current
+            CompositionLocalProvider(
+                LocalDensity provides Density(
+                    density = originalDensity.density,
+                    fontScale = 1.0f // Фиксированный масштаб шрифта
+                )
+            ) {
 
-                val scope = rememberCoroutineScope()
-                val navController = rememberNavController()
+                Box(modifier = Modifier.Companion.fillMaxSize().background(background)) {
 
-                // true - only once | does not start when recomposes
-                LaunchedEffect(true) {
+                    val scope = rememberCoroutineScope()
+                    val navController = rememberNavController()
 
-                    requestPermissionsIfNeeded()
+                    // true - only once | does not start when recomposes
+                    LaunchedEffect(true) {
 
-                    scope.launch {
-                        mainViewModel.handleEvent(DataEvent.RestoreCache)
-                        mainViewModel.handleEvent(DataEvent.FetchData)
-                        mainViewModel.handleEvent(DataEvent.SetupCacheUpdater)
+                        requestPermissionsIfNeeded()
+
+                        scope.launch {
+                            mainViewModel.handleEvent(DataEvent.RestoreCache)
+                            mainViewModel.handleEvent(DataEvent.FetchData)
+                            mainViewModel.handleEvent(DataEvent.SetupCacheUpdater)
+                        }
+
+                        RemoteConfigClient.Companion.instance
+                            .getRemoteConfig().addOnSuccessListener { rc ->
+
+                                try {
+
+                                    val server = rc.getString("ScheduleServer")
+                                    val accessToken = rc.getString("ScheduleServiceAccessToken")
+
+                                    mainViewModel.cacheManager.saveScheduleServerConfiguration(
+                                        CacheManager.ScheduleServerConfiguration(server, "Bearer $accessToken")
+                                    )
+
+                                    Log.i("MainActivity", "Конфигурация сервера получена")
+
+                                    // базовые настройки (дублирование для запроса недели после загрузки)
+                                    // не вызывается при отсутствии интернета (исключение происходит раньше)
+                                    startViewModel.settingsInit()
+
+                                }
+                                catch (e: Exception) {
+                                    TracerCrashReport.report(e, issueKey = "RUSTORE_REMOTE_CONFIG")
+                                    Log.e("RemoteConfigService", "Ошибка конфигурации: ${e.message}", e)
+                                }
+                            }
+                            .addOnFailureListener { e ->
+                                TracerCrashReport.report(e, issueKey = "RUSTORE_REMOTE_CONFIG")
+                                Log.e("RuStoreMessagingService", "RemoteConfig fetch failed: ${e.message}", e)
+                            }
+
                     }
 
-                    RemoteConfigClient.Companion.instance
-                        .getRemoteConfig().addOnSuccessListener { rc ->
+                    // базовые настройки (дублирование для обработки отсутствия интернета)
+                    startViewModel.settingsInit()
 
-                            try {
+                    // hide system ui navigation panel
+                    WindowCompat.setDecorFitsSystemWindows(window, false)
+                    val insetsController = WindowInsetsControllerCompat(window, window.decorView)
+                    insetsController.hide(WindowInsetsCompat.Type.navigationBars())
+                    insetsController.systemBarsBehavior =
+                        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
-                                val server = rc.getString("ScheduleServer")
-                                val accessToken = rc.getString("ScheduleServiceAccessToken")
-
-                                mainViewModel.cacheManager.saveScheduleServerConfiguration(
-                                    CacheManager.ScheduleServerConfiguration(server, "Bearer $accessToken")
-                                )
-
-                                Log.i("MainActivity", "Конфигурация сервера получена")
-
-                                // базовые настройки (дублирование для запроса недели после загрузки)
-                                // не вызывается при отсутствии интернета (исключение происходит раньше)
-                                startViewModel.settingsInit()
-
-                            }
-                            catch (e: Exception) {
-                                TracerCrashReport.report(e, issueKey = "RUSTORE_REMOTE_CONFIG")
-                                Log.e("RemoteConfigService", "Ошибка конфигурации: ${e.message}", e)
-                            }
-                        }
-                        .addOnFailureListener { e ->
-                            TracerCrashReport.report(e, issueKey = "RUSTORE_REMOTE_CONFIG")
-                            Log.e("RuStoreMessagingService", "RemoteConfig fetch failed: ${e.message}", e)
-                        }
+                    AddNavGraph(
+                        navController = navController,
+                        mainViewModel = mainViewModel,
+                        startViewModel = startViewModel,
+                        groupViewModel = groupViewModel,
+                        scheduleViewModel = scheduleViewModel,
+                        settingsViewModel = settingsViewModel
+                    )
 
                 }
 
-                // базовые настройки (дублирование для обработки отсутствия интернета)
-                startViewModel.settingsInit()
-
-                // hide system ui navigation panel
-                WindowCompat.setDecorFitsSystemWindows(window, false)
-                val insetsController = WindowInsetsControllerCompat(window, window.decorView)
-                insetsController.hide(WindowInsetsCompat.Type.navigationBars())
-                insetsController.systemBarsBehavior =
-                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-
-                AddNavGraph(
-                    navController = navController,
-                    mainViewModel = mainViewModel,
-                    startViewModel = startViewModel,
-                    groupViewModel = groupViewModel,
-                    scheduleViewModel = scheduleViewModel,
-                    settingsViewModel = settingsViewModel
-                )
-
             }
+
         }
     }
 

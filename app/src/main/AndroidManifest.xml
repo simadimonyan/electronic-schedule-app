@@ -20,7 +20,9 @@
         android:theme="@style/Theme.Schedule.SplashScreen"
         android:enableOnBackInvokedCallback="true"
         android:usesCleartextTraffic="true"
+        android:configChanges="fontScale"
         tools:targetApi="34">
+
         <activity
             android:name="com.mycollege.schedule.app.activity.ui.MainActivity"
             android:exported="true"
