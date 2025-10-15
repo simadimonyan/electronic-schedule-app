@@ -89,7 +89,7 @@ class GetTeachersUseCase @Inject constructor(
                 database.schedule().setNullTeachers(teachersToDelete) // обнуляет преподавателей в расписании групп (в группах такого нет тк без группы нет расписания)
                 database.teachers().clearTable(teachersToDelete)
                 if (teachersToDelete.contains(groupStateHolder.groupState.value.teacher))
-                    groupStateHolder.updateTeacher("Выбрать")
+                    groupStateHolder.updateTeacher("Выбрать преподавателя")
 
             }
             progress(100)

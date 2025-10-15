@@ -187,7 +187,7 @@ fun SettingsContent(
                             modifier = Modifier.padding(start = 7.dp, top = 10.dp)
                         )
 
-                        CardSettings(painterResource(R.drawable.sync), title = "Синхронизировать неделю", checkedState = settingsState.synchronizeWeekParity) {
+                        CardSettings(painterResource(R.drawable.sync), title = "Синхрон. неделю", checkedState = settingsState.synchronizeWeekParity) {
                             handleEvent(SettingsEvent.SynchronizeWeekParity(it))
                             handleEvent(SettingsEvent.SaveSettings)
                         }
@@ -248,12 +248,12 @@ fun SettingsContent(
                             painterResource(R.drawable.copyright),
                             contentDescription = "Info",
                             tint = buttons,
-                            modifier = Modifier.size(25.dp)
+                            modifier = Modifier.size(27.dp)
                         )
                         Spacer(modifier = Modifier.width(15.dp))
                         Text(
                             text = "Авторские права",
-                            fontSize = 14.sp
+                            fontSize = 15.sp
                         )
                     }
 
@@ -273,12 +273,12 @@ fun SettingsContent(
                             Icons.Outlined.Info,
                             contentDescription = "Info",
                             tint = buttons,
-                            modifier = Modifier.size(25.dp)
+                            modifier = Modifier.size(27.dp)
                         )
                         Spacer(modifier = Modifier.width(15.dp))
                         Text(
                             text = "О приложении",
-                            fontSize = 14.sp
+                            fontSize = 15.sp
                         )
                     }
                 }

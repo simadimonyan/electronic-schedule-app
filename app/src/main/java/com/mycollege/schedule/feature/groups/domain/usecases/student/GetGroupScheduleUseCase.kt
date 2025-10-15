@@ -23,7 +23,7 @@ class GetGroupScheduleUseCase @Inject constructor(
         return withContext(Dispatchers.IO) {
 
             val scheduleServerConfiguration = cacheManager.loadScheduleServerConfiguration()
-            val group = database.groups().getGroupByName(name)
+            val group = database.groups().getGroupByName(name).first()
 
             val newSchedules = mutableListOf<Schedule>()
 

@@ -84,10 +84,10 @@ class GetGroupsUseCase @Inject constructor(
                     }
 
                     // разница удаленных групп из сервера
-                    val groupsToDelete = dbGroups - cacheDriver.groups.maxOf { it.name }
+                    val groupsToDelete = dbGroups - cacheDriver.groups.map { it.name }
                     database.groups().clearTable(groupsToDelete)
                     if (groupsToDelete.contains(groupStateHolder.groupState.value.group))
-                        groupStateHolder.updateGroup("Выбрать")
+                        groupStateHolder.updateGroup("Выбрать группу")
 
                     progressValue = progressRatio + progressValue
                     progress(progressValue)

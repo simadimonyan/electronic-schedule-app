@@ -61,12 +61,12 @@ class ScheduleSyncWorker @AssistedInject constructor(
             if (settings != null) {
 
                 if (appStateHolder.appState.value.studentMode) {
-                    if (groupStateHolder.groupState.value.group != "Выбрать") {
+                    if (groupStateHolder.groupState.value.group != "Выбрать группу") {
                         getGroupScheduleUseCase.getServerGroupSchedule(groupStateHolder.groupState.value.group)
                     }
                 }
                 else {
-                    if (groupStateHolder.groupState.value.teacher != "Выбрать") {
+                    if (groupStateHolder.groupState.value.teacher != "Выбрать преподавателя") {
                         getTeacherScheduleUseCase.getServerTeacherSchedule(groupStateHolder.groupState.value.teacher)
                     }
                 }

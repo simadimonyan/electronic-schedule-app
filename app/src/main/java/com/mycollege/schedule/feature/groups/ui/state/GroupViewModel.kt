@@ -359,7 +359,8 @@ class GroupViewModel @Inject constructor(
      * Выбрать расписание
      */
     private fun chooseGroup(): Boolean {
-        if (!groupStateHolder.groupState.value.group.contains("Выбрать")) {
+        if ((appStateHolder.appState.value.studentMode && !groupStateHolder.groupState.value.group.contains("Выбрать группу"))
+            || !appStateHolder.appState.value.studentMode && !groupStateHolder.groupState.value.teacher.contains("Выбрать преподавателя")) {
             val context = resources.getContext()
 
             // save configuration on schedule create only

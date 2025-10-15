@@ -216,7 +216,7 @@ fun GroupContent(
                                 .animateScrollToPage(1)
                         }
                     },
-                    enabled = if (changeStudentModeFlag) groupState.group != "Выбрать" else groupState.teacher != "Выбрать преподавателя"
+                    enabled = if (changeStudentModeFlag) groupState.group != "Выбрать группу" else groupState.teacher != "Выбрать преподавателя"
                 )
 
                 if (showAds) {

@@ -46,12 +46,12 @@ fun CardSettings(painter: Painter, title: String, checkedState: Boolean, onChang
                 painter,
                 "icon",
                 tint = buttons,
-                modifier = Modifier.size(25.dp)
+                modifier = Modifier.size(27.dp)
             )
             Spacer(modifier = Modifier.width(15.dp))
             Text(
                 text = title,
-                fontSize = 14.sp
+                fontSize = 15.sp
             )
             Spacer(modifier = Modifier.weight(1f))
             Switch(
@@ -92,12 +92,12 @@ fun CardSettings(painter: ImageVector, title: String, checkedState: Boolean, onC
                 painter,
                 "icon",
                 tint = buttons,
-                modifier = Modifier.size(25.dp)
+                modifier = Modifier.size(27.dp)
             )
             Spacer(modifier = Modifier.width(15.dp))
             Text(
                 text = title,
-                fontSize = 14.sp
+                fontSize = 15.sp
             )
             Spacer(modifier = Modifier.weight(1f))
             Switch(

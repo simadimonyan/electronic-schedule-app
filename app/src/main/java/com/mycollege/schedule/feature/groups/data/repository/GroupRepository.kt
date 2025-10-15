@@ -12,8 +12,8 @@ interface GroupRepository {
     @Query("SELECT * FROM `groups` WHERE group_id = :id")
     fun getGroupById(id: String): List<Group>
 
-    @Query("SELECT * FROM `groups` WHERE `groups`.name = :name")
-    fun getGroupByName(name: String): Group
+    @Query("SELECT * FROM `groups` WHERE name = :name")
+    fun getGroupByName(name: String): List<Group>
 
     @Query("SELECT course FROM `groups`")
     fun getCourses(): List<String>

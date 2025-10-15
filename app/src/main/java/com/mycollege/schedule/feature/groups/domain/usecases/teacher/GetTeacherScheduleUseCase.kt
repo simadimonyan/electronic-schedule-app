@@ -2,6 +2,7 @@ package com.mycollege.schedule.feature.groups.domain.usecases.teacher
 
 import android.util.Log
 import androidx.room.Transaction
+import com.mycollege.schedule.app.activity.data.models.Group
 import com.mycollege.schedule.app.activity.data.models.Schedule
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.core.db.Database
@@ -35,7 +36,17 @@ class GetTeacherScheduleUseCase @Inject constructor(
 
                     Log.i("GetTeacherScheduleUseCase", "$schedule")
 
-                    val group = database.groups().getGroupByName(schedule.group.name)
+                    var dbResponse = database.groups().getGroupByName(schedule.group.name)
+
+                    // добавить группу, если его нет в базе (при запросе списка групп они перезапишутся)
+                    val group = if (dbResponse.isEmpty()) {
+                        database.persistence().save(Group(
+                            schedule.group.name,
+                            schedule.group.course.toString(),
+                            schedule.group.level
+                        ))
+                        database.groups().getGroupByName(schedule.group.name).first()
+                    } else dbResponse.first()
 
                     newSchedules.add(Schedule(
                         teacher.id,
