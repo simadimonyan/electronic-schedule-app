@@ -84,7 +84,7 @@ fun SegmentedButton(checkedState: Boolean, enabled: Boolean = true, onChanged: (
                     ),
                     icon = {}
                 ) {
-                    Text(text = option, fontSize = 17.sp, fontWeight = FontWeight.Normal)
+                    Text(text = option, fontSize = 15.sp, fontWeight = FontWeight.Normal)
                 }
             }
         }

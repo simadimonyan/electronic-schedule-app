@@ -106,6 +106,10 @@ class MainActivity : ComponentActivity() {
 
                                 Log.i("MainActivity", "Конфигурация сервера получена")
 
+                                // базовые настройки (дублирование для запроса недели после загрузки)
+                                // не вызывается при отсутствии интернета (исключение происходит раньше)
+                                startViewModel.settingsInit()
+
                             }
                             catch (e: Exception) {
                                 TracerCrashReport.report(e, issueKey = "RUSTORE_REMOTE_CONFIG")
@@ -119,7 +123,7 @@ class MainActivity : ComponentActivity() {
 
                 }
 
-                // базовые настройки
+                // базовые настройки (дублирование для обработки отсутствия интернета)
                 startViewModel.settingsInit()
 
                 // hide system ui navigation panel

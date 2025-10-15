@@ -19,6 +19,9 @@ interface ScheduleRepository {
     @Query("SELECT * FROM schedule WHERE teacher_id = :id AND week_count = :weekCount")
     fun getWeekTeacherSchedule(id: String, weekCount: Int): List<Schedule>
 
+    @Query("UPDATE schedule SET teacher_id = NULL WHERE teacher_id IN (SELECT teacher_id FROM teachers WHERE name IN (:teachersToNull))")
+    fun setNullTeachers(teachersToNull: List<String>)
+
     @Query("DELETE FROM `schedule` WHERE group_id = :id")
     fun deleteScheduleByGroup(id: String)
 

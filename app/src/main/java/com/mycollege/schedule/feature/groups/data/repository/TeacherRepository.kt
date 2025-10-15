@@ -19,7 +19,7 @@ interface TeacherRepository {
     @Query("SELECT DISTINCT department FROM teachers")
     fun getDepartments(): List<String>
 
-    @Query("DELETE FROM `teachers`")
-    fun clearTable()
+    @Query("DELETE FROM `teachers` WHERE name IN (:teachersToRemove)")
+    fun clearTable(teachersToRemove: List<String>)
 
 }

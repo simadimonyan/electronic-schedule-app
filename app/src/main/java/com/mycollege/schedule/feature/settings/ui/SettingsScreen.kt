@@ -10,10 +10,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -36,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -43,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import com.mycollege.schedule.R
 import com.mycollege.schedule.app.navigation.Start
 import com.mycollege.schedule.feature.settings.ui.components.AboutBottomSheet
 import com.mycollege.schedule.feature.settings.ui.components.CardSettings
@@ -54,6 +59,7 @@ import com.mycollege.schedule.feature.settings.ui.state.SettingsState
 import com.mycollege.schedule.feature.settings.ui.state.SettingsViewModel
 import com.mycollege.schedule.shared.ui.theme.ScheduleTheme
 import com.mycollege.schedule.shared.ui.theme.background
+import com.mycollege.schedule.shared.ui.theme.buttons
 
 @Preview
 @Composable
@@ -174,28 +180,35 @@ fun SettingsContent(
                 ) {
                     Column(modifier = Modifier.padding(10.dp, 0.dp)) {
 
-                        CardSettings(title = "Синхронизировать неделю", checkedState = settingsState.synchronizeWeekParity) {
+                        Text(
+                            text = "Расписание",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(start = 7.dp, top = 10.dp)
+                        )
+
+                        CardSettings(painterResource(R.drawable.sync), title = "Синхронизировать неделю", checkedState = settingsState.synchronizeWeekParity) {
                             handleEvent(SettingsEvent.SynchronizeWeekParity(it))
                             handleEvent(SettingsEvent.SaveSettings)
                         }
 
-                        HorizontalDivider(Modifier.padding(10.dp, 0.dp))
+                        HorizontalDivider(Modifier.padding(start = 45.dp, end = 10.dp))
                         
-                        CardSettings(title = "Уведомления", checkedState = settingsState.notificationsEnabled) {
+                        CardSettings(Icons.Default.Notifications, title = "Уведомления", checkedState = settingsState.notificationsEnabled) {
                             handleEvent(SettingsEvent.MakeNotificationsEnabled(it))
                             handleEvent(SettingsEvent.SaveSettings)
                         }
 
-                        HorizontalDivider(Modifier.padding(10.dp, 0.dp))
+                        HorizontalDivider(Modifier.padding(start = 45.dp, end = 10.dp))
 
-                        CardSettings(title = "Показать неделю", checkedState = settingsState.fullWeekVisibility) {
+                        CardSettings(painterResource(R.drawable.week), title = "Показать неделю", checkedState = settingsState.fullWeekVisibility) {
                             handleEvent(SettingsEvent.MakeScheduleWeekFull(it))
                             handleEvent(SettingsEvent.SaveSettings)
                         }
 
-                        HorizontalDivider(Modifier.padding(10.dp, 0.dp))
+                        HorizontalDivider(Modifier.padding(start = 45.dp, end = 10.dp))
 
-                        CardSettings(title = "Скрыть навигацию", checkedState = settingsState.navigationInvisibility) {
+                        CardSettings(Icons.Default.Menu, title = "Скрыть навигацию", checkedState = settingsState.navigationInvisibility) {
                             handleEvent(SettingsEvent.MakeNavigationInvisible(it))
                             handleEvent(SettingsEvent.SaveSettings)
                         }
@@ -214,6 +227,13 @@ fun SettingsContent(
                     colors = CardDefaults.cardColors(containerColor = Color.White),
                 ) {
 
+                    Text(
+                        text = "Помощь",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(start = 17.dp, top = 10.dp)
+                    )
+
                     Row(
                         modifier = Modifier
                             .clickable {
@@ -221,17 +241,23 @@ fun SettingsContent(
                             }
                             .height(60.dp)
                             .fillMaxWidth()
-                            .padding(horizontal = 20.dp),
+                            .padding(start = 15.dp, end = 15.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Spacer(modifier = Modifier.width(20.dp))
+                        Icon(
+                            painterResource(R.drawable.copyright),
+                            contentDescription = "Info",
+                            tint = buttons,
+                            modifier = Modifier.size(25.dp)
+                        )
+                        Spacer(modifier = Modifier.width(15.dp))
                         Text(
                             text = "Авторские права",
-                            fontSize = 16.sp
+                            fontSize = 14.sp
                         )
                     }
 
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp))
+                    HorizontalDivider(modifier = Modifier.padding(start = 55.dp, end = 20.dp))
 
                     Row(
                         modifier = Modifier
@@ -240,14 +266,19 @@ fun SettingsContent(
                             }
                             .height(60.dp)
                             .fillMaxWidth()
-                            .padding(horizontal = 20.dp),
+                            .padding(start = 15.dp, end = 15.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Outlined.Info, contentDescription = "Info", tint = Color.LightGray)
-                        Spacer(modifier = Modifier.width(10.dp))
+                        Icon(
+                            Icons.Outlined.Info,
+                            contentDescription = "Info",
+                            tint = buttons,
+                            modifier = Modifier.size(25.dp)
+                        )
+                        Spacer(modifier = Modifier.width(15.dp))
                         Text(
                             text = "О приложении",
-                            fontSize = 16.sp
+                            fontSize = 14.sp
                         )
                     }
                 }

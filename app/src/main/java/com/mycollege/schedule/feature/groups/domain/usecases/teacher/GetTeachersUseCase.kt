@@ -6,6 +6,7 @@ import com.mycollege.schedule.app.activity.data.models.Teacher
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.core.db.Database
 import com.mycollege.schedule.core.network.RetrofitClient
+import com.mycollege.schedule.feature.groups.ui.state.GroupStateHolder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -15,7 +16,8 @@ import javax.inject.Singleton
 @Singleton
 class GetTeachersUseCase @Inject constructor(
     private val database: Database,
-    private val cacheManager: CacheManager
+    private val cacheManager: CacheManager,
+    private val groupStateHolder: GroupStateHolder
 ) {
 
     suspend fun getRoomTeachers(department: String): Set<String> {
@@ -45,14 +47,13 @@ class GetTeachersUseCase @Inject constructor(
         return withContext(Dispatchers.IO) {
             val scheduleServerConfiguration = cacheManager.loadScheduleServerConfiguration()
 
-            // очистка бд
-            database.teachers().clearTable()
-
             progress(10)
 
             // запрос преподавателей
             val response = RetrofitClient(scheduleServerConfiguration.serverUrl).teachersApi
                 .search(scheduleServerConfiguration.accessToken).teachers
+
+            val dbTeachers = database.teachers().getTeachers()
 
             if (response.isNotEmpty()) {
 
@@ -82,6 +83,13 @@ class GetTeachersUseCase @Inject constructor(
                         teacher.department.toString()
                     ))
                 }
+
+                // разница удаленных преподавателей из сервера
+                val teachersToDelete = dbTeachers - response.map { it.label }
+                database.schedule().setNullTeachers(teachersToDelete) // обнуляет преподавателей в расписании групп (в группах такого нет тк без группы нет расписания)
+                database.teachers().clearTable(teachersToDelete)
+                if (teachersToDelete.contains(groupStateHolder.groupState.value.teacher))
+                    groupStateHolder.updateTeacher("Выбрать")
 
             }
             progress(100)

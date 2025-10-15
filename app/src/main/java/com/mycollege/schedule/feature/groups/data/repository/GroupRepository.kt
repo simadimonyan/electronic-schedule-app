@@ -30,7 +30,10 @@ interface GroupRepository {
     @Query("SELECT * FROM `groups` WHERE level = :level AND course = :course")
     fun getGroupsBy(level: String, course: String): List<Group>
 
-    @Query("DELETE FROM `groups`")
-    fun clearTable()
+    @Query("SELECT * FROM `groups` WHERE course = :course")
+    fun getGroupsBy(course: String): List<Group>
+
+    @Query("DELETE FROM `groups` WHERE name IN (:groupsToRemove)")
+    fun clearTable(groupsToRemove: List<String>)
 
 }

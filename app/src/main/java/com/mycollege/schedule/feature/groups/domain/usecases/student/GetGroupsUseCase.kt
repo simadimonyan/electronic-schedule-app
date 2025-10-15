@@ -6,6 +6,7 @@ import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.core.db.Database
 import com.mycollege.schedule.core.network.RetrofitClient
 import com.mycollege.schedule.core.network.dto.groups.Groups
+import com.mycollege.schedule.feature.groups.ui.state.GroupStateHolder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -15,7 +16,8 @@ import javax.inject.Singleton
 @Immutable
 class GetGroupsUseCase @Inject constructor(
     private val database: Database,
-    private val cacheManager: CacheManager
+    private val cacheManager: CacheManager,
+    private val groupStateHolder: GroupStateHolder
 ) {
 
     suspend fun getRoomGroups(course: String, level: String): Set<String> {
@@ -32,18 +34,13 @@ class GetGroupsUseCase @Inject constructor(
         return withContext(Dispatchers.IO) {
             val scheduleServerConfiguration = cacheManager.loadScheduleServerConfiguration()
 
-            progress(10)
-
             var response = Groups(emptyList())
 
-            // очистка групп
-            database.groups().clearTable()
-
             val maxCourses = Integer.parseInt(maxCourse)
-            var progressValue = 50
-            val progressRatio = maxCourses / 50
+            var progressValue = 30
+            val progressRatio = maxCourses / 70
 
-            progress(50)
+            progress(30)
 
             // собрать все группы
             for (course in 1..maxCourses) {
@@ -51,6 +48,9 @@ class GetGroupsUseCase @Inject constructor(
                 // запрос
                 var cacheDriver: Groups = RetrofitClient(scheduleServerConfiguration.serverUrl).groupsApi
                     .search(scheduleServerConfiguration.accessToken, course)
+
+                // получаем данные для сравнения
+                var dbGroups = database.groups().getGroupsBy(course.toString()).map { it.name }
 
                 // отдать в response выбранный курс
                 if ("$course" == actualCourse) response = cacheDriver
@@ -82,6 +82,12 @@ class GetGroupsUseCase @Inject constructor(
                             )
                         )
                     }
+
+                    // разница удаленных групп из сервера
+                    val groupsToDelete = dbGroups - cacheDriver.groups.maxOf { it.name }
+                    database.groups().clearTable(groupsToDelete)
+                    if (groupsToDelete.contains(groupStateHolder.groupState.value.group))
+                        groupStateHolder.updateGroup("Выбрать")
 
                     progressValue = progressRatio + progressValue
                     progress(progressValue)
