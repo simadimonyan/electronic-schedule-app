@@ -26,11 +26,11 @@ fun CachedMarkPreview() {
 @Composable
 fun CachedMark(modifier: Modifier) {
     Card(
-        modifier = modifier.border(1.dp, disabledBlue, RoundedCornerShape(3.dp)),
+        modifier = modifier, //.border(1.dp, disabledBlue, RoundedCornerShape(3.dp)),
         shape = RoundedCornerShape(3.dp),
-        colors = CardDefaults.cardColors(containerColor = buttons),
-        elevation = CardDefaults.elevatedCardElevation(2.dp)
+        colors = CardDefaults.cardColors(containerColor = Color.White),//buttons),
+        elevation = CardDefaults.elevatedCardElevation(0.dp)
     ) {
-        Icon(painterResource(R.drawable.cached), "cached", Modifier.padding(5.dp).size(15.dp), Color.White)
+        Icon(painterResource(R.drawable.cached), "cached", Modifier.padding(5.dp).size(15.dp), Color.Gray)//Color.White)
     }
 }

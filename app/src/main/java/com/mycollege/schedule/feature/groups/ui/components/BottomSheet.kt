@@ -2,6 +2,8 @@ package com.mycollege.schedule.feature.groups.ui.components
 
 import android.content.Context
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,7 +19,12 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ChipDefaults
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.FilterChip
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
@@ -33,8 +40,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,6 +52,9 @@ import com.mycollege.schedule.feature.groups.ui.state.GroupEvent
 import com.mycollege.schedule.feature.groups.ui.state.GroupState
 import com.mycollege.schedule.shared.ui.theme.background
 import com.mycollege.schedule.shared.ui.theme.buttons
+import com.mycollege.schedule.shared.ui.theme.disabledBlue
+import com.mycollege.schedule.shared.ui.theme.disabledLightBlue
+import com.mycollege.schedule.shared.ui.theme.disabledWhite
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -143,22 +155,31 @@ fun CourseKeys(
 
         if (index != 0) {
             HorizontalDivider(
-                thickness = 0.5.dp,
+                thickness = 1.dp,
                 modifier = Modifier.padding(25.dp, 0.dp),
-                color = Color.LightGray
+                color = disabledWhite
             )
         }
 
-        Text(
-            text = "$key курс",
-            modifier = Modifier
-                .padding(10.dp)
-                .fillMaxWidth()
+        Card(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                 .clickable { updateValue(key) },
-            textAlign = TextAlign.Center,
-            fontSize = 20.sp,
-            color = Color.Black
-        )
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White
+            ),
+            elevation = CardDefaults.elevatedCardElevation(0.dp),
+        ) {
+            Text(
+                text = "$key курс",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                textAlign = TextAlign.Center,
+                fontSize = 19.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black
+            )
+        }
     }
 }
 
@@ -170,42 +191,61 @@ fun SpecialityKeys(
     specialitiesToDisplay.forEachIndexed { index, speciality ->
         if (index != 0) {
             HorizontalDivider(
-                thickness = 0.5.dp,
+                thickness = 1.dp,
                 modifier = Modifier.padding(25.dp, 0.dp),
-                color = Color.LightGray
+                color = disabledWhite
             )
         }
 
-        Text(
-            text = speciality,
-            modifier = Modifier
-                .padding(10.dp)
-                .fillMaxWidth()
+        Card(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                 .clickable { updateValue(speciality) },
-            textAlign = TextAlign.Center,
-            fontSize = 20.sp,
-            color = Color.Black
-        )
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White
+            ),
+            elevation = CardDefaults.elevatedCardElevation(0.dp),
+        ) {
+            Text(
+                text = speciality,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                textAlign = TextAlign.Center,
+                fontSize = 19.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black
+            )
+        }
     }
 
     HorizontalDivider(
-        thickness = 0.5.dp,
+        thickness = 1.dp,
         modifier = Modifier.padding(25.dp, 0.dp),
-        color = Color.LightGray
+        color = disabledWhite
     )
-    Text(
-        text = LocalContext.current.getString(R.string.all_specialities),
-        modifier = Modifier
-            .padding(10.dp)
-            .fillMaxWidth()
+
+    Card(
+        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
             .clickable { updateValue("Все уровни") },
-        textAlign = TextAlign.Center,
-        fontSize = 20.sp,
-        color = Color.Black
-    )
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
+        elevation = CardDefaults.elevatedCardElevation(0.dp),
+    ) {
+        Text(
+            text = LocalContext.current.getString(R.string.all_specialities),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp),
+            textAlign = TextAlign.Center,
+            fontSize = 19.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color.Black
+        )
+    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun GroupListContent(
     groupsToDisplay: List<String>,
@@ -216,14 +256,19 @@ fun GroupListContent(
 
     val scope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf("") }
-    val filteredGroups = remember(groupsToDisplay, searchQuery) {
-        if (searchQuery.isBlank()) {
-            groupsToDisplay
-        } else {
-            groupsToDisplay.filter { group ->
-                group.contains(searchQuery, ignoreCase = true)
-            }
+    var chipSelected by remember { mutableStateOf(false) }
+    val filteredGroups = remember(groupsToDisplay, searchQuery, chipSelected, cachedGroups) {
+        var result = groupsToDisplay
+
+        if (chipSelected) {
+            result = result.filter { cachedGroups.contains(it) }
         }
+
+        if (searchQuery.isNotBlank()) {
+            result = result.filter { it.contains(searchQuery, ignoreCase = true) }
+        }
+
+        result
     }
 
     SearchField("Поиск группы", {
@@ -243,6 +288,32 @@ fun GroupListContent(
     ) {
 
         item {
+
+            FilterChip(
+                onClick = {
+                    chipSelected = !chipSelected
+
+                },
+                selected = chipSelected,
+                modifier = Modifier
+                    .padding(horizontal = 20.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ChipDefaults.filterChipColors(
+                    backgroundColor = disabledLightBlue,
+                    disabledContentColor = Color.Black,
+                    disabledBackgroundColor = disabledBlue,
+                    selectedContentColor = Color.White,
+                    selectedBackgroundColor = buttons
+                )
+            ) {
+                Text(
+                    "Сохранено",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = if (chipSelected) Color.White else buttons
+                )
+            }
+
             if (filteredGroups.isEmpty()) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
@@ -260,44 +331,55 @@ fun GroupListContent(
                     )
                 }
             }
+
+
         }
 
         itemsIndexed(filteredGroups, key = { _, group -> group }) { index, group ->
             group.let { groupName ->
                 if (index != 0) {
                     HorizontalDivider(
-                        thickness = 0.5.dp,
+                        thickness = 1.dp,
                         modifier = Modifier.padding(25.dp, 0.dp),
-                        color = Color.LightGray
+                        color = disabledWhite
                     )
                 }
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
+                Card(
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                        .clickable { updateValue(groupName) },
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    ),
+                    elevation = CardDefaults.elevatedCardElevation(0.dp)
                 ) {
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    Text(
-                        text = groupName,
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .clickable { updateValue(groupName) },
-                        textAlign = TextAlign.Center,
-                        fontSize = 20.sp,
-                        color = Color.Black
-                    )
-
-                    Box(
-                        modifier = Modifier.weight(1f),
-                        contentAlignment = Alignment.CenterEnd
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        if (cachedGroups.keys.contains(groupName)) {
-                            CachedMark(Modifier.padding(end = 25.dp))
-                        }
-                    }
 
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        Text(
+                            text = groupName,
+                            modifier = Modifier
+                                .padding(10.dp),
+                            textAlign = TextAlign.Center,
+                            fontSize = 19.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.Black
+                        )
+
+                        Box(
+                            modifier = Modifier.weight(1f),
+                            contentAlignment = Alignment.CenterEnd
+                        ) {
+                            if (cachedGroups.keys.contains(groupName)) {
+                                CachedMark(Modifier.padding(end = 25.dp))
+                            }
+                        }
+
+                    }
                 }
             }
         }
@@ -316,22 +398,31 @@ fun DepartmentListContent(
 
                     if (index != 0) {
                         HorizontalDivider(
-                            thickness = 0.5.dp,
+                            thickness = 1.dp,
                             modifier = Modifier.padding(25.dp, 0.dp),
-                            color = Color.LightGray
+                            color = disabledWhite
                         )
                     }
 
-                    Text(
-                        text = department,
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .fillMaxWidth()
+                    Card(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                             .clickable { updateValue(department) },
-                        textAlign = TextAlign.Center,
-                        fontSize = 20.sp,
-                        color = Color.Black
-                    )
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.White
+                        ),
+                        elevation = CardDefaults.elevatedCardElevation(0.dp),
+                    ) {
+                        Text(
+                            text = department,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(10.dp),
+                            textAlign = TextAlign.Center,
+                            fontSize = 19.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.Black
+                        )
+                    }
 
                 }
             }
@@ -339,7 +430,7 @@ fun DepartmentListContent(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun TeacherListContent(
     teachersToDisplay: List<String>,
@@ -350,14 +441,19 @@ fun TeacherListContent(
 
     val scope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf("") }
-    val filteredTeachers = remember(teachersToDisplay, searchQuery) {
-        if (searchQuery.isBlank()) {
-            teachersToDisplay
-        } else {
-            teachersToDisplay.filter { teacher ->
-                teacher.contains(searchQuery, ignoreCase = true)
-            }
+    var chipSelected by remember { mutableStateOf(false) }
+    val filteredTeachers = remember(teachersToDisplay, searchQuery, chipSelected, cachedTeachers) {
+        var result = teachersToDisplay
+
+        if (chipSelected) {
+            result = result.filter { cachedTeachers.contains(it) }
         }
+
+        if (searchQuery.isNotBlank()) {
+            result = result.filter { it.contains(searchQuery, ignoreCase = true) }
+        }
+
+        result
     }
 
     SearchField("Поиск преподавателя", {
@@ -377,6 +473,32 @@ fun TeacherListContent(
     ) {
 
         item {
+
+            FilterChip(
+                onClick = {
+                    chipSelected = !chipSelected
+
+                },
+                selected = chipSelected,
+                modifier = Modifier
+                    .padding(horizontal = 20.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ChipDefaults.filterChipColors(
+                    backgroundColor = disabledLightBlue,
+                    disabledContentColor = Color.Black,
+                    disabledBackgroundColor = disabledBlue,
+                    selectedContentColor = Color.White,
+                    selectedBackgroundColor = buttons
+                )
+            ) {
+                Text(
+                    "Сохранено",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = if (chipSelected) Color.White else buttons
+                )
+            }
+
             if (filteredTeachers.isEmpty()) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
@@ -400,38 +522,47 @@ fun TeacherListContent(
             teacher.let { teacherLabel ->
                 if (index != 0) {
                     HorizontalDivider(
-                        thickness = 0.5.dp,
+                        thickness = 1.dp,
                         modifier = Modifier.padding(25.dp, 0.dp),
-                        color = Color.LightGray
+                        color = disabledWhite
                     )
                 }
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
+                Card(
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                        .clickable { updateValue(teacherLabel) },
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    ),
+                    elevation = CardDefaults.elevatedCardElevation(0.dp)
                 ) {
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    Text(
-                        text = teacherLabel,
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .clickable { updateValue(teacherLabel) },
-                        textAlign = TextAlign.Center,
-                        fontSize = 20.sp,
-                        color = Color.Black
-                    )
-
-                    Box(
-                        modifier = Modifier.weight(1f),
-                        contentAlignment = Alignment.CenterEnd
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        if (cachedTeachers.keys.contains(teacherLabel)) {
-                            CachedMark(Modifier.padding(end = 25.dp))
-                        }
-                    }
 
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        Text(
+                            text = teacherLabel,
+                            modifier = Modifier
+                                .padding(10.dp),
+                            textAlign = TextAlign.Center,
+                            fontSize = 19.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.Black
+                        )
+
+                        Box(
+                            modifier = Modifier.weight(1f),
+                            contentAlignment = Alignment.CenterEnd
+                        ) {
+                            if (cachedTeachers.keys.contains(teacherLabel)) {
+                                CachedMark(Modifier.padding(end = 25.dp))
+                            }
+                        }
+
+                    }
                 }
 
             }

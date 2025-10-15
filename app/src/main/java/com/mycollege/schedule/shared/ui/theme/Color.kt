@@ -15,3 +15,4 @@ val buttons = Color(0xff0d80ff)
 
 val disabledWhite = Color(0x7CF3F2F7)
 val disabledBlue = Color(0x790D80FF)
+val disabledLightBlue = Color(0x3C0D80FF)
