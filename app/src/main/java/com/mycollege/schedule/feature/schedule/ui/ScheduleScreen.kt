@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import com.my.tracker.MyTracker
 import com.mycollege.schedule.app.activity.domain.models.LoadingState
 import com.mycollege.schedule.app.activity.ui.state.AppState
 import com.mycollege.schedule.app.navigation.Settings
@@ -74,6 +75,7 @@ fun ScheduleScreen(
     }
 
     val navigateToSettings = { // навигация в настройки
+        MyTracker.trackEvent("SettingsPathEvent")
         globalGraph.navigate(route = Settings) {
             popUpTo(globalGraph.graph.findStartDestination().id
             ) {

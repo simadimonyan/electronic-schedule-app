@@ -2,6 +2,7 @@ package com.mycollege.schedule.feature.groups.domain.usecases.teacher
 
 import androidx.compose.runtime.Immutable
 import androidx.room.Transaction
+import com.my.tracker.MyTracker
 import com.mycollege.schedule.app.activity.data.models.Teacher
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.core.db.Database
@@ -22,6 +23,7 @@ class GetTeachersUseCase @Inject constructor(
 
     suspend fun getRoomTeachers(department: String): Set<String> {
         return withContext(Dispatchers.IO) {
+            MyTracker.trackEvent("LocalGetTeachersUseCaseEvent")
             val result = mutableSetOf<String>()
             if (!department.equals("Все кафедры")) {
                 database.teachers().findTeachersBy(department).map {
@@ -45,6 +47,7 @@ class GetTeachersUseCase @Inject constructor(
     @Transaction
     suspend fun getServerTeachers(progress: (Int) -> Unit): Set<String> {
         return withContext(Dispatchers.IO) {
+            MyTracker.trackEvent("ServerGetTeachersUseCaseEvent")
             val scheduleServerConfiguration = cacheManager.loadScheduleServerConfiguration()
 
             progress(10)

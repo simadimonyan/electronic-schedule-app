@@ -10,6 +10,7 @@ import androidx.compose.runtime.Stable
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.my.tracker.MyTracker
 import com.mycollege.schedule.app.notifications.NotificationReceiver
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.feature.schedule.data.models.DataClasses
@@ -112,6 +113,7 @@ class ScheduleWorker @AssistedInject constructor(
                         cacheManager.saveServerNetworkLastRequest(CacheManager.ServerNetworkLastRequest(
                             weekParitySynchronization = System.currentTimeMillis()))
                     cacheManager.saveActualSettings(settings)
+                    MyTracker.trackEvent("BackgroundWeekSynchronizationEvent")
                 }
 
             }

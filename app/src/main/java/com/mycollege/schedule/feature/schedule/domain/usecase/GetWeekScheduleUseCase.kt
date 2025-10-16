@@ -1,6 +1,7 @@
 package com.mycollege.schedule.feature.schedule.domain.usecase
 
 import androidx.compose.runtime.Immutable
+import com.my.tracker.MyTracker
 import com.mycollege.schedule.app.activity.data.models.Group
 import com.mycollege.schedule.app.activity.data.models.Schedule
 import com.mycollege.schedule.core.db.Database
@@ -20,6 +21,7 @@ class GetWeekScheduleUseCase @Inject constructor(
 
     suspend fun getWeekSchedule(group: Group, weekCount: Int): HashMap<Int, ArrayList<DataClasses.Lesson>> =
         withContext(Dispatchers.IO) {
+            MyTracker.trackEvent("GetWeekGroupScheduleUseCaseEvent")
             val week = HashMap<Int, ArrayList<DataClasses.Lesson>>()
 
             for (day in 1..6) {
@@ -49,6 +51,7 @@ class GetWeekScheduleUseCase @Inject constructor(
 
     suspend fun getWeekTeacherSchedule(teacher: String, weekCount: Int): HashMap<Int, ArrayList<DataClasses.Lesson>> =
         withContext(Dispatchers.IO) {
+            MyTracker.trackEvent("GetWeekTeacherScheduleUseCaseEvent")
             val week = HashMap<Int, ArrayList<DataClasses.Lesson>>()
 
             val teacher = database.teachers().getTeachersBy(teacher).first()

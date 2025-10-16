@@ -2,6 +2,7 @@ package com.mycollege.schedule.feature.groups.domain.usecases.student
 
 import androidx.compose.runtime.Immutable
 import androidx.room.Transaction
+import com.my.tracker.MyTracker
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.core.db.Database
 import com.mycollege.schedule.core.network.RetrofitClient
@@ -22,6 +23,7 @@ class GetGroupsUseCase @Inject constructor(
 
     suspend fun getRoomGroups(course: String, level: String): Set<String> {
         return withContext(Dispatchers.IO) {
+            MyTracker.trackEvent("LocalGetGroupsUseCaseEvent")
             if (level == "Все уровни")
                 return@withContext database.groups().getAllGroupNamesBy(course).toSortedSet()
             else
@@ -32,6 +34,7 @@ class GetGroupsUseCase @Inject constructor(
     @Transaction
     suspend fun getServerGroups(actualCourse: String, maxCourse: String, progress: (Int) -> Unit): Set<String> {
         return withContext(Dispatchers.IO) {
+            MyTracker.trackEvent("ServerGetGroupsUseCaseEvent")
             val scheduleServerConfiguration = cacheManager.loadScheduleServerConfiguration()
 
             var response = Groups(emptyList())

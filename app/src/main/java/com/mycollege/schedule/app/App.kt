@@ -10,11 +10,13 @@ import androidx.work.Configuration
 import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
+import com.my.tracker.MyTracker
 import com.mycollege.schedule.BuildConfig
 import com.mycollege.schedule.app.activity.ui.state.AppStateHolder
 import com.mycollege.schedule.app.workmanager.ScheduleSyncWorker
 import com.mycollege.schedule.app.workmanager.ScheduleWorker
 import com.mycollege.schedule.app.workmanager.WeekChangeWorker
+import com.mycollege.schedule.core.analitics.Tracker
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.core.network.remote.RemoteConfigListener
 import com.mycollege.schedule.feature.groups.domain.usecases.student.GetGroupScheduleUseCase
@@ -60,6 +62,9 @@ class App : Application(), HasTracerConfiguration, Configuration.Provider {
     @SuppressLint("HardwareIds")
     override fun onCreate() {
         super.onCreate()
+
+        // My Tracker Analytics
+        initTracker()
 
         val updateManager = RuStoreAppUpdateManagerFactory.create(applicationContext)
 
@@ -128,6 +133,12 @@ class App : Application(), HasTracerConfiguration, Configuration.Provider {
                 }
             }
 
+    }
+
+    private fun initTracker() {
+        val trackerParams = Tracker()
+        trackerParams.init()
+        MyTracker.initTracker(BuildConfig.MY_TRACKER_SDK_KEY, this)
     }
 
     override val tracerConfiguration: List<TracerConfiguration>

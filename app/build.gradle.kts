@@ -10,6 +10,7 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
+val myTrackerSdkKey = properties["mytracker.sdk.key"] as String
 val pushServerAccessToken = properties["pushserver.accessToken"] as String
 val remoteConfigAppId = properties["remoteconfig.appId"] as String
 val pushClientProjectId = properties["pushclient.projectId"] as String
@@ -61,6 +62,7 @@ android {
             buildConfigField("String", "REMOTE_CONFIG_APP_ID", "\"$remoteConfigAppId\"")
             buildConfigField("String", "PUSH_CLIENT_PROJECT_ID", "\"$pushClientProjectId\"")
             buildConfigField("String", "ADVERTISEMENT_BANNER_ID", "\"$advertisementBannerId\"")
+            buildConfigField("String", "MY_TRACKER_SDK_KEY", "\"$myTrackerSdkKey\"")
         }
         release {
             isMinifyEnabled = true //R8 compiler
@@ -75,6 +77,7 @@ android {
             buildConfigField("String", "REMOTE_CONFIG_APP_ID", "\"$remoteConfigAppId\"")
             buildConfigField("String", "PUSH_CLIENT_PROJECT_ID", "\"$pushClientProjectId\"")
             buildConfigField("String", "ADVERTISEMENT_BANNER_ID", "\"$advertisementBannerId\"")
+            buildConfigField("String", "MY_TRACKER_SDK_KEY", "\"$myTrackerSdkKey\"")
         }
     }
     compileOptions {
@@ -107,6 +110,9 @@ android {
 }
 
 dependencies {
+
+    implementation("com.my.tracker:mytracker-sdk:3.3.+")
+
     implementation(libs.appupdate)
 
     implementation(libs.dagger.compiler)

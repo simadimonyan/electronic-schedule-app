@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.my.tracker.MyTracker
 import com.mycollege.schedule.R
 
 import com.mycollege.schedule.shared.ui.theme.buttons
@@ -148,6 +149,7 @@ fun CustomAppBar(
                                         viewModel.appStateHolder.updateIndex(0)
                                         pagerState.animateScrollToPage(0)
                                     }
+                                    MyTracker.trackEvent("GroupScreenPathEvent")
                                 }
                             )
                     )
@@ -170,6 +172,7 @@ fun CustomAppBar(
                                         viewModel.appStateHolder.updateIndex(1)
                                         pagerState.animateScrollToPage(1)
                                     }
+                                    MyTracker.trackEvent("ScheduleScreenPathEvent")
                                 }
                             )
                     )

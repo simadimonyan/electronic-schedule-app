@@ -2,6 +2,7 @@ package com.mycollege.schedule.feature.groups.domain.usecases.teacher
 
 import android.util.Log
 import androidx.room.Transaction
+import com.my.tracker.MyTracker
 import com.mycollege.schedule.app.activity.data.models.Group
 import com.mycollege.schedule.app.activity.data.models.Schedule
 import com.mycollege.schedule.core.cache.CacheManager
@@ -21,6 +22,7 @@ class GetTeacherScheduleUseCase @Inject constructor(
     @Transaction
     suspend fun getServerTeacherSchedule(name: String) {
         return withContext(Dispatchers.IO) {
+            MyTracker.trackEvent("ServerGetTeacherScheduleUseCaseEvent")
 
             val scheduleServerConfiguration = cacheManager.loadScheduleServerConfiguration()
             val teacher = database.teachers().getTeachersBy(name).first()

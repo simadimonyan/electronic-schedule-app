@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import com.my.tracker.MyTracker
 import com.mycollege.schedule.R
 import com.mycollege.schedule.app.navigation.Start
 import com.mycollege.schedule.feature.settings.ui.components.AboutBottomSheet
@@ -85,6 +86,7 @@ fun SettingsScreen(
     }
 
     val onExit: () -> Unit = {
+        MyTracker.trackEvent("SettingsLeavePathEvent")
         navController.navigate(Start) {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
@@ -166,6 +168,8 @@ fun SettingsContent(
                 SegmentedButton(settingsState.weekCount, !settingsState.synchronizeWeekParity) {
                     handleEvent(SettingsEvent.MakeWeekCountDifferent(it))
                     handleEvent(SettingsEvent.SaveSettings)
+                    if (it) MyTracker.trackEvent("ToggleSecondWeekCountEvent")
+                        else MyTracker.trackEvent("ToggleFirstWeekCountEvent")
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -190,6 +194,8 @@ fun SettingsContent(
                         CardSettings(painterResource(R.drawable.sync), title = "Синхрон. неделю", checkedState = settingsState.synchronizeWeekParity) {
                             handleEvent(SettingsEvent.SynchronizeWeekParity(it))
                             handleEvent(SettingsEvent.SaveSettings)
+                            if (settingsState.synchronizeWeekParity) MyTracker.trackEvent("WeekSynchronizationOnEvent")
+                                else MyTracker.trackEvent("WeekSynchronizationOffEvent")
                         }
 
                         HorizontalDivider(Modifier.padding(start = 45.dp, end = 10.dp))
@@ -197,6 +203,8 @@ fun SettingsContent(
                         CardSettings(Icons.Default.Notifications, title = "Уведомления", checkedState = settingsState.notificationsEnabled) {
                             handleEvent(SettingsEvent.MakeNotificationsEnabled(it))
                             handleEvent(SettingsEvent.SaveSettings)
+                            if (settingsState.notificationsEnabled) MyTracker.trackEvent("NotificationsOnEvent")
+                                else MyTracker.trackEvent("NotificationsOffEvent")
                         }
 
                         HorizontalDivider(Modifier.padding(start = 45.dp, end = 10.dp))
@@ -204,6 +212,8 @@ fun SettingsContent(
                         CardSettings(painterResource(R.drawable.week), title = "Показать неделю", checkedState = settingsState.fullWeekVisibility) {
                             handleEvent(SettingsEvent.MakeScheduleWeekFull(it))
                             handleEvent(SettingsEvent.SaveSettings)
+                            if (settingsState.fullWeekVisibility) MyTracker.trackEvent("FullWeekVisibilityOnEvent")
+                                else MyTracker.trackEvent("FullWeekVisibilityOffEvent")
                         }
 
                         HorizontalDivider(Modifier.padding(start = 45.dp, end = 10.dp))
@@ -211,6 +221,8 @@ fun SettingsContent(
                         CardSettings(Icons.Default.Menu, title = "Скрыть навигацию", checkedState = settingsState.navigationInvisibility) {
                             handleEvent(SettingsEvent.MakeNavigationInvisible(it))
                             handleEvent(SettingsEvent.SaveSettings)
+                            if (settingsState.navigationInvisibility) MyTracker.trackEvent("NavigationInvisibilityOnEvent")
+                                else MyTracker.trackEvent("NavigationInvisibilityOffEvent")
                         }
 
                     }
@@ -238,6 +250,7 @@ fun SettingsContent(
                         modifier = Modifier
                             .clickable {
                                 openCopyrights()
+                                MyTracker.trackEvent("CopyrightToggleEvent")
                             }
                             .height(60.dp)
                             .fillMaxWidth()
@@ -263,6 +276,7 @@ fun SettingsContent(
                         modifier = Modifier
                             .clickable {
                                 onAboutToggle()
+                                MyTracker.trackEvent("AboutApplicationToggleEvent")
                             }
                             .height(60.dp)
                             .fillMaxWidth()

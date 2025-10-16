@@ -2,6 +2,7 @@ package com.mycollege.schedule.feature.schedule.domain.usecase
 
 import android.util.Log
 import androidx.compose.runtime.Immutable
+import com.my.tracker.MyTracker
 import com.mycollege.schedule.app.activity.data.models.Group
 import com.mycollege.schedule.app.activity.data.models.Teacher
 import com.mycollege.schedule.core.db.Database
@@ -21,6 +22,7 @@ class GetTodayScheduleUseCase @Inject constructor(
 
     suspend fun getTodaySchedule(group: Group, dayWeek: String, weekCount: Int): List<DataClasses.Lesson> =
         withContext(Dispatchers.IO) {
+            MyTracker.trackEvent("GetTodayGroupScheduleUseCaseEvent")
             val schedule = database.schedule().getDaySchedule(group.id.toString(), dayWeek, weekCount)
             Log.d("TODAY", "${group.name} $dayWeek $weekCount $schedule")
             val result = ArrayList<DataClasses.Lesson>()
@@ -45,7 +47,7 @@ class GetTodayScheduleUseCase @Inject constructor(
 
     suspend fun getTodayTeacherSchedule(teacher: String, dayWeek: String, weekCount: Int): List<DataClasses.Lesson> =
         withContext(Dispatchers.IO) {
-
+            MyTracker.trackEvent("GetTodayTeacherScheduleUseCaseEvent")
             val teacher = database.teachers().getTeachersBy(teacher).first()
 
             if (false) return@withContext emptyList()

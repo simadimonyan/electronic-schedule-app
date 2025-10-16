@@ -1,6 +1,7 @@
 package com.mycollege.schedule.feature.groups.domain.usecases.student
 
 import androidx.compose.runtime.Immutable
+import com.my.tracker.MyTracker
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.core.db.Database
 import com.mycollege.schedule.core.network.RetrofitClient
@@ -18,6 +19,7 @@ class GetLevelUseCase @Inject constructor(
 
     suspend fun getRoomLevels(course: String): Set<String> {
         return withContext(Dispatchers.IO) {
+            MyTracker.trackEvent("LocalGetLevelsUseCaseEvent")
             return@withContext database.groups().getLevelsBy(course).toSortedSet { level1, level2 ->
                 level1.length.compareTo(level2.length) // сортировка по возрастанию длины
             }
@@ -26,6 +28,7 @@ class GetLevelUseCase @Inject constructor(
 
     suspend fun getServerLevels(course: String): Set<String> {
         return withContext(Dispatchers.IO) {
+            MyTracker.trackEvent("ServerGetLevelsUseCaseEvent")
             val scheduleServerConfiguration = cacheManager.loadScheduleServerConfiguration()
             return@withContext RetrofitClient(scheduleServerConfiguration.serverUrl).groupsApi
                 .levels(scheduleServerConfiguration.accessToken, Integer.parseInt(course)).levels

@@ -6,6 +6,7 @@ import androidx.compose.runtime.Stable
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.my.tracker.MyTracker
 import com.mycollege.schedule.app.activity.ui.state.AppStateHolder
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.feature.groups.domain.usecases.student.GetGroupScheduleUseCase
@@ -62,11 +63,13 @@ class ScheduleSyncWorker @AssistedInject constructor(
 
                 if (appStateHolder.appState.value.studentMode) {
                     if (groupStateHolder.groupState.value.group != "Выбрать группу") {
+                        MyTracker.trackEvent("BackgroundGroupScheduleLoadEvent")
                         getGroupScheduleUseCase.getServerGroupSchedule(groupStateHolder.groupState.value.group)
                     }
                 }
                 else {
                     if (groupStateHolder.groupState.value.teacher != "Выбрать преподавателя") {
+                        MyTracker.trackEvent("BackgroundTeacherScheduleLoadEvent")
                         getTeacherScheduleUseCase.getServerTeacherSchedule(groupStateHolder.groupState.value.teacher)
                     }
                 }

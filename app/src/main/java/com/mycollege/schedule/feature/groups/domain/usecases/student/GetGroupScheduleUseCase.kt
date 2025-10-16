@@ -2,6 +2,7 @@ package com.mycollege.schedule.feature.groups.domain.usecases.student
 
 import android.util.Log
 import androidx.room.Transaction
+import com.my.tracker.MyTracker
 import com.mycollege.schedule.app.activity.data.models.Schedule
 import com.mycollege.schedule.app.activity.data.models.Teacher
 import com.mycollege.schedule.core.cache.CacheManager
@@ -21,6 +22,7 @@ class GetGroupScheduleUseCase @Inject constructor(
     @Transaction
     suspend fun getServerGroupSchedule(name: String) {
         return withContext(Dispatchers.IO) {
+            MyTracker.trackEvent("ServerGetGroupScheduleUseCaseEvent")
 
             val scheduleServerConfiguration = cacheManager.loadScheduleServerConfiguration()
             val group = database.groups().getGroupByName(name).first()

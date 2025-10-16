@@ -1,6 +1,7 @@
 package com.mycollege.schedule.feature.groups.domain.usecases.student
 
 import androidx.compose.runtime.Immutable
+import com.my.tracker.MyTracker
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.core.db.Database
 import com.mycollege.schedule.core.network.RetrofitClient
@@ -18,12 +19,14 @@ class GetCoursesUseCase @Inject constructor(
 
     suspend fun getRoomCourses(): Set<String> {
         return withContext(Dispatchers.IO) {
+            MyTracker.trackEvent("LocalGetCoursesUseCaseEvent")
             return@withContext database.groups().getCourses().toSortedSet()
         }
     }
 
     suspend fun getServerCourses(): Set<String> {
         return withContext(Dispatchers.IO) {
+            MyTracker.trackEvent("ServerGetCoursesUseCaseEvent")
             val scheduleServerConfiguration = cacheManager.loadScheduleServerConfiguration()
             return@withContext RetrofitClient(scheduleServerConfiguration.serverUrl).groupsApi
                 .courses(scheduleServerConfiguration.accessToken).courses

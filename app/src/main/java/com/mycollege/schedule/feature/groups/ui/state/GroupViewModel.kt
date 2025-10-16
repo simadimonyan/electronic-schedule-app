@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.my.tracker.MyTracker
 import com.mycollege.schedule.R
 import com.mycollege.schedule.app.activity.domain.models.LoadingStateHolder
 import com.mycollege.schedule.app.activity.ui.state.AppStateHolder
@@ -81,6 +82,8 @@ class GroupViewModel @Inject constructor(
      */
     private fun changeAppModeToggle(studentMode: Boolean) {
         viewModelScope.launch {
+            if (studentMode) MyTracker.trackEvent("StudentModePathEvent")
+                else MyTracker.trackEvent("TeacherModePathEvent")
             appStateHolder.updateStudentMode(studentMode)
             cacheManager.saveStudentMode(studentMode)
             loadingStateHolder.updateScheduleLoading(false)
@@ -270,6 +273,7 @@ class GroupViewModel @Inject constructor(
      */
     private fun updateCourse(course: String) {
         viewModelScope.launch {
+            MyTracker.trackEvent("UpdateCourseEvent")
             groupStateHolder.updateCourse(course)
             updateLevel(resources.getString(R.string.all_specialities))
             updateGroup(resources.getString(R.string.choose))
@@ -281,6 +285,7 @@ class GroupViewModel @Inject constructor(
      */
     private fun updateLevel(level: String) {
         viewModelScope.launch {
+            MyTracker.trackEvent("UpdateLevelEvent")
             groupStateHolder.updateLevel(level)
             updateGroup(resources.getString(R.string.choose))
         }
@@ -291,6 +296,7 @@ class GroupViewModel @Inject constructor(
      */
     private fun updateGroup(group: String) {
         viewModelScope.launch {
+            MyTracker.trackEvent("UpdateGroupEvent")
             groupStateHolder.updateGroup(group)
             scheduleStateHolder.updateBuildScheduleGroupModeFlag(false)
             loadingStateHolder.updateScheduleLoading(false)
@@ -302,6 +308,7 @@ class GroupViewModel @Inject constructor(
      */
     private fun updateDepartment(department: String) {
         viewModelScope.launch {
+            MyTracker.trackEvent("UpdateDepartmentEvent")
             groupStateHolder.updateDepartment(department)
             groupStateHolder.updateTeacher("Выбрать преподавателя")
         }
@@ -312,6 +319,7 @@ class GroupViewModel @Inject constructor(
      */
     private fun updateTeacher(teacher: String) {
         viewModelScope.launch {
+            MyTracker.trackEvent("UpdateTeacherEvent")
             groupStateHolder.updateTeacher(teacher)
             scheduleStateHolder.updateBuildScheduleTeacherModeFlag(false)
             loadingStateHolder.updateScheduleLoading(false)
@@ -359,6 +367,9 @@ class GroupViewModel @Inject constructor(
      * Выбрать расписание
      */
     private fun chooseGroup(): Boolean {
+
+        MyTracker.trackEvent("BuildScheduleEvent")
+
         if ((appStateHolder.appState.value.studentMode && !groupStateHolder.groupState.value.group.contains("Выбрать группу"))
             || !appStateHolder.appState.value.studentMode && !groupStateHolder.groupState.value.teacher.contains("Выбрать преподавателя")) {
             val context = resources.getContext()

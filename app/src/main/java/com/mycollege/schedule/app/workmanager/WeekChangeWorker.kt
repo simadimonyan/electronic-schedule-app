@@ -6,6 +6,7 @@ import androidx.compose.runtime.Stable
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.my.tracker.MyTracker
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.feature.settings.ui.state.SettingsState
 import dagger.assisted.Assisted
@@ -35,6 +36,7 @@ class WeekChangeWorker @AssistedInject constructor(
                     !settings.weekCount
                 )
                 cacheManager.saveActualSettings(settings)
+                MyTracker.trackEvent("BackgroundLocalWeekChangeEvent")
             }
             cacheManager.clearDismissedNotifications()
             Log.e("WeekChangerWorker", "Week auto-changing executed!")
