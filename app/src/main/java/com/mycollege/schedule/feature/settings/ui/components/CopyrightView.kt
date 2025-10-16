@@ -161,7 +161,7 @@ fun CopyrightView(onDisposable: () -> Unit) {
                 ) {
                     TopAppBar(
                         title = {
-                            Text("Интеллектуальная собственность", fontSize = 20.sp, color = Color.White)
+                            Text("Авторское право", fontSize = 20.sp, color = Color.White)
                         },
                         navigationIcon = {
                             IconButton(onClick = {

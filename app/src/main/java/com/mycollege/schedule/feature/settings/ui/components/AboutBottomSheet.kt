@@ -57,7 +57,7 @@ fun AboutBottomSheet(
 
     ModalBottomSheet(
         modifier = Modifier.wrapContentHeight().padding(10.dp, 30.dp, 10.dp, 15.dp),
-        sheetState = rememberModalBottomSheetState(),
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         shape = RoundedCornerShape(17.dp),
         contentColor = Color.Black,
         containerColor = Color.White,
@@ -144,13 +144,10 @@ fun AboutContent() {
         Card(
             modifier = Modifier.fillMaxWidth()
                 .height(50.dp)
-                .padding(horizontal = 10.dp)
-                .clickable(
-                    interactionSource = null,
-                    indication = null
-                ) {
-                    uriHandler.openUri("https://t.me/+KJ4GaYqruzJjOTJi") // android-app-link
-                },
+                .padding(horizontal = 10.dp),
+            onClick = {
+                uriHandler.openUri("https://t.me/+KJ4GaYqruzJjOTJi") // android-app-link
+            },
             shape = RoundedCornerShape(10.dp),
             colors = CardDefaults.cardColors(containerColor = disabledVeryLightBlue)
         ) {
@@ -168,6 +165,6 @@ fun AboutContent() {
             }
         }
 
-        //Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(20.dp))
     }
 }
