@@ -41,6 +41,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowInsetsControllerCompat
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -160,7 +161,7 @@ fun CopyrightView(onDisposable: () -> Unit) {
                 ) {
                     TopAppBar(
                         title = {
-                            Text("Авторские права", color = Color.White)
+                            Text("Интеллектуальная собственность", fontSize = 20.sp, color = Color.White)
                         },
                         navigationIcon = {
                             IconButton(onClick = {

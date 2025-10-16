@@ -1,7 +1,7 @@
 package com.mycollege.schedule.feature.settings.ui.components
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
@@ -23,11 +24,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mycollege.schedule.BuildConfig
 import com.mycollege.schedule.R
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Preview
 @Composable
@@ -59,6 +64,9 @@ fun AboutBottomSheet(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutContent() {
+
+    val formatter = DateTimeFormatter.ofPattern("yyyy", Locale("RU"))
+
     Column(
         modifier = Modifier
     ) {
@@ -71,34 +79,55 @@ fun AboutContent() {
         ) {
 
             Image(
-                painter = painterResource(R.drawable.logo),
+                painter = painterResource(R.drawable.imsit),
                 contentDescription = "Logo",
                 modifier = Modifier
                     .clip(RoundedCornerShape(10.dp))
-                    .size(100.dp)
+                    .size(200.dp, 120.dp)
             )
+
+            Spacer(modifier = Modifier.height(30.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.logo),
+                    contentDescription = "Logo",
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .size(60.dp)
+                )
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Column {
+                    Text(
+                        text = "Мой ИМСИТ",
+                        fontSize = 24.sp,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    Spacer(modifier = Modifier.height(5.dp))
+
+                    Text(
+                        text = "Версия: " + BuildConfig.VERSION_NAME,
+                        color = Color.DarkGray,
+                        fontSize = 18.sp
+                    )
+                }
+
+            }
 
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
-                text = "Мой ИМСИТ",
-                fontSize = 24.sp,
-                color = Color.Black,
-                fontWeight = FontWeight.Medium
+                text = "Copyright © 2024 - ${LocalDate.now().format(formatter)}",
+                color = Color.DarkGray,
+                textAlign = TextAlign.Center,
+                fontSize = 18.sp
             )
-
-            Row(
-                modifier = Modifier
-                    .height(60.dp)
-                    .padding(vertical = 20.dp, horizontal = 20.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "версия приложения: " + BuildConfig.VERSION_NAME,
-                    color = Color.Black,
-                    fontSize = 18.sp
-                )
-            }
         }
 
         Spacer(modifier = Modifier.height(20.dp))

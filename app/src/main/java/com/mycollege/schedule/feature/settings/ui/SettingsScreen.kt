@@ -265,7 +265,7 @@ fun SettingsContent(
                         )
                         Spacer(modifier = Modifier.width(15.dp))
                         Text(
-                            text = "Авторские права",
+                            text = "Интеллектуальная собственность",
                             fontSize = 15.sp
                         )
                     }
