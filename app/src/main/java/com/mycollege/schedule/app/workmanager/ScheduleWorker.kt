@@ -113,7 +113,7 @@ class ScheduleWorker @AssistedInject constructor(
                         cacheManager.saveServerNetworkLastRequest(CacheManager.ServerNetworkLastRequest(
                             weekParitySynchronization = System.currentTimeMillis()))
                     cacheManager.saveActualSettings(settings)
-                    MyTracker.trackEvent("BackgroundWeekSynchronizationEvent")
+                    MyTracker.trackEvent("Фоновый процесс синхронизации четности недели из сервера")
                 }
 
             }

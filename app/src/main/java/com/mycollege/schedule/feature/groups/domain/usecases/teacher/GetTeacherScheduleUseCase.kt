@@ -22,7 +22,7 @@ class GetTeacherScheduleUseCase @Inject constructor(
     @Transaction
     suspend fun getServerTeacherSchedule(name: String) {
         return withContext(Dispatchers.IO) {
-            MyTracker.trackEvent("ServerGetTeacherScheduleUseCaseEvent")
+            MyTracker.trackEvent("Получить расписание преподавателя из сервера")
 
             val scheduleServerConfiguration = cacheManager.loadScheduleServerConfiguration()
             val teacher = database.teachers().getTeachersBy(name).first()

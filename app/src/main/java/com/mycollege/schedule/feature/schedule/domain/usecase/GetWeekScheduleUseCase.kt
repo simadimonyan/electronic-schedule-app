@@ -21,7 +21,7 @@ class GetWeekScheduleUseCase @Inject constructor(
 
     suspend fun getWeekSchedule(group: Group, weekCount: Int): HashMap<Int, ArrayList<DataClasses.Lesson>> =
         withContext(Dispatchers.IO) {
-            MyTracker.trackEvent("GetWeekGroupScheduleUseCaseEvent")
+            MyTracker.trackEvent("Открыть расписание группы на неделю")
             val week = HashMap<Int, ArrayList<DataClasses.Lesson>>()
 
             for (day in 1..6) {
@@ -51,7 +51,7 @@ class GetWeekScheduleUseCase @Inject constructor(
 
     suspend fun getWeekTeacherSchedule(teacher: String, weekCount: Int): HashMap<Int, ArrayList<DataClasses.Lesson>> =
         withContext(Dispatchers.IO) {
-            MyTracker.trackEvent("GetWeekTeacherScheduleUseCaseEvent")
+            MyTracker.trackEvent("Открыть расписание преподавателя на неделю")
             val week = HashMap<Int, ArrayList<DataClasses.Lesson>>()
 
             val teacher = database.teachers().getTeachersBy(teacher).first()

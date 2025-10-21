@@ -22,7 +22,7 @@ class GetGroupScheduleUseCase @Inject constructor(
     @Transaction
     suspend fun getServerGroupSchedule(name: String) {
         return withContext(Dispatchers.IO) {
-            MyTracker.trackEvent("ServerGetGroupScheduleUseCaseEvent")
+            MyTracker.trackEvent("Получить расписание группы из сервера")
 
             val scheduleServerConfiguration = cacheManager.loadScheduleServerConfiguration()
             val group = database.groups().getGroupByName(name).first()

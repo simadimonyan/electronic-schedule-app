@@ -149,7 +149,7 @@ fun CustomAppBar(
                                         viewModel.appStateHolder.updateIndex(0)
                                         pagerState.animateScrollToPage(0)
                                     }
-                                    MyTracker.trackEvent("GroupScreenPathEvent")
+                                    MyTracker.trackEvent("Перейти на главный экран")
                                 }
                             )
                     )
@@ -172,7 +172,7 @@ fun CustomAppBar(
                                         viewModel.appStateHolder.updateIndex(1)
                                         pagerState.animateScrollToPage(1)
                                     }
-                                    MyTracker.trackEvent("ScheduleScreenPathEvent")
+                                    MyTracker.trackEvent("Перейти на экран расписания")
                                 }
                             )
                     )

@@ -16,7 +16,7 @@ class GetDepartmentsUseCase @Inject constructor(
 
     suspend fun getRoomDepartments(): Set<String> {
         return withContext(Dispatchers.IO) {
-            MyTracker.trackEvent("LocalGetDepartmentsUseCaseEvent")
+            MyTracker.trackEvent("Получить кешированный список кафедр")
             val result = database.teachers().getDepartments().toMutableSet()
             result.add("Все кафедры")
             result.toSortedSet()

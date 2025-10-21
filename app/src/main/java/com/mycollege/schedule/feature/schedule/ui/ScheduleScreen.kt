@@ -75,7 +75,7 @@ fun ScheduleScreen(
     }
 
     val navigateToSettings = { // навигация в настройки
-        MyTracker.trackEvent("SettingsPathEvent")
+        MyTracker.trackEvent("Перейти в экран настроек")
         globalGraph.navigate(route = Settings) {
             popUpTo(globalGraph.graph.findStartDestination().id
             ) {

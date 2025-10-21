@@ -36,7 +36,7 @@ class WeekChangeWorker @AssistedInject constructor(
                     !settings.weekCount
                 )
                 cacheManager.saveActualSettings(settings)
-                MyTracker.trackEvent("BackgroundLocalWeekChangeEvent")
+                MyTracker.trackEvent("Локальная смена четности недели без синхронизации")
             }
             cacheManager.clearDismissedNotifications()
             Log.e("WeekChangerWorker", "Week auto-changing executed!")

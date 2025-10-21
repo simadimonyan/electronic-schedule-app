@@ -86,7 +86,7 @@ fun SettingsScreen(
     }
 
     val onExit: () -> Unit = {
-        MyTracker.trackEvent("SettingsLeavePathEvent")
+        MyTracker.trackEvent("Выйти из экрана настроек")
         navController.navigate(Start) {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
@@ -168,8 +168,8 @@ fun SettingsContent(
                 SegmentedButton(settingsState.weekCount, !settingsState.synchronizeWeekParity) {
                     handleEvent(SettingsEvent.MakeWeekCountDifferent(it))
                     handleEvent(SettingsEvent.SaveSettings)
-                    if (it) MyTracker.trackEvent("ToggleSecondWeekCountEvent")
-                        else MyTracker.trackEvent("ToggleFirstWeekCountEvent")
+                    if (it) MyTracker.trackEvent("Переключить расписание на вторую неделю")
+                        else MyTracker.trackEvent("Переключить расписание на первую неделю")
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -194,8 +194,8 @@ fun SettingsContent(
                         CardSettings(painterResource(R.drawable.sync), title = "Синхрон. неделю", checkedState = settingsState.synchronizeWeekParity) {
                             handleEvent(SettingsEvent.SynchronizeWeekParity(it))
                             handleEvent(SettingsEvent.SaveSettings)
-                            if (settingsState.synchronizeWeekParity) MyTracker.trackEvent("WeekSynchronizationOnEvent")
-                                else MyTracker.trackEvent("WeekSynchronizationOffEvent")
+                            if (settingsState.synchronizeWeekParity) MyTracker.trackEvent("Включить синхронизацию недели")
+                                else MyTracker.trackEvent("Выключить синхронизацию недели")
                         }
 
                         HorizontalDivider(Modifier.padding(start = 45.dp, end = 10.dp))
@@ -203,8 +203,8 @@ fun SettingsContent(
                         CardSettings(Icons.Default.Notifications, title = "Уведомления", checkedState = settingsState.notificationsEnabled) {
                             handleEvent(SettingsEvent.MakeNotificationsEnabled(it))
                             handleEvent(SettingsEvent.SaveSettings)
-                            if (settingsState.notificationsEnabled) MyTracker.trackEvent("NotificationsOnEvent")
-                                else MyTracker.trackEvent("NotificationsOffEvent")
+                            if (settingsState.notificationsEnabled) MyTracker.trackEvent("Включить уведомления расписания")
+                                else MyTracker.trackEvent("Выключить уведомления расписания")
                         }
 
                         HorizontalDivider(Modifier.padding(start = 45.dp, end = 10.dp))
@@ -212,8 +212,8 @@ fun SettingsContent(
                         CardSettings(painterResource(R.drawable.week), title = "Показать неделю", checkedState = settingsState.fullWeekVisibility) {
                             handleEvent(SettingsEvent.MakeScheduleWeekFull(it))
                             handleEvent(SettingsEvent.SaveSettings)
-                            if (settingsState.fullWeekVisibility) MyTracker.trackEvent("FullWeekVisibilityOnEvent")
-                                else MyTracker.trackEvent("FullWeekVisibilityOffEvent")
+                            if (settingsState.fullWeekVisibility) MyTracker.trackEvent("Включить расписание на неделю")
+                                else MyTracker.trackEvent("Выключить расписание на неделю")
                         }
 
                         HorizontalDivider(Modifier.padding(start = 45.dp, end = 10.dp))
@@ -221,8 +221,8 @@ fun SettingsContent(
                         CardSettings(Icons.Default.Menu, title = "Скрыть навигацию", checkedState = settingsState.navigationInvisibility) {
                             handleEvent(SettingsEvent.MakeNavigationInvisible(it))
                             handleEvent(SettingsEvent.SaveSettings)
-                            if (settingsState.navigationInvisibility) MyTracker.trackEvent("NavigationInvisibilityOnEvent")
-                                else MyTracker.trackEvent("NavigationInvisibilityOffEvent")
+                            if (settingsState.navigationInvisibility) MyTracker.trackEvent("Выключить видимость навигации")
+                                else MyTracker.trackEvent("Включить видимость навигации")
                         }
 
                     }
@@ -250,7 +250,7 @@ fun SettingsContent(
                         modifier = Modifier
                             .clickable {
                                 openCopyrights()
-                                MyTracker.trackEvent("CopyrightToggleEvent")
+                                MyTracker.trackEvent("Открыть вкладку авторское право")
                             }
                             .height(60.dp)
                             .fillMaxWidth()
@@ -276,7 +276,7 @@ fun SettingsContent(
                         modifier = Modifier
                             .clickable {
                                 onAboutToggle()
-                                MyTracker.trackEvent("AboutApplicationToggleEvent")
+                                MyTracker.trackEvent("Открыть вкладку о приложении")
                             }
                             .height(60.dp)
                             .fillMaxWidth()

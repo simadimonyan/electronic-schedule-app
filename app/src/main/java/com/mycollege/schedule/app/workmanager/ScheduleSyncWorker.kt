@@ -63,13 +63,13 @@ class ScheduleSyncWorker @AssistedInject constructor(
 
                 if (appStateHolder.appState.value.studentMode) {
                     if (groupStateHolder.groupState.value.group != "Выбрать группу") {
-                        MyTracker.trackEvent("BackgroundGroupScheduleLoadEvent")
+                        MyTracker.trackEvent("Фоновый процесс загрузки расписания группы из сервера")
                         getGroupScheduleUseCase.getServerGroupSchedule(groupStateHolder.groupState.value.group)
                     }
                 }
                 else {
                     if (groupStateHolder.groupState.value.teacher != "Выбрать преподавателя") {
-                        MyTracker.trackEvent("BackgroundTeacherScheduleLoadEvent")
+                        MyTracker.trackEvent("Фоновый процесс загрузки расписания преподавателя из сервера")
                         getTeacherScheduleUseCase.getServerTeacherSchedule(groupStateHolder.groupState.value.teacher)
                     }
                 }

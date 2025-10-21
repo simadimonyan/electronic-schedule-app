@@ -22,7 +22,7 @@ class GetTodayScheduleUseCase @Inject constructor(
 
     suspend fun getTodaySchedule(group: Group, dayWeek: String, weekCount: Int): List<DataClasses.Lesson> =
         withContext(Dispatchers.IO) {
-            MyTracker.trackEvent("GetTodayGroupScheduleUseCaseEvent")
+            MyTracker.trackEvent("Открыть расписание группы на сегодня")
             val schedule = database.schedule().getDaySchedule(group.id.toString(), dayWeek, weekCount)
             Log.d("TODAY", "${group.name} $dayWeek $weekCount $schedule")
             val result = ArrayList<DataClasses.Lesson>()
@@ -47,7 +47,7 @@ class GetTodayScheduleUseCase @Inject constructor(
 
     suspend fun getTodayTeacherSchedule(teacher: String, dayWeek: String, weekCount: Int): List<DataClasses.Lesson> =
         withContext(Dispatchers.IO) {
-            MyTracker.trackEvent("GetTodayTeacherScheduleUseCaseEvent")
+            MyTracker.trackEvent("Открыть расписание преподавателя на сегодня")
             val teacher = database.teachers().getTeachersBy(teacher).first()
 
             if (false) return@withContext emptyList()

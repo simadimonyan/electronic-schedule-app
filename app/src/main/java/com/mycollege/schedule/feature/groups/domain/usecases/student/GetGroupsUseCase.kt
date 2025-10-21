@@ -23,7 +23,7 @@ class GetGroupsUseCase @Inject constructor(
 
     suspend fun getRoomGroups(course: String, level: String): Set<String> {
         return withContext(Dispatchers.IO) {
-            MyTracker.trackEvent("LocalGetGroupsUseCaseEvent")
+            MyTracker.trackEvent("Получить кешированный список групп")
             if (level == "Все уровни")
                 return@withContext database.groups().getAllGroupNamesBy(course).toSortedSet()
             else
@@ -34,7 +34,7 @@ class GetGroupsUseCase @Inject constructor(
     @Transaction
     suspend fun getServerGroups(actualCourse: String, maxCourse: String, progress: (Int) -> Unit): Set<String> {
         return withContext(Dispatchers.IO) {
-            MyTracker.trackEvent("ServerGetGroupsUseCaseEvent")
+            MyTracker.trackEvent("Получить список групп из сервера")
             val scheduleServerConfiguration = cacheManager.loadScheduleServerConfiguration()
 
             var response = Groups(emptyList())

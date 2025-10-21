@@ -23,7 +23,7 @@ class GetTeachersUseCase @Inject constructor(
 
     suspend fun getRoomTeachers(department: String): Set<String> {
         return withContext(Dispatchers.IO) {
-            MyTracker.trackEvent("LocalGetTeachersUseCaseEvent")
+            MyTracker.trackEvent("Получить кешированный список преподавателей")
             val result = mutableSetOf<String>()
             if (!department.equals("Все кафедры")) {
                 database.teachers().findTeachersBy(department).map {
@@ -47,7 +47,7 @@ class GetTeachersUseCase @Inject constructor(
     @Transaction
     suspend fun getServerTeachers(progress: (Int) -> Unit): Set<String> {
         return withContext(Dispatchers.IO) {
-            MyTracker.trackEvent("ServerGetTeachersUseCaseEvent")
+            MyTracker.trackEvent("Получить список преподавателей из сервера")
             val scheduleServerConfiguration = cacheManager.loadScheduleServerConfiguration()
 
             progress(10)

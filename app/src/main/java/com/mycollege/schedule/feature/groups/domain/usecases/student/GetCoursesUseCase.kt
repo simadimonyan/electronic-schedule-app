@@ -19,14 +19,14 @@ class GetCoursesUseCase @Inject constructor(
 
     suspend fun getRoomCourses(): Set<String> {
         return withContext(Dispatchers.IO) {
-            MyTracker.trackEvent("LocalGetCoursesUseCaseEvent")
+            MyTracker.trackEvent("Получить кешированный список курсов")
             return@withContext database.groups().getCourses().toSortedSet()
         }
     }
 
     suspend fun getServerCourses(): Set<String> {
         return withContext(Dispatchers.IO) {
-            MyTracker.trackEvent("ServerGetCoursesUseCaseEvent")
+            MyTracker.trackEvent("Получить список курсов из сервера")
             val scheduleServerConfiguration = cacheManager.loadScheduleServerConfiguration()
             return@withContext RetrofitClient(scheduleServerConfiguration.serverUrl).groupsApi
                 .courses(scheduleServerConfiguration.accessToken).courses

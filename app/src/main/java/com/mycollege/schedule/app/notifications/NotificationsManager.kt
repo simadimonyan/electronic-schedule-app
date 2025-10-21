@@ -14,6 +14,7 @@ import androidx.compose.runtime.Immutable
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.my.tracker.MyTracker
 import com.mycollege.schedule.R
 import com.mycollege.schedule.core.cache.CacheManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -135,6 +136,7 @@ class NotificationReceiver : BroadcastReceiver() {
             }
             if (timestamp >= System.currentTimeMillis()) {
                 notificationManager.notify(lesson.hashCode(), notification)
+                MyTracker.trackEvent("Фоновый процесс доставки уведомления о начале пары")
             }
 
         }
@@ -155,6 +157,7 @@ class NotificationDismissReceiver : BroadcastReceiver() {
         if (lesson != null) {
             cacheManager.saveDismissedNotification(date, lesson)
             Log.d("NotificationDismissReceiver", "Уведомление смахнуто: notificationId=$notificationId, lesson=$lesson, date=$date")
+            MyTracker.trackEvent("Смахнуть уведомление о начале пары")
         } else {
             Log.e("NotificationDismissReceiver", "Неверные данные: lesson=$lesson, date=$date, notificationId=$notificationId")
         }
