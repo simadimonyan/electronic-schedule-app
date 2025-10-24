@@ -11,7 +11,7 @@
 
     <!-- UI -->
     <string name="all_specialities">Все уровни</string>
-    <string name="choose">Выбрать</string>
+    <string name="choose">Выбрать группу</string>
     <string name="choose_group">Выбор группы</string>
     <string name="first_course">1 курс</string>
     <string name="course">Курс</string>
