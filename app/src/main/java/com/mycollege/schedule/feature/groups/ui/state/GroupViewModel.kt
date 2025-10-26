@@ -237,7 +237,8 @@ class GroupViewModel @Inject constructor(
                     val groups = getGroupsUseCase.getRoomGroups(groupState.course.split(" ")[0], groupState.level)
 
                     // берем данные из базы
-                    if (courses.isNotEmpty()) {
+                    if (courses.isNotEmpty() && levels.isNotEmpty() && groups.isNotEmpty()) {
+                        loadingStateHolder.updateChooseConfigurationLoading(false)
                         groupStateHolder.updateCoursesToDisplay(courses.toList())
                         groupStateHolder.updateLevelsToDisplay(levels.toList())
                         groupStateHolder.updateGroupsToDisplay(groups.toList())
@@ -254,7 +255,8 @@ class GroupViewModel @Inject constructor(
                     val teachers = getTeachersUseCase.getRoomTeachers(groupState.department)
 
                     // берем данные из базы
-                    if (teachers.isNotEmpty()) {
+                    if (teachers.isNotEmpty() && departments.isNotEmpty()) {
+                        loadingStateHolder.updateChooseConfigurationLoading(false)
                         groupStateHolder.updateDepartmentToDisplay(departments.toList())
                         groupStateHolder.updateTeachersToDisplay(teachers.toList())
                     }
@@ -262,6 +264,7 @@ class GroupViewModel @Inject constructor(
                         loadingStateHolder.updateChooseConfigurationLoading(true)
                         loadingStateHolder.updateChooseConfigurationProgress(10)
                     }
+
                 }
 
             }
