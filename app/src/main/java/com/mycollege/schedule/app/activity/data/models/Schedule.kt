@@ -61,6 +61,10 @@ class Schedule {
     @ColumnInfo(name = "type")
     var type: String = ""
 
+    // ссылка на eios
+    @ColumnInfo(name = "eios")
+    var eios: String = ""
+
     // номер аудитории
     @ColumnInfo(name = "location")
     var location: String = ""
@@ -74,6 +78,7 @@ class Schedule {
         time: String,
         name: String,
         type: String,
+        eios: String,
         location: String
     ) {
         this.teacher = teacher
@@ -84,6 +89,7 @@ class Schedule {
         this.time = time
         this.name = name
         this.type = type
+        this.eios = eios
         this.location = location
     }
 

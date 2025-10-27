@@ -190,6 +190,7 @@ class WebParser @Inject constructor(
                                             time = time,
                                             name = name.toString(),
                                             type = finalType,
+                                            eios = "",
                                             location = location.toString()
                                         )
                                     )

@@ -10,6 +10,7 @@ class DataClasses {
         val time: String
         val type: String
         val name: String?
+        val eios: String?
         val location: String?
     }
 
@@ -20,6 +21,7 @@ class DataClasses {
         override val type: String,
         override val name: String?,
         val teacher: String?,
+        override val eios: String?,
         override val location: String?
     ) : Lesson
 
@@ -30,6 +32,7 @@ class DataClasses {
         override val type: String,
         override val name: String?,
         val group: String?,
+        override val eios: String?,
         override val location: String?
     ) : Lesson
 

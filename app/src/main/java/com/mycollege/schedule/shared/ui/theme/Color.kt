@@ -17,3 +17,5 @@ val disabledWhite = Color(0x7CF3F2F7)
 val disabledBlue = Color(0x790D80FF)
 val disabledLightBlue = Color(0x3C0D80FF)
 val disabledVeryLightBlue = Color(0x190D80FF)
+
+val moodle = Color(0xFFE77629)

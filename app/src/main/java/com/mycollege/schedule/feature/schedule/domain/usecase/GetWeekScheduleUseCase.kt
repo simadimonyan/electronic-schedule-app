@@ -40,6 +40,7 @@ class GetWeekScheduleUseCase @Inject constructor(
                         lesson.type,
                         lesson.name,
                         teacherName.toString(),
+                        if (lesson.eios.isBlank()) null else lesson.eios,
                         lesson.location
                     ))
                 }
@@ -83,6 +84,7 @@ class GetWeekScheduleUseCase @Inject constructor(
                                 lesson.type,
                                 lesson.name,
                                 group.name,
+                                if (lesson.eios.isBlank()) null else lesson.eios,
                                 lesson.location
                             )
                         )

@@ -59,6 +59,7 @@ class GetTeacherScheduleUseCase @Inject constructor(
                         schedule.timePeriod.replace(".", ":"),
                         schedule.lessonName,
                         schedule.lessonType,
+                        schedule.eiosLink,
                         schedule.auditory
                     ))
                 }

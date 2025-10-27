@@ -17,5 +17,6 @@ data class ScheduleUnit(
     val lessonType: String,
     val lessonName: String,
     val teacher: Teacher,
+    val eiosLink: String,
     val auditory: String
 )
