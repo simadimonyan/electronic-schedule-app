@@ -206,7 +206,7 @@ fun GroupContent(
                 // ---
 
                 ActionButton(
-                    text = context.getString(R.string.choose),
+                    text = "Выбрать",
                     icon = R.drawable.logo,
                     onClick = {
                         handleEvent(GroupEvent.ChooseGroup)

@@ -5,8 +5,12 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import android.provider.Settings
 import android.util.Log
 import androidx.compose.runtime.Stable
+import androidx.core.content.ContextCompat.startActivity
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mycollege.schedule.app.activity.domain.models.LoadingStateHolder
@@ -250,12 +254,38 @@ class ScheduleViewModel @Inject constructor(
 
                 val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-                alarmManager.setExact(
-                    AlarmManager.RTC_WAKEUP,
-                    notificationTime,
-                    pendingIntent
-                )
-                return@withContext intent
+                // версии ниже Android 12 не просят разрешения на точные будильники
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+
+                    if (alarmManager.canScheduleExactAlarms()) {
+
+                        alarmManager.setExact(
+                            AlarmManager.RTC_WAKEUP,
+                            notificationTime,
+                            pendingIntent
+                        )
+                        return@withContext intent
+
+                    }
+                    else { // запросить разрешение
+                        val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                            data = "package:${context.packageName}".toUri()
+                        }
+                        context.startActivity(intent)
+                    }
+
+                }
+                else {
+
+                    alarmManager.setExact(
+                        AlarmManager.RTC_WAKEUP,
+                        notificationTime,
+                        pendingIntent
+                    )
+                    return@withContext intent
+
+                }
+
             }
             return@withContext null
         }
