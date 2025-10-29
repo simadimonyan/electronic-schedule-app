@@ -15,6 +15,7 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.my.tracker.MyTracker
 import com.mycollege.schedule.BuildConfig
 import com.mycollege.schedule.R
 import com.mycollege.schedule.app.activity.domain.models.LoadingState
@@ -121,8 +123,11 @@ fun GroupContent(
     cachedGroups: Map<String, Long>,
     cachedTeachers: Map<String, Long>
 ) {
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        MyTracker.trackEvent("Просмотр рекламы")
+    }
 
     ScheduleTheme {
         Scaffold(modifier = Modifier.fillMaxSize(), contentWindowInsets = WindowInsets(0), containerColor = background) { innerPadding ->
