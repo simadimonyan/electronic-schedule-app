@@ -45,8 +45,8 @@ android {
         applicationId = "com.mycollege.schedule"
         targetSdk = 34
         minSdk = 29
-        versionCode = 16
-        versionName = "1.5.1"
+        versionCode = 17
+        versionName = "1.5.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
