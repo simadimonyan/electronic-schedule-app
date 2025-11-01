@@ -79,7 +79,6 @@ fun GroupScreen(
     viewModel: GroupViewModel = hiltViewModel(),
     pagerState: PagerState
 ) {
-    val context = LocalContext.current
     val groupState by viewModel.groupStateHolder.groupState.collectAsState()
     val appState by viewModel.appStateHolder.appState.collectAsState()
     val parserState by viewModel.groupParserStateHolder.loadingState.collectAsState()
@@ -152,7 +151,7 @@ fun GroupContent(
                             title = LocalContext.current.getString(R.string.course),
                             subtitle = groupState.course,
                             onClick = {
-                                handleEvent(GroupEvent.Display)
+                                if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
                                 handleEvent(GroupEvent.ShowBottomSheet)
                                 handleEvent(GroupEvent.SetSelectedIndex(0))
                             }
@@ -163,7 +162,7 @@ fun GroupContent(
                             title = LocalContext.current.getString(R.string.speciality),
                             subtitle = groupState.level,
                             onClick = {
-                                handleEvent(GroupEvent.Display)
+                                if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
                                 handleEvent(GroupEvent.ShowBottomSheet)
                                 handleEvent(GroupEvent.SetSelectedIndex(1))
                             }
@@ -174,7 +173,7 @@ fun GroupContent(
                             title = LocalContext.current.getString(R.string.group),
                             subtitle = groupState.group,
                             onClick = {
-                                handleEvent(GroupEvent.Display)
+                                if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
                                 handleEvent(GroupEvent.ShowBottomSheet)
                                 handleEvent(GroupEvent.SetSelectedIndex(2))
                             }
@@ -187,7 +186,7 @@ fun GroupContent(
                             title = "Кафедра",
                             subtitle = groupState.department,
                             onClick = {
-                                handleEvent(GroupEvent.Display)
+                                if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
                                 handleEvent(GroupEvent.ShowBottomSheet)
                                 handleEvent(GroupEvent.SetSelectedIndex(3))
                             }
@@ -198,7 +197,7 @@ fun GroupContent(
                             title = "Преподаватель",
                             subtitle = groupState.teacher,
                             onClick = {
-                                handleEvent(GroupEvent.Display)
+                                if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
                                 handleEvent(GroupEvent.ShowBottomSheet)
                                 handleEvent(GroupEvent.SetSelectedIndex(4))
                             },
@@ -240,7 +239,7 @@ fun GroupContent(
 
                 if (groupState.showBottomSheet) {
                     BottomSheetContent(
-                        loading = parserState.chooseConfigurationLoading,
+                        loadingState = parserState,
                         progress = parserState.chooseConfigurationProgress,
                         groupState,
                         handleEvent,

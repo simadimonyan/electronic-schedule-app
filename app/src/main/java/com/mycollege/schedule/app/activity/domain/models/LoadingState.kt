@@ -28,7 +28,12 @@ data class LoadingState(
     /**
      * Прогресс статуса обновления расписания
      */
-    val scheduleProgress: Int = 0
+    val scheduleProgress: Int = 0,
+
+    /**
+     * Сетевые ошибки при загрузке данных
+     */
+    val networkIssues: Boolean = false
 
 )
 
@@ -53,6 +58,10 @@ class LoadingStateHolder @Inject constructor() {
 
     fun updateScheduleProgress(progress: Int) {
         _loadingState.update { it.copy(scheduleProgress = progress) }
+    }
+
+    fun updateNetworkIssues(issues: Boolean) {
+        _loadingState.update { it.copy(networkIssues = issues) }
     }
 
 }

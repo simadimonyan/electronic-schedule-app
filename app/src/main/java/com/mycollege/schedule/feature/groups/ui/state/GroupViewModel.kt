@@ -97,6 +97,7 @@ class GroupViewModel @Inject constructor(
         viewModelScope.launch {
 
             val groupState = groupStateHolder.groupState.value
+            loadingStateHolder.updateNetworkIssues(false)
 
             try {
 
@@ -229,6 +230,7 @@ class GroupViewModel @Inject constructor(
 
                 // в том числе проблемы с сетью
                 Log.e("GroupViewModel", "Ошибка при получении данных - $e")
+                loadingStateHolder.updateNetworkIssues(true)
 
                 if (appStateHolder.appState.value.studentMode) {
 
@@ -242,10 +244,12 @@ class GroupViewModel @Inject constructor(
                         groupStateHolder.updateCoursesToDisplay(courses.toList())
                         groupStateHolder.updateLevelsToDisplay(levels.toList())
                         groupStateHolder.updateGroupsToDisplay(groups.toList())
+                        return@launch
                     }
                     else {// если в базе нет данных - бесконечная загрузка
                         loadingStateHolder.updateChooseConfigurationLoading(true)
                         loadingStateHolder.updateChooseConfigurationProgress(10)
+                        return@launch
                     }
 
                 }
@@ -259,10 +263,12 @@ class GroupViewModel @Inject constructor(
                         loadingStateHolder.updateChooseConfigurationLoading(false)
                         groupStateHolder.updateDepartmentToDisplay(departments.toList())
                         groupStateHolder.updateTeachersToDisplay(teachers.toList())
+                        return@launch
                     }
                     else {// если в базе нет данных - бесконечная загрузка
                         loadingStateHolder.updateChooseConfigurationLoading(true)
                         loadingStateHolder.updateChooseConfigurationProgress(10)
+                        return@launch
                     }
 
                 }
@@ -492,6 +498,7 @@ class GroupViewModel @Inject constructor(
                         }
 
                     }
+
                 }
 
             }

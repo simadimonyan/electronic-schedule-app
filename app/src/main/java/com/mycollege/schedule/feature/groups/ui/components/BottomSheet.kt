@@ -49,6 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mycollege.schedule.R
+import com.mycollege.schedule.app.activity.domain.models.LoadingState
 import com.mycollege.schedule.feature.groups.ui.state.GroupEvent
 import com.mycollege.schedule.feature.groups.ui.state.GroupState
 import com.mycollege.schedule.shared.ui.theme.background
@@ -61,7 +62,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomSheetContent(
-    loading: Boolean,
+    loadingState: LoadingState,
     progress: Int,
     groupState: GroupState,
     handleEvent: (GroupEvent) -> Unit,
@@ -86,7 +87,7 @@ fun BottomSheetContent(
         dragHandle = { BottomSheetDefaults.DragHandle(color = Color.Black) },
         onDismissRequest = onDismiss
     ) {
-        if (loading) {
+        if (loadingState.chooseConfigurationLoading) {
             Text(
                 text = context.getString(R.string.update_data),
                 modifier = Modifier
@@ -109,7 +110,7 @@ fun BottomSheetContent(
         } else {
 
             // отобразить данные по окончанию загрузки
-            handleEvent(GroupEvent.Display)
+            if (!loadingState.networkIssues) handleEvent(GroupEvent.Display)
 
             BottomSheet(groupState, cachedGroups, cachedTeachers, sheetState) { newValue ->
                 when (selectedIndex) {
