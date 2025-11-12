@@ -20,9 +20,7 @@ class GetLevelUseCase @Inject constructor(
     suspend fun getRoomLevels(course: String): Set<String> {
         return withContext(Dispatchers.IO) {
             MyTracker.trackEvent("Получить кешированный список уровней")
-            return@withContext database.groups().getLevelsBy(course).toSortedSet { level1, level2 ->
-                level1.length.compareTo(level2.length) // сортировка по возрастанию длины
-            }
+            return@withContext database.groups().getLevelsBy(course).toSortedSet(compareBy({ it.length }, { it }))
         }
     }
 
@@ -32,7 +30,7 @@ class GetLevelUseCase @Inject constructor(
             val scheduleServerConfiguration = cacheManager.loadScheduleServerConfiguration()
             return@withContext RetrofitClient(scheduleServerConfiguration.serverUrl).groupsApi
                 .levels(scheduleServerConfiguration.accessToken, Integer.parseInt(course)).levels
-                    .toSortedSet( compareBy { it.length })
+                .toSortedSet(compareBy({ it.length }, { it }))
         }
     }
 

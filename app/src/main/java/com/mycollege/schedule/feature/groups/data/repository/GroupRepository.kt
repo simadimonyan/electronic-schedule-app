@@ -18,7 +18,7 @@ interface GroupRepository {
     @Query("SELECT course FROM `groups`")
     fun getCourses(): List<String>
 
-    @Query("SELECT level FROM `groups` WHERE course = :course")
+    @Query("SELECT DISTINCT level FROM `groups` WHERE course = :course")
     fun getLevelsBy(course: String): List<String>
 
     @Query("SELECT name FROM `groups` WHERE level = :level AND course = :course")

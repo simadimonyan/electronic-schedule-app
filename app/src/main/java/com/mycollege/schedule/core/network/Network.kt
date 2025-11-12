@@ -31,13 +31,13 @@ class Network {
 @Immutable
 class RetrofitClient(private val urlString: String) {
 
-//    private val logging = HttpLoggingInterceptor().apply { // --debug only
-//        level = HttpLoggingInterceptor.Level.BODY
-//    }
-//
-//    private val client = OkHttpClient.Builder() // --debug only
-//        .addInterceptor(logging)
-//        .build()
+    private val logging = HttpLoggingInterceptor().apply { // --debug only
+        level = HttpLoggingInterceptor.Level.BODY
+    }
+
+    private val client = OkHttpClient.Builder() // --debug only
+        .addInterceptor(logging)
+        .build()
 
     private val gson = GsonBuilder()
         .setLenient()  // "bad" json process
@@ -46,7 +46,7 @@ class RetrofitClient(private val urlString: String) {
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(urlString)
-            //.client(client) // --debug only
+            .client(client) // --debug only
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }

@@ -122,6 +122,8 @@ class GroupViewModel @Inject constructor(
                                 loadingStateHolder.updateChooseConfigurationProgress(it)
                             }
 
+                            Log.i("test", levels.toString())
+
                             groupStateHolder.updateCoursesToDisplay(courses.toList())
                             groupStateHolder.updateLevelsToDisplay(levels.toList())
                             groupStateHolder.updateGroupsToDisplay(groups.toList())
@@ -137,6 +139,8 @@ class GroupViewModel @Inject constructor(
                             val courses = getCoursesUseCase.getRoomCourses()
                             val levels = getLevelUseCase.getRoomLevels(groupState.course.split(" ")[0])
                             val groups = getGroupsUseCase.getRoomGroups(groupState.course.split(" ")[0], groupState.level)
+
+                            Log.i("test", levels.toString())
 
                             groupStateHolder.updateCoursesToDisplay(courses.toList())
                             groupStateHolder.updateLevelsToDisplay(levels.toList())
@@ -196,6 +200,8 @@ class GroupViewModel @Inject constructor(
                             loadingStateHolder.updateChooseConfigurationProgress(it)
                         }
 
+                        Log.i("test", levels.toString())
+
                         groupStateHolder.updateCoursesToDisplay(courses.toList())
                         groupStateHolder.updateLevelsToDisplay(levels.toList())
                         groupStateHolder.updateGroupsToDisplay(groups.toList())
@@ -237,6 +243,8 @@ class GroupViewModel @Inject constructor(
                     val courses = getCoursesUseCase.getRoomCourses()
                     val levels = getLevelUseCase.getRoomLevels(groupState.course.split(" ")[0])
                     val groups = getGroupsUseCase.getRoomGroups(groupState.course.split(" ")[0], groupState.level)
+
+                    Log.i("test", levels.toString())
 
                     // берем данные из базы
                     if (courses.isNotEmpty() && levels.isNotEmpty() && groups.isNotEmpty()) {
