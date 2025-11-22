@@ -198,7 +198,7 @@ fun SettingsContent(
                                 else MyTracker.trackEvent("Выключить синхронизацию недели")
                         }
 
-                        HorizontalDivider(Modifier.padding(start = 45.dp, end = 10.dp))
+                        HorizontalDivider(Modifier.padding(start = 45.dp, end = 10.dp), color = Color.LightGray)
                         
                         CardSettings(Icons.Default.Notifications, title = "Уведомления", checkedState = settingsState.notificationsEnabled) {
                             handleEvent(SettingsEvent.MakeNotificationsEnabled(it))
@@ -207,7 +207,7 @@ fun SettingsContent(
                                 else MyTracker.trackEvent("Выключить уведомления расписания")
                         }
 
-                        HorizontalDivider(Modifier.padding(start = 45.dp, end = 10.dp))
+                        HorizontalDivider(Modifier.padding(start = 45.dp, end = 10.dp), color = Color.LightGray)
 
                         CardSettings(painterResource(R.drawable.week), title = "Показать неделю", checkedState = settingsState.fullWeekVisibility) {
                             handleEvent(SettingsEvent.MakeScheduleWeekFull(it))
@@ -216,7 +216,7 @@ fun SettingsContent(
                                 else MyTracker.trackEvent("Выключить расписание на неделю")
                         }
 
-                        HorizontalDivider(Modifier.padding(start = 45.dp, end = 10.dp))
+                        HorizontalDivider(Modifier.padding(start = 45.dp, end = 10.dp), color = Color.LightGray)
 
                         CardSettings(Icons.Default.Menu, title = "Скрыть навигацию", checkedState = settingsState.navigationInvisibility) {
                             handleEvent(SettingsEvent.MakeNavigationInvisible(it))
@@ -270,7 +270,7 @@ fun SettingsContent(
                         )
                     }
 
-                    HorizontalDivider(modifier = Modifier.padding(start = 55.dp, end = 20.dp))
+                    HorizontalDivider(modifier = Modifier.padding(start = 55.dp, end = 20.dp), color = Color.LightGray)
 
                     Row(
                         modifier = Modifier

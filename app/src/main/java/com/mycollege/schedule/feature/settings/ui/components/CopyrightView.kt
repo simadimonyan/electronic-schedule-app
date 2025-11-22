@@ -14,6 +14,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -62,7 +63,10 @@ fun CopyrightView(onDisposable: () -> Unit) {
     val activity = LocalContext.current as ComponentActivity
 
     LaunchedEffect(Unit) {
-        WindowInsetsControllerCompat(activity.window, view).isAppearanceLightStatusBars = false
+        scope.launch {
+            delay(220L)
+            WindowInsetsControllerCompat(activity.window, view).isAppearanceLightStatusBars = false
+        }
     }
 
     PredictiveBackHandler(true) { progress: Flow<BackEventCompat> ->
