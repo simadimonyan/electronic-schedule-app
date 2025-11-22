@@ -110,29 +110,6 @@ class App : Application(), HasTracerConfiguration, Configuration.Provider {
             .setRemoteConfigClientEventListener(listener)
             .build()
             .init()
-
-        RuStorePushClient.init(
-            application = this,
-            projectId = BuildConfig.PUSH_CLIENT_PROJECT_ID,
-            logger = DefaultLogger()
-        )
-
-        RuStorePushClient.checkPushAvailability()
-            .addOnSuccessListener { result ->
-                if (result is FeatureAvailabilityResult.Available) {
-
-                    RuStorePushClient.getToken()
-                        .addOnSuccessListener { resultToken ->
-                            Log.d("App", "getToken onSuccess token = $resultToken")
-                        }
-                        .addOnFailureListener { throwable ->
-                            Log.e("App", "getToken onFailure", throwable)
-                            TracerCrashReport.report(throwable, issueKey = "RUSTORE_PUSH_CLIENT")
-                        }
-
-                }
-            }
-
     }
 
     private fun initTracker() {
