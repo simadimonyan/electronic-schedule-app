@@ -72,6 +72,7 @@ fun SearchField(placeholder: String, onValueChanged: (String) -> Unit, onFocusCh
         colors = TextFieldDefaults.colors(
             unfocusedContainerColor = disabledWhite,
             focusedContainerColor = disabledWhite,
+            focusedTextColor = Color.Black,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
         ),

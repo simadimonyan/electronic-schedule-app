@@ -86,15 +86,15 @@ fun AboutContent() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Image(
-                painter = painterResource(R.drawable.imsit),
-                contentDescription = "Logo",
-                modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .size(200.dp, 120.dp)
-            )
+//            Image(
+//                painter = painterResource(R.drawable.imsit),
+//                contentDescription = "Logo",
+//                modifier = Modifier
+//                    .clip(RoundedCornerShape(10.dp))
+//                    .size(200.dp, 120.dp)
+//            )
 
-            Spacer(modifier = Modifier.height(30.dp))
+//            Spacer(modifier = Modifier.height(30.dp))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -111,7 +111,7 @@ fun AboutContent() {
 
                 Column {
                     Text(
-                        text = "Мой ИМСИТ",
+                        text = "Моя Академия",
                         fontSize = 24.sp,
                         color = Color.Black,
                         fontWeight = FontWeight.Medium

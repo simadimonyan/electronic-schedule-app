@@ -32,5 +32,5 @@
     <string name="tg">@dimitrisimonyan</string>>
     <string name="lesson_alert">Скоро занятие! 📚</string>
     <string name="onboarding">Подгрузка расписания ведется с https://imsit.ru</string>
-    <string name="app_name" translatable="false">Мой ИМСИТ</string>
+    <string name="app_name" translatable="false">Моя Академия</string>
 </resources>
