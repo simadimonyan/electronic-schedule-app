@@ -2,6 +2,8 @@ package com.mycollege.schedule.app.navigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
@@ -23,6 +25,8 @@ import com.mycollege.schedule.feature.schedule.ui.ScheduleScreen
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleViewModel
 import com.mycollege.schedule.feature.settings.ui.SettingsScreen
 import com.mycollege.schedule.feature.settings.ui.state.SettingsViewModel
+import com.mycollege.schedule.shared.ui.theme.background
+import com.mycollege.schedule.shared.ui.theme.backgroundDark
 
 @Composable
 fun AppPager(
@@ -53,11 +57,15 @@ fun AddNavGraph(
     settingsViewModel: SettingsViewModel
 ) {
 
-    val appState by mainViewModel.appStateHolder.appState.collectAsState()
+    val darkMode = isSystemInDarkTheme()
     
-    NavHost(navController = navController, startDestination = Start) { // if (appState.firstStartUp) Onboarding else Start
-        composable<Onboarding>(
-        ) {
+    NavHost(
+        navController = navController,
+        modifier = Modifier.fillMaxSize()
+            .background(if (darkMode) backgroundDark else background),
+        startDestination = Start // if (appState.firstStartUp) Onboarding else Start
+    ) {
+        composable<Onboarding>() {
             OnboardingScreen(hiltViewModel())
         }
         composable<Start> {
