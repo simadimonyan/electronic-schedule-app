@@ -2,9 +2,8 @@ package com.mycollege.schedule.feature.groups.ui.components
 
 import android.content.Context
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +18,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ChipDefaults
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FilterChip
@@ -41,7 +39,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -53,10 +50,12 @@ import com.mycollege.schedule.app.activity.domain.models.LoadingState
 import com.mycollege.schedule.feature.groups.ui.state.GroupEvent
 import com.mycollege.schedule.feature.groups.ui.state.GroupState
 import com.mycollege.schedule.shared.ui.theme.background
+import com.mycollege.schedule.shared.ui.theme.backgroundDark
 import com.mycollege.schedule.shared.ui.theme.buttons
 import com.mycollege.schedule.shared.ui.theme.disabledBlue
 import com.mycollege.schedule.shared.ui.theme.disabledLightBlue
 import com.mycollege.schedule.shared.ui.theme.disabledWhite
+import com.mycollege.schedule.shared.ui.theme.secondaryDark
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,7 +72,7 @@ fun BottomSheetContent(
 ) {
     val context: Context = LocalContext.current
     val animatedProgress = animateFloatAsState(targetValue = progress / 100f, label = "progress")
-
+    val darkMode = isSystemInDarkTheme()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(
@@ -82,9 +81,9 @@ fun BottomSheetContent(
             .imePadding(),
         sheetState = sheetState,
         shape = RoundedCornerShape(17.dp),
-        contentColor = Color.White,
-        containerColor = Color.White,
-        dragHandle = { BottomSheetDefaults.DragHandle(color = Color.Black) },
+        contentColor = if (darkMode) Color.White else Color.Black,
+        containerColor = if (darkMode) backgroundDark else Color.White,
+        dragHandle = { BottomSheetDefaults.DragHandle(color = if (darkMode) Color.White else Color.Black )},
         onDismissRequest = onDismiss
     ) {
         if (loadingState.chooseConfigurationLoading) {
@@ -95,7 +94,7 @@ fun BottomSheetContent(
                     .fillMaxWidth(),
                 textAlign = TextAlign.Center,
                 fontSize = 17.sp,
-                color = Color.Black
+                color = if (darkMode) Color.White else Color.Black
             )
 
             LinearProgressIndicator(
@@ -104,7 +103,7 @@ fun BottomSheetContent(
                     .fillMaxWidth()
                     .padding(50.dp, 10.dp),
                 color = buttons,
-                trackColor = background
+                trackColor = if (darkMode) secondaryDark else background
             )
             Spacer(modifier = Modifier.height(20.dp))
         } else {
@@ -152,6 +151,9 @@ fun CourseKeys(
     coursesToDisplay: List<String>,
     updateValue: (String) -> Unit
 ) {
+
+    val darkMode = isSystemInDarkTheme()
+
     coursesToDisplay.forEachIndexed { index, key ->
         if (coursesToDisplay.isEmpty()) return@forEachIndexed
 
@@ -159,7 +161,7 @@ fun CourseKeys(
             HorizontalDivider(
                 thickness = 1.dp,
                 modifier = Modifier.padding(25.dp, 0.dp),
-                color = disabledWhite
+                color = if (darkMode) Color.DarkGray else disabledWhite
             )
         }
 
@@ -167,7 +169,7 @@ fun CourseKeys(
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                 .clickable { updateValue(key) },
             colors = CardDefaults.cardColors(
-                containerColor = Color.White
+                containerColor = if (darkMode) backgroundDark else Color.White
             ),
             elevation = CardDefaults.elevatedCardElevation(0.dp),
         ) {
@@ -179,7 +181,7 @@ fun CourseKeys(
                 textAlign = TextAlign.Center,
                 fontSize = 19.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.Black
+                color = if (darkMode) Color.White else Color.Black
             )
         }
     }
@@ -190,12 +192,15 @@ fun SpecialityKeys(
     specialitiesToDisplay: List<String>,
     updateValue: (String) -> Unit
 ) {
+
+    val darkMode = isSystemInDarkTheme()
+
     specialitiesToDisplay.forEachIndexed { index, speciality ->
         if (index != 0) {
             HorizontalDivider(
                 thickness = 1.dp,
                 modifier = Modifier.padding(25.dp, 0.dp),
-                color = disabledWhite
+                color = if (darkMode) Color.DarkGray else disabledWhite
             )
         }
 
@@ -203,7 +208,7 @@ fun SpecialityKeys(
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                 .clickable { updateValue(speciality) },
             colors = CardDefaults.cardColors(
-                containerColor = Color.White
+                containerColor = if (darkMode) backgroundDark else Color.White
             ),
             elevation = CardDefaults.elevatedCardElevation(0.dp),
         ) {
@@ -215,7 +220,7 @@ fun SpecialityKeys(
                 textAlign = TextAlign.Center,
                 fontSize = 19.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.Black
+                color = if (darkMode) Color.White else Color.Black
             )
         }
     }
@@ -223,14 +228,14 @@ fun SpecialityKeys(
     HorizontalDivider(
         thickness = 1.dp,
         modifier = Modifier.padding(25.dp, 0.dp),
-        color = disabledWhite
+        color = if (darkMode) Color.DarkGray else disabledWhite
     )
 
     Card(
         modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
             .clickable { updateValue("Все уровни") },
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = if (darkMode) backgroundDark else Color.White
         ),
         elevation = CardDefaults.elevatedCardElevation(0.dp),
     ) {
@@ -242,7 +247,7 @@ fun SpecialityKeys(
             textAlign = TextAlign.Center,
             fontSize = 19.sp,
             fontWeight = FontWeight.Medium,
-            color = Color.Black
+            color = if (darkMode) Color.White else Color.Black
         )
     }
 }
@@ -256,6 +261,7 @@ fun GroupListContent(
     sheetState: SheetState
 ) {
 
+    val darkMode = isSystemInDarkTheme()
     val scope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf("") }
     var chipSelected by remember { mutableStateOf(false) }
@@ -329,7 +335,7 @@ fun GroupListContent(
                             .padding(vertical = 100.dp),
                         textAlign = TextAlign.Center,
                         fontSize = 20.sp,
-                        color = Color.Black
+                        color = if (darkMode) Color.White else Color.Black
                     )
                 }
             }
@@ -343,7 +349,7 @@ fun GroupListContent(
                     HorizontalDivider(
                         thickness = 1.dp,
                         modifier = Modifier.padding(25.dp, 0.dp),
-                        color = disabledWhite
+                        color = if (darkMode) Color.DarkGray else disabledWhite
                     )
                 }
 
@@ -351,7 +357,7 @@ fun GroupListContent(
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                         .clickable { updateValue(groupName) },
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White
+                        containerColor = if (darkMode) backgroundDark else Color.White
                     ),
                     elevation = CardDefaults.elevatedCardElevation(0.dp)
                 ) {
@@ -369,7 +375,7 @@ fun GroupListContent(
                             textAlign = TextAlign.Center,
                             fontSize = 19.sp,
                             fontWeight = FontWeight.Medium,
-                            color = Color.Black
+                            color = if (darkMode) Color.White else Color.Black
                         )
 
                         Box(
@@ -394,6 +400,9 @@ fun DepartmentListContent(
     departmentsToDisplay: List<String>,
     updateValue: (String) -> Unit
 ) {
+
+    val darkMode = isSystemInDarkTheme()
+
     LazyColumn {
         itemsIndexed(departmentsToDisplay.sortedBy { -it.length }, key = { _, department -> department }) { index, department ->
             department.let { department ->
@@ -403,7 +412,7 @@ fun DepartmentListContent(
                         HorizontalDivider(
                             thickness = 1.dp,
                             modifier = Modifier.padding(25.dp, 0.dp),
-                            color = disabledWhite
+                            color = if (darkMode) Color.DarkGray else disabledWhite
                         )
                     }
 
@@ -411,7 +420,7 @@ fun DepartmentListContent(
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                             .clickable { updateValue(department) },
                         colors = CardDefaults.cardColors(
-                            containerColor = Color.White
+                            containerColor = if (darkMode) backgroundDark else Color.White
                         ),
                         elevation = CardDefaults.elevatedCardElevation(0.dp),
                     ) {
@@ -423,7 +432,7 @@ fun DepartmentListContent(
                             textAlign = TextAlign.Center,
                             fontSize = 19.sp,
                             fontWeight = FontWeight.Medium,
-                            color = Color.Black
+                            color = if (darkMode) Color.White else Color.Black
                         )
                     }
 
@@ -442,6 +451,7 @@ fun TeacherListContent(
     sheetState: SheetState
 ) {
 
+    val darkMode = isSystemInDarkTheme()
     val scope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf("") }
     var chipSelected by remember { mutableStateOf(false) }
@@ -515,7 +525,7 @@ fun TeacherListContent(
                             .padding(vertical = 100.dp),
                         textAlign = TextAlign.Center,
                         fontSize = 20.sp,
-                        color = Color.Black
+                        color = if (darkMode) Color.White else Color.Black
                     )
                 }
             }
@@ -527,7 +537,7 @@ fun TeacherListContent(
                     HorizontalDivider(
                         thickness = 1.dp,
                         modifier = Modifier.padding(25.dp, 0.dp),
-                        color = disabledWhite
+                        color = if (darkMode) Color.DarkGray else disabledWhite
                     )
                 }
 
@@ -535,7 +545,7 @@ fun TeacherListContent(
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                         .clickable { updateValue(teacherLabel) },
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White
+                        containerColor = if (darkMode) backgroundDark else Color.White
                     ),
                     elevation = CardDefaults.elevatedCardElevation(0.dp)
                 ) {
@@ -553,7 +563,7 @@ fun TeacherListContent(
                             textAlign = TextAlign.Center,
                             fontSize = 19.sp,
                             fontWeight = FontWeight.Medium,
-                            color = Color.Black
+                            color = if (darkMode) Color.White else Color.Black
                         )
 
                         Box(

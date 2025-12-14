@@ -4,8 +4,8 @@
         <item name="windowSplashScreenBackground">#FFFFFF</item>
         <item name="windowSplashScreenIconBackgroundColor">#FFFFFF</item>
         <item name="windowSplashScreenAnimationDuration">1000</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_myacademy_avd</item>
-        <item name="postSplashScreenTheme">@style/Theme.Schedule</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_myacademy_avd_light</item>
+        <item name="postSplashScreenTheme">@style/Theme.Schedule.Light</item>
         <item name="android:windowSplashScreenBehavior">icon_preferred</item>
     </style>
 </resources>

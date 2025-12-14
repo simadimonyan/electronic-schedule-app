@@ -1,6 +1,7 @@
 package com.mycollege.schedule.feature.settings.ui.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,7 +36,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mycollege.schedule.BuildConfig
 import com.mycollege.schedule.R
+import com.mycollege.schedule.shared.ui.theme.backgroundDark
 import com.mycollege.schedule.shared.ui.theme.disabledBlue
+import com.mycollege.schedule.shared.ui.theme.disabledBlueDark
 import com.mycollege.schedule.shared.ui.theme.disabledVeryLightBlue
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -54,13 +57,15 @@ fun AboutBottomSheet(
     onDismiss: () -> Unit
 ) {
 
+    val darkMode = isSystemInDarkTheme()
+
     ModalBottomSheet(
         modifier = Modifier.wrapContentHeight().padding(10.dp, 30.dp, 10.dp, 15.dp),
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         shape = RoundedCornerShape(17.dp),
-        contentColor = Color.Black,
-        containerColor = Color.White,
-        dragHandle = { BottomSheetDefaults.DragHandle(color = Color.Black) },
+        contentColor = if (darkMode) Color.White else Color.Black,
+        containerColor = if (darkMode) backgroundDark else Color.White,
+        dragHandle = { BottomSheetDefaults.DragHandle(color = if (darkMode) Color.White else Color.Black) },
         onDismissRequest = onDismiss
     ) {
         AboutContent()
@@ -74,6 +79,7 @@ fun AboutContent() {
 
     val formatter = DateTimeFormatter.ofPattern("yyyy", Locale("RU"))
     val uriHandler = LocalUriHandler.current
+    val darkMode = isSystemInDarkTheme()
 
     Column(
         modifier = Modifier
@@ -113,7 +119,7 @@ fun AboutContent() {
                     Text(
                         text = "Моя Академия",
                         fontSize = 24.sp,
-                        color = Color.Black,
+                        color = if (darkMode) Color.White else Color.Black,
                         fontWeight = FontWeight.Medium
                     )
 
@@ -121,7 +127,7 @@ fun AboutContent() {
 
                     Text(
                         text = "Версия: " + BuildConfig.VERSION_NAME,
-                        color = Color.DarkGray,
+                        color = if (darkMode) Color.LightGray else Color.DarkGray,
                         fontSize = 18.sp
                     )
                 }
@@ -132,7 +138,7 @@ fun AboutContent() {
 
             Text(
                 text = "Copyright © 2024 - ${LocalDate.now().format(formatter)}",
-                color = Color.DarkGray,
+                color = if (darkMode) Color.LightGray else Color.DarkGray,
                 textAlign = TextAlign.Center,
                 fontSize = 18.sp
             )
@@ -159,7 +165,7 @@ fun AboutContent() {
                     painter = painterResource(R.drawable.telegram_icon),
                     contentDescription = "Logo",
                     modifier = Modifier.size(30.dp),
-                    tint = disabledBlue
+                    tint = if (darkMode) disabledBlueDark else disabledBlue
                 )
             }
         }

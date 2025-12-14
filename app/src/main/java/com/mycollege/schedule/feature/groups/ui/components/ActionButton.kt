@@ -21,9 +21,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.mycollege.schedule.R
 import com.mycollege.schedule.shared.ui.theme.buttons
+import com.mycollege.schedule.shared.ui.theme.disabledDark
 
 @Composable
-fun ActionButton(text: String, icon: Int, onClick: () -> Unit, enabled: Boolean) {
+fun ActionButton(text: String, icon: Int, onClick: () -> Unit, enabled: Boolean, darkMode: Boolean) {
     Button(
         onClick = onClick,
         modifier = Modifier
@@ -31,7 +32,7 @@ fun ActionButton(text: String, icon: Int, onClick: () -> Unit, enabled: Boolean)
             .padding(20.dp, 30.dp, 20.dp, 0.dp)
             .size(0.dp, 65.dp),
         shape = RoundedCornerShape(10.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = buttons, disabledContainerColor = Color.LightGray),
+        colors = ButtonDefaults.buttonColors(containerColor = buttons, disabledContainerColor = if (darkMode) disabledDark else Color.LightGray),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp),
         enabled = enabled
     ) {
@@ -45,10 +46,10 @@ fun ActionButton(text: String, icon: Int, onClick: () -> Unit, enabled: Boolean)
                 painter = painterResource(id = R.drawable.notification),
                 contentDescription = null,
                 modifier = Modifier.size(35.dp),
-                colorFilter = ColorFilter.tint(Color.White),
+                colorFilter = ColorFilter.tint(if (darkMode) if (!enabled) Color.Gray else Color.White else Color.White),
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = text, Modifier.padding(0.dp, 7.dp), color = Color.White)
+            Text(text = text, Modifier.padding(0.dp, 7.dp), color = if (darkMode) if (!enabled) Color.Gray else Color.White else Color.White)
         }
     }
 }

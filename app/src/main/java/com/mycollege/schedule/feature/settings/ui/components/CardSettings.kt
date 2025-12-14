@@ -1,6 +1,6 @@
 package com.mycollege.schedule.feature.settings.ui.components
 
-import android.text.Layout
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,10 +23,16 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mycollege.schedule.shared.ui.theme.backgroundDark
 import com.mycollege.schedule.shared.ui.theme.buttons
+import com.mycollege.schedule.shared.ui.theme.secondaryDark
+import com.mycollege.schedule.shared.ui.theme.tertiaryDark
 
 @Composable
 fun CardSettings(painter: Painter, title: String, checkedState: Boolean, onChanged: (Boolean) -> Unit) {
+
+    val darkMode = isSystemInDarkTheme()
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -51,6 +57,7 @@ fun CardSettings(painter: Painter, title: String, checkedState: Boolean, onChang
             Spacer(modifier = Modifier.width(15.dp))
             Text(
                 text = title,
+                color = if (darkMode) Color.White else Color.Black,
                 fontSize = 15.sp
             )
             Spacer(modifier = Modifier.weight(1f))
@@ -60,11 +67,11 @@ fun CardSettings(painter: Painter, title: String, checkedState: Boolean, onChang
                 modifier = Modifier.padding(10.dp).size(15.dp),
                 colors = SwitchDefaults.colors(
                     checkedTrackColor = buttons,
-                    uncheckedTrackColor = Color.LightGray,
-                    uncheckedBorderColor = Color.Gray,
+                    uncheckedTrackColor = if (darkMode) tertiaryDark else Color.LightGray,
+                    uncheckedBorderColor = if (darkMode) backgroundDark else Color.Gray,
                     checkedBorderColor = buttons,
-                    checkedThumbColor = Color.White,
-                    uncheckedThumbColor = Color.White,
+                    checkedThumbColor = if (darkMode) backgroundDark else Color.White,
+                    uncheckedThumbColor = if (darkMode) backgroundDark else Color.White,
                 )
             )
         }
@@ -73,6 +80,9 @@ fun CardSettings(painter: Painter, title: String, checkedState: Boolean, onChang
 
 @Composable
 fun CardSettings(painter: ImageVector, title: String, checkedState: Boolean, onChanged: (Boolean) -> Unit) {
+
+    val darkMode = isSystemInDarkTheme()
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -97,6 +107,7 @@ fun CardSettings(painter: ImageVector, title: String, checkedState: Boolean, onC
             Spacer(modifier = Modifier.width(15.dp))
             Text(
                 text = title,
+                color = if (darkMode) Color.White else Color.Black,
                 fontSize = 15.sp
             )
             Spacer(modifier = Modifier.weight(1f))
@@ -106,11 +117,11 @@ fun CardSettings(painter: ImageVector, title: String, checkedState: Boolean, onC
                 modifier = Modifier.padding(10.dp).size(15.dp),
                 colors = SwitchDefaults.colors(
                     checkedTrackColor = buttons,
-                    uncheckedTrackColor = Color.LightGray,
-                    uncheckedBorderColor = Color.Gray,
+                    uncheckedTrackColor = if (darkMode) tertiaryDark else Color.LightGray,
+                    uncheckedBorderColor = if (darkMode) backgroundDark else Color.Gray,
                     checkedBorderColor = buttons,
-                    checkedThumbColor = Color.White,
-                    uncheckedThumbColor = Color.White,
+                    checkedThumbColor = if (darkMode) backgroundDark else Color.White,
+                    uncheckedThumbColor = if (darkMode) backgroundDark else Color.White,
                 )
             )
         }

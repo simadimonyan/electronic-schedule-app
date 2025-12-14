@@ -1,5 +1,6 @@
 package com.mycollege.schedule.feature.groups.ui.components
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mycollege.schedule.R
 import com.mycollege.schedule.shared.ui.theme.disabledWhite
+import com.mycollege.schedule.shared.ui.theme.secondaryDark
 
 @Preview
 @Composable
@@ -40,6 +42,7 @@ fun SearchField(placeholder: String, onValueChanged: (String) -> Unit, onFocusCh
     var input by remember { mutableStateOf("") }
     var isFocused by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
+    val darkMode = isSystemInDarkTheme()
 
     TextField(
         value = input,
@@ -59,22 +62,24 @@ fun SearchField(placeholder: String, onValueChanged: (String) -> Unit, onFocusCh
                 }
             },
         placeholder = {
-            Text(placeholder, modifier = Modifier, color = Color.Gray, fontSize = 14.sp)
+            Text(placeholder, modifier = Modifier, color = if (darkMode) Color.LightGray else Color.Gray, fontSize = 14.sp)
         },
         leadingIcon = {
             Icon(
                 painterResource(R.drawable.search),
                 "search",
-                Modifier.size(20.dp)
+                Modifier.size(20.dp),
+                tint = if (darkMode) Color.White else Color.Black
             )
         },
         shape = RoundedCornerShape(10.dp),
         colors = TextFieldDefaults.colors(
-            unfocusedContainerColor = disabledWhite,
-            focusedContainerColor = disabledWhite,
-            focusedTextColor = Color.Black,
+            unfocusedContainerColor = if (darkMode) secondaryDark else disabledWhite,
+            focusedContainerColor = if (darkMode) secondaryDark else disabledWhite,
+            focusedTextColor = if (darkMode) Color.White else Color.Black,
             focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+            unfocusedIndicatorColor = Color.Transparent,
+            cursorColor = if (darkMode) Color.White else Color.Black
         ),
         singleLine = true,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),

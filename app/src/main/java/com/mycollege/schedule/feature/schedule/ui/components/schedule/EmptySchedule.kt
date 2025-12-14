@@ -1,6 +1,7 @@
 package com.mycollege.schedule.feature.schedule.ui.components.schedule
 
 import android.content.Context
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +24,7 @@ import com.mycollege.schedule.feature.schedule.ui.state.ScheduleState
 @Composable
 fun DefaultLoadingUnit(scheduleState: ScheduleState) {
     val context: Context = LocalContext.current
+    val darkMode = isSystemInDarkTheme()
 
     Row(
         modifier = Modifier
@@ -32,7 +34,7 @@ fun DefaultLoadingUnit(scheduleState: ScheduleState) {
     ) {
         Text(
             text = scheduleState.todayDate,
-            color = Color.Black,
+            color = if (darkMode) Color.White else Color.Black,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         )
@@ -44,6 +46,7 @@ fun DefaultLoadingUnit(scheduleState: ScheduleState) {
             .fillMaxWidth()
             .padding(0.dp, 50.dp, 0.dp, 10.dp),
         textAlign = TextAlign.Center,
+        color = if (darkMode) Color.White else Color.Black,
         fontSize = 23.sp,
         fontWeight = FontWeight.Bold
     )

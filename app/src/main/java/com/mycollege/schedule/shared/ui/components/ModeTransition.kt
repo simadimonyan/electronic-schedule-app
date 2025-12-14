@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mycollege.schedule.shared.ui.theme.backgroundDark
 import kotlinx.coroutines.delay
 
 
@@ -39,6 +41,7 @@ fun ModeTransition(studentMode: Boolean) {
 
     var visibleBackground by remember { mutableStateOf(false) }
     var visibleModeText by remember { mutableStateOf(false) }
+    val darkMode = isSystemInDarkTheme()
 
     LaunchedEffect(Unit) {
         visibleBackground = true
@@ -55,7 +58,7 @@ fun ModeTransition(studentMode: Boolean) {
         exit = fadeOut(animationSpec = tween(700))
     ) {
         Box(
-            modifier = Modifier.fillMaxSize().background(Color.White),
+            modifier = Modifier.fillMaxSize().background(if (darkMode) backgroundDark else Color.White),
             contentAlignment = Alignment.CenterStart
         ) {
             AnimatedVisibility(
@@ -75,13 +78,13 @@ fun ModeTransition(studentMode: Boolean) {
                     Column(Modifier.padding(bottom = 40.dp), horizontalAlignment = Alignment.Start) {
                         Text(
                             text = "РЕЖИМ",
-                            color = Color.Black,
+                            color = if (darkMode) Color.White else Color.Black,
                             fontWeight = FontWeight.Medium,
                             fontSize = 20.sp,
                         )
                         Text(
                             text = if (studentMode) "СТУДЕНТА" else "ПРЕПОДАВАТЕЛЯ",
-                            color = Color.Black,
+                            color = if (darkMode) Color.White else Color.Black,
                             fontWeight = FontWeight.Medium,
                             fontSize = 38.sp
                         )

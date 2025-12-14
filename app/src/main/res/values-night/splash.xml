@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Schedule.SplashScreen" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#FF28282C</item>
+        <item name="windowSplashScreenIconBackgroundColor">#FF28282C</item>
+        <item name="windowSplashScreenAnimationDuration">1000</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_myacademy_avd_dark</item>
+        <item name="postSplashScreenTheme">@style/Theme.Schedule.Dark</item>
+    </style>
+</resources>

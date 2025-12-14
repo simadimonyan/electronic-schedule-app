@@ -1,6 +1,7 @@
 package com.mycollege.schedule.feature.groups.ui
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,9 +46,11 @@ import com.mycollege.schedule.feature.groups.ui.state.GroupState
 import com.mycollege.schedule.feature.groups.ui.state.GroupViewModel
 import com.mycollege.schedule.shared.ui.theme.ScheduleTheme
 import com.mycollege.schedule.shared.ui.theme.background
+import com.mycollege.schedule.shared.ui.theme.backgroundDark
 import com.yandex.mobile.ads.banner.BannerAdSize
 import com.yandex.mobile.ads.banner.BannerAdView
 import com.yandex.mobile.ads.common.AdRequest
+import com.yandex.mobile.ads.common.AdTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.rustore.sdk.remoteconfig.RemoteConfigClient
@@ -71,6 +75,7 @@ fun GroupPreview() {
         emptyMap(),
         emptyMap()
     )
+
 }
 
 @SuppressLint("MutableCollectionMutableState")
@@ -123,13 +128,14 @@ fun GroupContent(
     cachedTeachers: Map<String, Long>
 ) {
     val scope = rememberCoroutineScope()
+    val darkMode = isSystemInDarkTheme()
 
     LaunchedEffect(Unit) {
         MyTracker.trackEvent("Просмотр рекламы")
     }
 
     ScheduleTheme {
-        Scaffold(modifier = Modifier.fillMaxSize(), contentWindowInsets = WindowInsets(0), containerColor = background) { innerPadding ->
+        Scaffold(modifier = Modifier.fillMaxSize(), contentWindowInsets = WindowInsets(0), containerColor = if (darkMode) backgroundDark else background) { innerPadding ->
             Column(modifier = Modifier.fillMaxHeight().padding(innerPadding).padding(0.dp, 70.dp, 0.dp, 0.dp)) {
 
                 ModeSegmentedButton(appState.studentMode) {
@@ -154,7 +160,8 @@ fun GroupContent(
                                 if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
                                 handleEvent(GroupEvent.ShowBottomSheet)
                                 handleEvent(GroupEvent.SetSelectedIndex(0))
-                            }
+                            },
+                            darkMode = darkMode
                         )
 
                         GroupCard(
@@ -165,7 +172,8 @@ fun GroupContent(
                                 if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
                                 handleEvent(GroupEvent.ShowBottomSheet)
                                 handleEvent(GroupEvent.SetSelectedIndex(1))
-                            }
+                            },
+                            darkMode = darkMode
                         )
 
                         GroupCard(
@@ -176,7 +184,8 @@ fun GroupContent(
                                 if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
                                 handleEvent(GroupEvent.ShowBottomSheet)
                                 handleEvent(GroupEvent.SetSelectedIndex(2))
-                            }
+                            },
+                            darkMode = darkMode
                         )
                     }
                     else {
@@ -189,7 +198,8 @@ fun GroupContent(
                                 if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
                                 handleEvent(GroupEvent.ShowBottomSheet)
                                 handleEvent(GroupEvent.SetSelectedIndex(3))
-                            }
+                            },
+                            darkMode = darkMode
                         )
 
                         GroupCard(
@@ -201,6 +211,7 @@ fun GroupContent(
                                 handleEvent(GroupEvent.ShowBottomSheet)
                                 handleEvent(GroupEvent.SetSelectedIndex(4))
                             },
+                            darkMode = darkMode
                         )
 
                     }
@@ -220,7 +231,8 @@ fun GroupContent(
                                 .animateScrollToPage(1)
                         }
                     },
-                    enabled = if (changeStudentModeFlag) groupState.group != "Выбрать группу" else groupState.teacher != "Выбрать преподавателя"
+                    enabled = if (changeStudentModeFlag) groupState.group != "Выбрать группу" else groupState.teacher != "Выбрать преподавателя",
+                    darkMode
                 )
 
                 if (showAds) {
@@ -229,7 +241,9 @@ fun GroupContent(
                             BannerAdView(context).apply {
                                 setAdUnitId(BuildConfig.ADVERTISEMENT_BANNER_ID)
                                 setAdSize(BannerAdSize.stickySize(context, 370))
-                                val adRequest = AdRequest.Builder().build()
+                                val adRequest = AdRequest.Builder().setPreferredTheme(
+                                    if (darkMode) AdTheme.DARK else AdTheme.LIGHT
+                                ).build()
                                 setBannerAdEventListener(YandexAdsListener())
                                 loadAd(adRequest)
                             }

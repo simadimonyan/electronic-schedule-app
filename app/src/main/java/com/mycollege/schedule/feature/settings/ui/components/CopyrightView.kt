@@ -55,6 +55,7 @@ import kotlin.coroutines.cancellation.CancellationException
 fun CopyrightView(onDisposable: () -> Unit) {
 
     val scope = rememberCoroutineScope()
+    val darkMode = isSystemInDarkTheme()
 
     var visible by remember { mutableStateOf(false) }
     var showTopBar by remember { mutableStateOf(true) }
@@ -75,7 +76,7 @@ fun CopyrightView(onDisposable: () -> Unit) {
             scope.launch {
                 visible = !visible
                 delay(250L)
-                WindowInsetsControllerCompat(activity.window, view).isAppearanceLightStatusBars = true
+                WindowInsetsControllerCompat(activity.window, view).isAppearanceLightStatusBars = !darkMode
                 onDisposable()
             }
         } catch (e: CancellationException) {
@@ -172,7 +173,7 @@ fun CopyrightView(onDisposable: () -> Unit) {
                                 scope.launch {
                                     visible = !visible
                                     delay(250L)
-                                    WindowInsetsControllerCompat(activity.window, view).isAppearanceLightStatusBars = true
+                                    WindowInsetsControllerCompat(activity.window, view).isAppearanceLightStatusBars = !darkMode
                                     onDisposable()
                                 }
                             }) {

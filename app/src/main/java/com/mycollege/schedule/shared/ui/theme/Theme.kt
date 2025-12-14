@@ -11,15 +11,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = backgroundDark,
+    secondary = buttonsDark,
+    tertiary = disabledWhite
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = background,
+    secondary = buttons,
+    tertiary = disabledWhite
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -48,6 +48,7 @@ fun ScheduleTheme(
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
+
 
     MaterialTheme(
         colorScheme = colorScheme,

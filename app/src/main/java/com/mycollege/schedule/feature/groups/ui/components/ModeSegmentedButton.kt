@@ -2,6 +2,7 @@ package com.mycollege.schedule.feature.groups.ui.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
@@ -26,13 +27,15 @@ import com.mycollege.schedule.shared.ui.theme.buttons
 @Composable
 fun ModeSegmentedButton(studentMode: Boolean, onChanged: (Boolean) -> Unit) {
 
+    val darkMode = isSystemInDarkTheme()
+
     var selectedIndex by remember { mutableIntStateOf(if (studentMode) 0 else 1) }
     val modes = listOf("Студент", "Преподаватель")
 
     Surface(
         modifier = Modifier.wrapContentSize()
             .padding(horizontal = 30.dp),
-        color = Color.White,
+        color = if (darkMode) Color(0xFF414148) else Color.White,
         shape = RoundedCornerShape(10.dp),
         shadowElevation = 2.dp
     ) {
@@ -43,11 +46,11 @@ fun ModeSegmentedButton(studentMode: Boolean, onChanged: (Boolean) -> Unit) {
 
                 val isSelected = selectedIndex == index
                 val backgroundColor by animateColorAsState(
-                    targetValue = if (isSelected) buttons else Color.White,
+                    targetValue = if (isSelected) buttons else if (darkMode) Color(0xFF34343A) else Color.White,
                     animationSpec = tween(durationMillis = 300), label = ""
                 )
                 val contentColor by animateColorAsState(
-                    targetValue = if (isSelected) Color.White else Color.Black,
+                    targetValue = if (isSelected) { Color.White } else if (darkMode) Color.White else Color.Black,
                     animationSpec = tween(durationMillis = 300), label = ""
                 )
 
@@ -66,7 +69,7 @@ fun ModeSegmentedButton(studentMode: Boolean, onChanged: (Boolean) -> Unit) {
                         activeContainerColor = backgroundColor,
                         activeBorderColor = Color.Transparent,
                         inactiveBorderColor = Color.Transparent,
-                        inactiveContainerColor = Color.White,
+                        inactiveContainerColor = if (darkMode) Color(0xFF34343A) else Color.White,
                         activeContentColor = contentColor
                     ),
                     icon = {}

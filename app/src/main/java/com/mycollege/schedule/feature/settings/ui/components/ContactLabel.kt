@@ -2,6 +2,7 @@ package com.mycollege.schedule.feature.settings.ui.components
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -15,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.Placeholder
@@ -24,10 +26,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mycollege.schedule.R
+import com.mycollege.schedule.shared.ui.theme.tertiaryDark
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun ContactLabel() {
+
+    val darkMode = isSystemInDarkTheme()
+
     BoxWithConstraints(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
@@ -48,7 +54,8 @@ fun ContactLabel() {
                         contentDescription = altText,
                         modifier = Modifier
                             .size(16.dp)
-                            .offset(y = 1.dp)
+                            .offset(y = 1.dp),
+                        colorFilter = ColorFilter.tint(if (darkMode) tertiaryDark else Color.Black)
                     )
                 }
             )
@@ -64,7 +71,7 @@ fun ContactLabel() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 60.dp),
-                color = Color.Gray,
+                color = if (darkMode) tertiaryDark else Color.Gray,
                 lineHeight = 17.sp,
                 minLines = 2,
                 maxLines = 2,

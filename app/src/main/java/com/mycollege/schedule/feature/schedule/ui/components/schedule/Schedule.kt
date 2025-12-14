@@ -3,6 +3,7 @@ package com.mycollege.schedule.feature.schedule.ui.components.schedule
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -36,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import com.mycollege.schedule.R
 import com.mycollege.schedule.feature.schedule.data.models.DataClasses
 import com.mycollege.schedule.shared.ui.theme.buttons
+import com.mycollege.schedule.shared.ui.theme.secondaryDark
 
 @Preview
 @Composable
@@ -53,6 +55,9 @@ fun ScheduleUnitPreview() {
 
 @Composable
 fun ScheduleUnit(lesson: DataClasses.Lesson) {
+
+    val darkMode = isSystemInDarkTheme()
+
     Card(
         modifier = Modifier
             .padding(20.dp, 0.dp, 20.dp, 7.dp)
@@ -63,19 +68,21 @@ fun ScheduleUnit(lesson: DataClasses.Lesson) {
         Card(
             modifier = Modifier
                 .padding(4.dp, 0.dp, 0.dp, 0.dp)
-                .border(BorderStroke(2.dp, Color.White)),
+                .border(BorderStroke(2.dp, if (darkMode) secondaryDark else Color.White)),
             shape = RoundedCornerShape(0.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+            colors = CardDefaults.cardColors(containerColor = if (darkMode) secondaryDark else Color.White)
         ) {
             ScheduleUnitContent(lesson)
         }
     }
+
 }
 
 @Composable
 private fun ScheduleUnitContent(lesson: DataClasses.Lesson) {
 
     val studentMode = lesson is DataClasses.GroupLesson
+    val darkMode = isSystemInDarkTheme()
 
     Column(modifier = Modifier.padding(20.dp, 5.dp, 20.dp, 5.dp)) {
         Row(
@@ -84,34 +91,34 @@ private fun ScheduleUnitContent(lesson: DataClasses.Lesson) {
         ) {
             Text(
                 text = "№${lesson.count}",
-                color = Color.Black,
+                color = if (darkMode) Color.White else Color.Black,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = lesson.type,
-                color = Color.Black,
+                color = if (darkMode) Color.White else Color.Black,
                 fontSize = 15.sp,
                 fontStyle = FontStyle.Italic
             )
             Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = lesson.time,
-                color = Color.Black,
+                color = if (darkMode) Color.White else Color.Black,
                 fontSize = 15.sp,
                 textAlign = TextAlign.End
             )
         }
         Text(
             text =  (if (lesson.name.equals("null")) "Неизвестная дисциплина" else lesson.name).toString(),
-            color = Color.Black,
+            color = if (darkMode) Color.White else Color.Black,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold
         )
         Text(
             text =  if (studentMode) (if (lesson.teacher.equals("null")) "" else lesson.teacher).toString() else (if ((lesson as DataClasses.TeacherLesson).group.equals("null")) "" else lesson.group).toString(),
-            color = Color.Black,
+            color = if (darkMode) Color.White else Color.Black,
             fontSize = 15.sp,
             fontStyle = FontStyle.Italic
         )
@@ -122,7 +129,7 @@ private fun ScheduleUnitContent(lesson: DataClasses.Lesson) {
             Text(
                 text = (if (lesson.location.equals("null")) "Неизвестная аудитория" else lesson.location).toString(),
                 modifier = Modifier.padding(top = 10.dp),
-                color = Color.Black,
+                color = if (darkMode) Color.White else Color.Black,
                 fontSize = 15.sp,
                 fontStyle = FontStyle.Italic
             )

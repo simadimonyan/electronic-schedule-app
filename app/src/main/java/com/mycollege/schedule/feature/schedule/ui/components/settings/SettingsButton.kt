@@ -2,6 +2,7 @@ package com.mycollege.schedule.feature.schedule.ui.components.settings
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
@@ -15,11 +16,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.mycollege.schedule.shared.ui.theme.buttons
+import com.mycollege.schedule.shared.ui.theme.secondaryDark
 
 @Composable
 fun SettingsButton(navigateToSettings: () -> Unit) {
+
+    val darkMode = isSystemInDarkTheme()
+
     Card(
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = if (darkMode) secondaryDark else Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
         shape = RoundedCornerShape(10.dp)
     ) {

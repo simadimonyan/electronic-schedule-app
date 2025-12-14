@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -46,6 +47,7 @@ fun CustomAppBar(
     pagerState: PagerState
 ) {
     val appState by viewModel.appStateHolder.appState.collectAsState()
+    val darkMode = isSystemInDarkTheme()
 
     val imageSize = 62.dp
 
@@ -108,7 +110,7 @@ fun CustomAppBar(
                 defaultElevation = 3.dp
             ),
             colors = CardDefaults.cardColors(
-                containerColor = Color.White
+                containerColor = if (darkMode) Color(0xFF34343A) else Color.White
             )
         ) {
             Box(modifier = Modifier.fillMaxSize()) {

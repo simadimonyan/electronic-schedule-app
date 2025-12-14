@@ -3,6 +3,7 @@ package com.mycollege.schedule.feature.settings.ui
 import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -60,7 +61,10 @@ import com.mycollege.schedule.feature.settings.ui.state.SettingsState
 import com.mycollege.schedule.feature.settings.ui.state.SettingsViewModel
 import com.mycollege.schedule.shared.ui.theme.ScheduleTheme
 import com.mycollege.schedule.shared.ui.theme.background
+import com.mycollege.schedule.shared.ui.theme.backgroundDark
 import com.mycollege.schedule.shared.ui.theme.buttons
+import com.mycollege.schedule.shared.ui.theme.secondaryDark
+import com.mycollege.schedule.shared.ui.theme.tertiaryDark
 
 @Preview
 @Composable
@@ -135,25 +139,28 @@ fun SettingsContent(
     openCopyrights: () -> Unit,
     onExit: () -> Unit
 ) {
+
+    val darkMode = isSystemInDarkTheme()
+
     ScheduleTheme {
         Scaffold(modifier = Modifier
-            .fillMaxSize(), containerColor = background,
+            .fillMaxSize(), containerColor = if (darkMode) backgroundDark else background,
             bottomBar = {
                 ContactLabel()
             },
             topBar = {
                 TopAppBar(
                     title = {
-                        Text("Настройки", color = Color.Black, fontWeight = FontWeight.Medium)
+                        Text("Настройки", color = if (darkMode) Color.White else Color.Black, fontWeight = FontWeight.Medium)
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = background
+                        containerColor = if (darkMode) backgroundDark else background
                     ),
                     navigationIcon = {
                         IconButton(onClick = {
                             onExit()
                         }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад", tint = Color.Black)
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад", tint = if (darkMode) Color.White else Color.Black)
                         }
                     }
                 )
@@ -180,7 +187,7 @@ fun SettingsContent(
                         .padding(20.dp, 0.dp, 20.dp, 0.dp)
                         .wrapContentHeight(),
                     elevation = CardDefaults.cardElevation(2.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                    colors = CardDefaults.cardColors(containerColor = if (darkMode) secondaryDark else Color.White)
                 ) {
                     Column(modifier = Modifier.padding(10.dp, 0.dp)) {
 
@@ -188,7 +195,8 @@ fun SettingsContent(
                             text = "Расписание",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
-                            modifier = Modifier.padding(start = 7.dp, top = 10.dp)
+                            modifier = Modifier.padding(start = 7.dp, top = 10.dp),
+                            color = if (darkMode) Color.White else Color.Black
                         )
 
                         CardSettings(painterResource(R.drawable.sync), title = "Синхрон. неделю", checkedState = settingsState.synchronizeWeekParity) {
@@ -198,7 +206,7 @@ fun SettingsContent(
                                 else MyTracker.trackEvent("Выключить синхронизацию недели")
                         }
 
-                        HorizontalDivider(Modifier.padding(start = 45.dp, end = 10.dp), color = Color.LightGray)
+                        HorizontalDivider(Modifier.padding(start = 45.dp, end = 10.dp), color = if (darkMode) tertiaryDark else Color.LightGray)
                         
                         CardSettings(Icons.Default.Notifications, title = "Уведомления", checkedState = settingsState.notificationsEnabled) {
                             handleEvent(SettingsEvent.MakeNotificationsEnabled(it))
@@ -207,7 +215,7 @@ fun SettingsContent(
                                 else MyTracker.trackEvent("Выключить уведомления расписания")
                         }
 
-                        HorizontalDivider(Modifier.padding(start = 45.dp, end = 10.dp), color = Color.LightGray)
+                        HorizontalDivider(Modifier.padding(start = 45.dp, end = 10.dp), color = if (darkMode) tertiaryDark else Color.LightGray)
 
                         CardSettings(painterResource(R.drawable.week), title = "Показать неделю", checkedState = settingsState.fullWeekVisibility) {
                             handleEvent(SettingsEvent.MakeScheduleWeekFull(it))
@@ -216,7 +224,7 @@ fun SettingsContent(
                                 else MyTracker.trackEvent("Выключить расписание на неделю")
                         }
 
-                        HorizontalDivider(Modifier.padding(start = 45.dp, end = 10.dp), color = Color.LightGray)
+                        HorizontalDivider(Modifier.padding(start = 45.dp, end = 10.dp), color = if (darkMode) tertiaryDark else Color.LightGray)
 
                         CardSettings(Icons.Default.Menu, title = "Скрыть навигацию", checkedState = settingsState.navigationInvisibility) {
                             handleEvent(SettingsEvent.MakeNavigationInvisible(it))
@@ -236,14 +244,15 @@ fun SettingsContent(
                         .padding(20.dp, 0.dp, 20.dp, 0.dp)
                         .wrapContentHeight(),
                     elevation = CardDefaults.cardElevation(2.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = if (darkMode) secondaryDark else Color.White),
                 ) {
 
                     Text(
                         text = "Помощь",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(start = 17.dp, top = 10.dp)
+                        modifier = Modifier.padding(start = 17.dp, top = 10.dp),
+                        color = if (darkMode) Color.White else Color.Black
                     )
 
                     Row(
@@ -266,11 +275,12 @@ fun SettingsContent(
                         Spacer(modifier = Modifier.width(15.dp))
                         Text(
                             text = "Авторское право",
-                            fontSize = 15.sp
+                            fontSize = 15.sp,
+                            color = if (darkMode) Color.White else Color.Black
                         )
                     }
 
-                    HorizontalDivider(modifier = Modifier.padding(start = 55.dp, end = 20.dp), color = Color.LightGray)
+                    HorizontalDivider(modifier = Modifier.padding(start = 55.dp, end = 20.dp), color = if (darkMode) tertiaryDark else Color.LightGray)
 
                     Row(
                         modifier = Modifier
@@ -292,7 +302,8 @@ fun SettingsContent(
                         Spacer(modifier = Modifier.width(15.dp))
                         Text(
                             text = "О приложении",
-                            fontSize = 15.sp
+                            fontSize = 15.sp,
+                            color = if (darkMode) Color.White else Color.Black
                         )
                     }
                 }

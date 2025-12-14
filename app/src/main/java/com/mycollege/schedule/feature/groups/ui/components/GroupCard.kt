@@ -25,14 +25,14 @@ import androidx.compose.ui.unit.sp
 import com.mycollege.schedule.shared.ui.theme.buttons
 
 @Composable
-fun GroupCard(icon: Int, title: String, subtitle: String, onClick: () -> Unit, enabled: Boolean = true) {
+fun GroupCard(icon: Int, title: String, subtitle: String, onClick: () -> Unit, enabled: Boolean = true, darkMode: Boolean) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
             .padding(20.dp, 0.dp, 20.dp, 20.dp),
         elevation = CardDefaults.cardElevation(2.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = if (darkMode) Color(0xFF34343A) else Color.White),
         onClick = onClick,
         enabled = enabled
     ) {
@@ -58,11 +58,12 @@ fun GroupCard(icon: Int, title: String, subtitle: String, onClick: () -> Unit, e
                 Text(
                     text = title,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    color = if (darkMode) Color.White else Color(0xFF34343A)
                 )
                 Text(
                     text = subtitle,
-                    color = Color.Gray,
+                    color = if (darkMode) Color.LightGray else Color.Black,
                     fontSize = 14.sp
                 )
             }

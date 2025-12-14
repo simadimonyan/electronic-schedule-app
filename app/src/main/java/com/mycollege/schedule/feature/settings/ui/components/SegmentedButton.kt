@@ -2,6 +2,7 @@ package com.mycollege.schedule.feature.settings.ui.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
@@ -24,12 +25,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mycollege.schedule.shared.ui.theme.buttons
 import com.mycollege.schedule.shared.ui.theme.disabledBlue
+import com.mycollege.schedule.shared.ui.theme.disabledDark
 import com.mycollege.schedule.shared.ui.theme.disabledWhite
+import com.mycollege.schedule.shared.ui.theme.tertiaryDark
 
 @Composable
 fun SegmentedButton(checkedState: Boolean, enabled: Boolean = true, onChanged: (Boolean) -> Unit) {
     var selectedIndex by remember { mutableIntStateOf(if (!checkedState) 0 else 1) }
     val options = listOf("Неделя 1", "Неделя 2")
+    val darkMode = isSystemInDarkTheme()
 
     LaunchedEffect(checkedState) {
         selectedIndex = if (!checkedState) 0 else 1
@@ -38,7 +42,7 @@ fun SegmentedButton(checkedState: Boolean, enabled: Boolean = true, onChanged: (
     Surface(
         modifier = Modifier.wrapContentSize()
             .padding(horizontal = 20.dp),
-        color = Color.White,
+        color = if (darkMode) Color(0xFF414148) else Color.White,
         shape = RoundedCornerShape(10.dp),
         shadowElevation = 2.dp
     ) {
@@ -49,11 +53,11 @@ fun SegmentedButton(checkedState: Boolean, enabled: Boolean = true, onChanged: (
 
                 val isSelected = selectedIndex == index
                 val backgroundColor by animateColorAsState(
-                    targetValue = if (isSelected) buttons else Color.White,
+                    targetValue = if (isSelected) buttons else if (darkMode) Color(0xFF34343A) else Color.White,
                     animationSpec = tween(durationMillis = 300), label = ""
                 )
                 val contentColor by animateColorAsState(
-                    targetValue = if (isSelected) Color.White else Color.Black,
+                    targetValue = if (isSelected) Color.White else if (darkMode) Color.White else Color.Black,
                     animationSpec = tween(durationMillis = 300), label = ""
                 )
 
@@ -73,14 +77,13 @@ fun SegmentedButton(checkedState: Boolean, enabled: Boolean = true, onChanged: (
                         activeContainerColor = backgroundColor,
                         activeBorderColor = Color.Transparent,
                         inactiveBorderColor = Color.Transparent,
-                        inactiveContainerColor = Color.White,
+                        inactiveContainerColor = if (darkMode) Color(0xFF34343A) else Color.White,
                         activeContentColor = contentColor,
-                        inactiveContentColor = contentColor,
                         disabledActiveContainerColor = disabledBlue,
-                        disabledInactiveContainerColor = disabledWhite,
+                        disabledInactiveContainerColor = if (darkMode) disabledDark else disabledWhite,
                         disabledInactiveBorderColor = Color.Transparent,
-                        disabledActiveContentColor = Color.White,
-                        disabledInactiveContentColor = Color.LightGray
+                        disabledActiveContentColor = if (darkMode) Color.LightGray else Color.White,
+                        disabledInactiveContentColor = if (darkMode) Color.LightGray else Color.Gray
                     ),
                     icon = {}
                 ) {

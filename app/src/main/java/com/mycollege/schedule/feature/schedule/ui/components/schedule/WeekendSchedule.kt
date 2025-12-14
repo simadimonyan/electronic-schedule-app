@@ -2,6 +2,7 @@ package com.mycollege.schedule.feature.schedule.ui.components.schedule
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,9 +15,13 @@ import androidx.compose.ui.unit.dp
 import com.mycollege.schedule.R
 import com.mycollege.schedule.feature.schedule.ui.components.utils.Loader
 import com.mycollege.schedule.shared.ui.theme.buttons
+import com.mycollege.schedule.shared.ui.theme.secondaryDark
 
 @Composable
 fun WeekendUnit() {
+
+    val darkMode = isSystemInDarkTheme()
+
     Card(
         modifier = Modifier
             .padding(20.dp, 0.dp, 20.dp, 7.dp)
@@ -27,9 +32,9 @@ fun WeekendUnit() {
         Card(
             modifier = Modifier
                 .padding(4.dp, 0.dp, 0.dp, 0.dp)
-                .border(BorderStroke(2.dp, Color.White)),
+                .border(BorderStroke(2.dp, if (darkMode) secondaryDark else Color.White)),
             shape = RoundedCornerShape(0.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+            colors = CardDefaults.cardColors(containerColor = if (darkMode) secondaryDark else Color.White)
         ) {
             Loader(resource = R.raw.weekend, 130.dp)
         }

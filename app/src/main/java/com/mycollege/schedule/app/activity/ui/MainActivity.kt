@@ -141,11 +141,12 @@ class MainActivity : ComponentActivity() {
                     startViewModel.settingsInit()
 
                     // hide system ui navigation panel
+                    val darkMode = isSystemInDarkTheme()
                     WindowCompat.setDecorFitsSystemWindows(window, false)
                     val insetsController = WindowInsetsControllerCompat(window, window.decorView)
                     insetsController.hide(WindowInsetsCompat.Type.navigationBars())
                     insetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                    insetsController.isAppearanceLightStatusBars = true // dark icons color - true
+                    insetsController.isAppearanceLightStatusBars = !darkMode // dark icons color - true
 
                     AddNavGraph(
                         navController = navController,

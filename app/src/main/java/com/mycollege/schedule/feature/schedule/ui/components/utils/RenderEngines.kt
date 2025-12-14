@@ -1,6 +1,7 @@
 package com.mycollege.schedule.feature.schedule.ui.components.utils
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -39,6 +40,8 @@ fun WeekScheduleRender(
         handleEvent(ScheduleEvent.WeekCountChanged)
     }
 
+    val darkMode = isSystemInDarkTheme()
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -59,7 +62,7 @@ fun WeekScheduleRender(
                 ) {
                     Text(
                         text = scheduleState.todayDate,
-                        color = Color.Black,
+                        color = if (darkMode) Color.White else Color.Black,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -78,7 +81,7 @@ fun WeekScheduleRender(
                         scheduleState.weekDates[dayIndex]?.let {
                             Text(
                                 text = it,
-                                color = Color.Black,
+                                color = if (darkMode) Color.White else Color.Black,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -115,6 +118,8 @@ fun TodayScheduleRender(
     handleEvent: (ScheduleEvent) -> Unit
 ) {
 
+    val darkMode = isSystemInDarkTheme()
+
     LaunchedEffect(settingsState.weekCount) {
         handleEvent(ScheduleEvent.WeekCountChanged)
     }
@@ -127,7 +132,7 @@ fun TodayScheduleRender(
     ) {
         Text(
             text = scheduleState.todayDate,
-            color = Color.Black,
+            color = if (darkMode) Color.White else Color.Black,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         )

@@ -7,6 +7,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,9 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +50,7 @@ import com.mycollege.schedule.feature.schedule.ui.state.ScheduleViewModel
 import com.mycollege.schedule.feature.settings.ui.state.SettingsState
 import com.mycollege.schedule.shared.ui.theme.ScheduleTheme
 import com.mycollege.schedule.shared.ui.theme.background
+import com.mycollege.schedule.shared.ui.theme.backgroundDark
 
 @Preview
 @Composable
@@ -103,13 +102,15 @@ fun ScheduleContent(
         handleEvent(ScheduleEvent.ShowIfCachedSchedule)
     }
 
+    val darkMode = isSystemInDarkTheme()
+
     ScheduleTheme {
-        Scaffold(modifier = Modifier.fillMaxSize(), contentWindowInsets = WindowInsets(0), containerColor = background) { innerPadding ->
+        Scaffold(modifier = Modifier.fillMaxSize(), contentWindowInsets = WindowInsets(0), containerColor = if (darkMode) backgroundDark else background) { innerPadding ->
             Box(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(top = 30.dp)) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(background)
+                        .background(if (darkMode) backgroundDark else background)
                 ) {
                     if (parseState.scheduleLoading) {
 
@@ -121,7 +122,7 @@ fun ScheduleContent(
                         ) {
                             Text(
                                 text = scheduleState.todayDate,
-                                color = Color.Black,
+                                color = if (darkMode) Color.White else Color.Black,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
