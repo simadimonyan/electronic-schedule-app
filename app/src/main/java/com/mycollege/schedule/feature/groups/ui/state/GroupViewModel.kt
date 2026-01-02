@@ -367,6 +367,10 @@ class GroupViewModel @Inject constructor(
         try {
             val applicationMode = cacheManager.loadStudentMode()
             val configuration = cacheManager.loadLastConfiguration()
+            val appTheme = cacheManager.loadAppTheme()
+
+            appStateHolder.updateDarkTheme(appTheme)
+
             if (configuration.group.isNotEmpty()) {
                 groupStateHolder.updateGroup(configuration.group)
                 groupStateHolder.updateLevel(configuration.speciality)

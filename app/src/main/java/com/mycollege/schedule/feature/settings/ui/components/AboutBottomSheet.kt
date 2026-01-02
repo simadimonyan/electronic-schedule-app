@@ -1,7 +1,6 @@
 package com.mycollege.schedule.feature.settings.ui.components
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mycollege.schedule.BuildConfig
 import com.mycollege.schedule.R
+import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
 import com.mycollege.schedule.shared.ui.theme.backgroundDark
 import com.mycollege.schedule.shared.ui.theme.disabledBlue
 import com.mycollege.schedule.shared.ui.theme.disabledBlueDark
@@ -57,7 +57,7 @@ fun AboutBottomSheet(
     onDismiss: () -> Unit
 ) {
 
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
 
     ModalBottomSheet(
         modifier = Modifier.wrapContentHeight().padding(10.dp, 30.dp, 10.dp, 15.dp),
@@ -79,7 +79,7 @@ fun AboutContent() {
 
     val formatter = DateTimeFormatter.ofPattern("yyyy", Locale("RU"))
     val uriHandler = LocalUriHandler.current
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
 
     Column(
         modifier = Modifier

@@ -39,6 +39,7 @@ import com.mycollege.schedule.R
 
 import com.mycollege.schedule.shared.ui.theme.buttons
 import com.mycollege.schedule.feature.groups.ui.state.GroupViewModel
+import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
 import kotlinx.coroutines.launch
 
 @Composable
@@ -47,7 +48,7 @@ fun CustomAppBar(
     pagerState: PagerState
 ) {
     val appState by viewModel.appStateHolder.appState.collectAsState()
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
 
     val imageSize = 62.dp
 

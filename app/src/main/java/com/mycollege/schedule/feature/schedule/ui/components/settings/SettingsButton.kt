@@ -15,13 +15,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
 import com.mycollege.schedule.shared.ui.theme.buttons
 import com.mycollege.schedule.shared.ui.theme.secondaryDark
 
 @Composable
 fun SettingsButton(navigateToSettings: () -> Unit) {
 
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
 
     Card(
         colors = CardDefaults.cardColors(containerColor = if (darkMode) secondaryDark else Color.White),

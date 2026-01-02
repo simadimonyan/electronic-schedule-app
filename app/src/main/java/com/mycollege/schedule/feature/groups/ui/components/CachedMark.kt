@@ -15,6 +15,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mycollege.schedule.R
+import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
 import com.mycollege.schedule.shared.ui.theme.backgroundDark
 import com.mycollege.schedule.shared.ui.theme.buttons
 import com.mycollege.schedule.shared.ui.theme.disabledBlue
@@ -28,7 +29,7 @@ fun CachedMarkPreview() {
 @Composable
 fun CachedMark(modifier: Modifier) {
 
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
 
     Card(
         modifier = modifier, //.border(1.dp, disabledBlue, RoundedCornerShape(3.dp)),

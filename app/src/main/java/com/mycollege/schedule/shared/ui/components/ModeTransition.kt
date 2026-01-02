@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
 import com.mycollege.schedule.shared.ui.theme.backgroundDark
 import kotlinx.coroutines.delay
 
@@ -41,7 +42,7 @@ fun ModeTransition(studentMode: Boolean) {
 
     var visibleBackground by remember { mutableStateOf(false) }
     var visibleModeText by remember { mutableStateOf(false) }
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
 
     LaunchedEffect(Unit) {
         visibleBackground = true

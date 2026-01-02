@@ -8,6 +8,7 @@ import androidx.compose.runtime.Stable
 import androidx.core.content.edit
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.mycollege.schedule.app.activity.ui.state.AppState
 import com.mycollege.schedule.feature.settings.ui.state.SettingsState
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -30,6 +31,7 @@ class CacheManager @Inject constructor(
     private val scheduleServerConfiguration = "server_config"
     private val serverNetworkLastRequest = "server_last_request"
     private val dismissedNotificationsKey = "dismissed_notifications"
+    private val darkThemeKey = "dark_theme_key"
 
     @Immutable
     data class Configuration(
@@ -252,6 +254,14 @@ class CacheManager @Inject constructor(
     fun shouldUpdateCache(): Boolean {
         val last = getLastUpdatedTime()
         return last == 0L
+    }
+
+    fun saveAppTheme(darkTheme: Boolean) {
+        preferences.edit { putBoolean(darkThemeKey, darkTheme) }
+    }
+
+    fun loadAppTheme(): Boolean {
+        return preferences.getBoolean(darkThemeKey, false)
     }
 
 }

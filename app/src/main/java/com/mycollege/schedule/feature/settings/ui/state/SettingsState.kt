@@ -54,8 +54,19 @@ class SettingsStateHolder @Inject constructor() {
     private val _networkSynchronizationIssues = MutableSharedFlow<Boolean>()
     val networkSynchronizationIssues = _networkSynchronizationIssues.asSharedFlow()
 
+    private val _themeChanged = MutableSharedFlow<Boolean>()
+    val themeChanged = _themeChanged.asSharedFlow()
+
     suspend fun sendNetworkIssue() {
         _networkSynchronizationIssues.emit(true)
+    }
+
+    suspend fun sendThemeChange() {
+        _themeChanged.emit(true)
+    }
+
+    fun clearThemeChange() {
+        _themeChanged.tryEmit(false)
     }
 
     fun updateSettingsState(state: SettingsState) {

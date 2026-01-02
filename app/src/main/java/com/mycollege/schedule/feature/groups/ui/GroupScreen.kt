@@ -43,6 +43,7 @@ import com.mycollege.schedule.feature.groups.ui.components.ModeSegmentedButton
 import com.mycollege.schedule.feature.groups.ui.state.GroupEvent
 import com.mycollege.schedule.feature.groups.ui.state.GroupState
 import com.mycollege.schedule.feature.groups.ui.state.GroupViewModel
+import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
 import com.mycollege.schedule.shared.ui.theme.ScheduleTheme
 import com.mycollege.schedule.shared.ui.theme.background
 import com.mycollege.schedule.shared.ui.theme.backgroundDark
@@ -127,143 +128,142 @@ fun GroupContent(
     cachedTeachers: Map<String, Long>
 ) {
     val scope = rememberCoroutineScope()
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
 
     LaunchedEffect(Unit) {
         MyTracker.trackEvent("Просмотр рекламы")
     }
 
-    ScheduleTheme {
-        Scaffold(modifier = Modifier.fillMaxSize(), contentWindowInsets = WindowInsets(0), containerColor = if (darkMode) backgroundDark else background) { innerPadding ->
-            Column(modifier = Modifier.fillMaxHeight().padding(innerPadding).padding(0.dp, 70.dp, 0.dp, 0.dp)) {
+    Scaffold(modifier = Modifier.fillMaxSize(), contentWindowInsets = WindowInsets(0), containerColor = if (darkMode) backgroundDark else background) { innerPadding ->
+        Column(modifier = Modifier.fillMaxHeight().padding(innerPadding).padding(0.dp, 70.dp, 0.dp, 0.dp)) {
 
-                ModeSegmentedButton(appState.studentMode) {
-                    handleEvent(GroupEvent.ChangeStudentMode(it))
-                }
+            ModeSegmentedButton(appState.studentMode) {
+                handleEvent(GroupEvent.ChangeStudentMode(it))
+            }
 
-                // 480.dp is size of height when 80.dp is too big
-                BoxWithConstraints {
-                    val padding = if (maxHeight < 480.dp) 40.dp else 80.dp
-                    Spacer(modifier = Modifier.padding(bottom = padding))
-                }
+            // 480.dp is size of height when 80.dp is too big
+            BoxWithConstraints {
+                val padding = if (maxHeight < 480.dp) 40.dp else 80.dp
+                Spacer(modifier = Modifier.padding(bottom = padding))
+            }
 
-                // body cards
-                Column {
+            // body cards
+            Column {
 
-                    if (changeStudentModeFlag) {
-                        GroupCard(
-                            icon = R.drawable.study,
-                            title = LocalContext.current.getString(R.string.course),
-                            subtitle = groupState.course,
-                            onClick = {
-                                if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
-                                handleEvent(GroupEvent.ShowBottomSheet)
-                                handleEvent(GroupEvent.SetSelectedIndex(0))
-                            },
-                            darkMode = darkMode
-                        )
-
-                        GroupCard(
-                            icon = R.drawable.books,
-                            title = LocalContext.current.getString(R.string.speciality),
-                            subtitle = groupState.level,
-                            onClick = {
-                                if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
-                                handleEvent(GroupEvent.ShowBottomSheet)
-                                handleEvent(GroupEvent.SetSelectedIndex(1))
-                            },
-                            darkMode = darkMode
-                        )
-
-                        GroupCard(
-                            icon = R.drawable.people,
-                            title = LocalContext.current.getString(R.string.group),
-                            subtitle = groupState.group,
-                            onClick = {
-                                if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
-                                handleEvent(GroupEvent.ShowBottomSheet)
-                                handleEvent(GroupEvent.SetSelectedIndex(2))
-                            },
-                            darkMode = darkMode
-                        )
-                    }
-                    else {
-
-                        GroupCard(
-                            icon = R.drawable.department,
-                            title = "Кафедра",
-                            subtitle = groupState.department,
-                            onClick = {
-                                if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
-                                handleEvent(GroupEvent.ShowBottomSheet)
-                                handleEvent(GroupEvent.SetSelectedIndex(3))
-                            },
-                            darkMode = darkMode
-                        )
-
-                        GroupCard(
-                            icon = R.drawable.teacher,
-                            title = "Преподаватель",
-                            subtitle = groupState.teacher,
-                            onClick = {
-                                if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
-                                handleEvent(GroupEvent.ShowBottomSheet)
-                                handleEvent(GroupEvent.SetSelectedIndex(4))
-                            },
-                            darkMode = darkMode
-                        )
-
-                    }
-
-                }
-
-                // ---
-
-                ActionButton(
-                    text = "Выбрать",
-                    icon = R.drawable.logo,
-                    onClick = {
-                        handleEvent(GroupEvent.ChooseGroup)
-                        scope.launch {
-                            updateAppStateIndex(1)
-                            pagerState
-                                .animateScrollToPage(1)
-                        }
-                    },
-                    enabled = if (changeStudentModeFlag) groupState.group != "Выбрать группу" else groupState.teacher != "Выбрать преподавателя",
-                    darkMode
-                )
-
-                if (showAds) {
-                    Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp), horizontalArrangement = Arrangement.Center) {
-                        AndroidView(factory = { context ->
-                            BannerAdView(context).apply {
-                                setAdUnitId(BuildConfig.ADVERTISEMENT_BANNER_ID)
-                                setAdSize(BannerAdSize.stickySize(context, 370))
-                                val adRequest = AdRequest.Builder().setPreferredTheme(
-                                    if (darkMode) AdTheme.DARK else AdTheme.LIGHT
-                                ).build()
-                                setBannerAdEventListener(YandexAdsListener())
-                                loadAd(adRequest)
-                            }
-                        })
-                    }
-                }
-
-                if (groupState.showBottomSheet) {
-                    BottomSheetContent(
-                        loadingState = parserState,
-                        progress = parserState.chooseConfigurationProgress,
-                        groupState,
-                        handleEvent,
-                        selectedIndex = groupState.selectedIndex,
-                        onDismiss = { handleEvent(GroupEvent.HideBottomSheet) },
-                        cachedGroups,
-                        cachedTeachers
+                if (changeStudentModeFlag) {
+                    GroupCard(
+                        icon = R.drawable.study,
+                        title = LocalContext.current.getString(R.string.course),
+                        subtitle = groupState.course,
+                        onClick = {
+                            if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
+                            handleEvent(GroupEvent.ShowBottomSheet)
+                            handleEvent(GroupEvent.SetSelectedIndex(0))
+                        },
+                        darkMode = darkMode
                     )
+
+                    GroupCard(
+                        icon = R.drawable.books,
+                        title = LocalContext.current.getString(R.string.speciality),
+                        subtitle = groupState.level,
+                        onClick = {
+                            if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
+                            handleEvent(GroupEvent.ShowBottomSheet)
+                            handleEvent(GroupEvent.SetSelectedIndex(1))
+                        },
+                        darkMode = darkMode
+                    )
+
+                    GroupCard(
+                        icon = R.drawable.people,
+                        title = LocalContext.current.getString(R.string.group),
+                        subtitle = groupState.group,
+                        onClick = {
+                            if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
+                            handleEvent(GroupEvent.ShowBottomSheet)
+                            handleEvent(GroupEvent.SetSelectedIndex(2))
+                        },
+                        darkMode = darkMode
+                    )
+                }
+                else {
+
+                    GroupCard(
+                        icon = R.drawable.department,
+                        title = "Кафедра",
+                        subtitle = groupState.department,
+                        onClick = {
+                            if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
+                            handleEvent(GroupEvent.ShowBottomSheet)
+                            handleEvent(GroupEvent.SetSelectedIndex(3))
+                        },
+                        darkMode = darkMode
+                    )
+
+                    GroupCard(
+                        icon = R.drawable.teacher,
+                        title = "Преподаватель",
+                        subtitle = groupState.teacher,
+                        onClick = {
+                            if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
+                            handleEvent(GroupEvent.ShowBottomSheet)
+                            handleEvent(GroupEvent.SetSelectedIndex(4))
+                        },
+                        darkMode = darkMode
+                    )
+
                 }
 
             }
+
+            // ---
+
+            ActionButton(
+                text = "Выбрать",
+                icon = R.drawable.logo,
+                onClick = {
+                    handleEvent(GroupEvent.ChooseGroup)
+                    scope.launch {
+                        updateAppStateIndex(1)
+                        pagerState
+                            .animateScrollToPage(1)
+                    }
+                },
+                enabled = if (changeStudentModeFlag) groupState.group != "Выбрать группу" else groupState.teacher != "Выбрать преподавателя",
+                darkMode
+            )
+
+            if (showAds) {
+                Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp), horizontalArrangement = Arrangement.Center) {
+                    AndroidView(factory = { context ->
+                        BannerAdView(context).apply {
+                            setAdUnitId(BuildConfig.ADVERTISEMENT_BANNER_ID)
+                            setAdSize(BannerAdSize.stickySize(context, 370))
+                            val adRequest = AdRequest.Builder().setPreferredTheme(
+                                if (darkMode) AdTheme.DARK else AdTheme.LIGHT
+                            ).build()
+                            setBannerAdEventListener(YandexAdsListener())
+                            loadAd(adRequest)
+                        }
+                    })
+                }
+            }
+
+            if (groupState.showBottomSheet) {
+                BottomSheetContent(
+                    loadingState = parserState,
+                    progress = parserState.chooseConfigurationProgress,
+                    groupState,
+                    handleEvent,
+                    selectedIndex = groupState.selectedIndex,
+                    onDismiss = { handleEvent(GroupEvent.HideBottomSheet) },
+                    cachedGroups,
+                    cachedTeachers
+                )
+            }
+
         }
     }
+
 }

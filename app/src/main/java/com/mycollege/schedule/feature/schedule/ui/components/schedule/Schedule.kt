@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mycollege.schedule.R
 import com.mycollege.schedule.feature.schedule.data.models.DataClasses
+import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
 import com.mycollege.schedule.shared.ui.theme.buttons
 import com.mycollege.schedule.shared.ui.theme.secondaryDark
 
@@ -56,7 +57,7 @@ fun ScheduleUnitPreview() {
 @Composable
 fun ScheduleUnit(lesson: DataClasses.Lesson) {
 
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
 
     Card(
         modifier = Modifier
@@ -82,7 +83,7 @@ fun ScheduleUnit(lesson: DataClasses.Lesson) {
 private fun ScheduleUnitContent(lesson: DataClasses.Lesson) {
 
     val studentMode = lesson is DataClasses.GroupLesson
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
 
     Column(modifier = Modifier.padding(20.dp, 5.dp, 20.dp, 5.dp)) {
         Row(

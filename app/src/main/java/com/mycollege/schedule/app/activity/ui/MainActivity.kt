@@ -15,16 +15,16 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.booleanResource
 import androidx.compose.ui.unit.Density
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -35,6 +35,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
+import com.mycollege.schedule.R
 import com.mycollege.schedule.app.activity.ui.state.DataEvent
 import com.mycollege.schedule.app.activity.ui.state.MainViewModel
 import com.mycollege.schedule.app.activity.ui.state.StartViewModel
@@ -43,6 +44,8 @@ import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.feature.groups.ui.state.GroupViewModel
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleViewModel
 import com.mycollege.schedule.feature.settings.ui.state.SettingsViewModel
+import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
+import com.mycollege.schedule.shared.ui.theme.ScheduleTheme
 import com.mycollege.schedule.shared.ui.theme.background
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -61,9 +64,14 @@ class MainActivity : ComponentActivity() {
     private val settingsViewModel: SettingsViewModel by viewModels()
     private val startViewModel: StartViewModel by viewModels()
 
-    @SuppressLint("HardwareIds")
+    @SuppressLint("HardwareIds", "StateFlowValueCalledInComposition")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        groupViewModel.init()
+        val darkTheme = groupViewModel.appStateHolder.appState.value.darkTheme
+
+        setTheme(if (darkTheme) R.style.Theme_Schedule_Dark else R.style.Theme_Schedule_Light)
 
         val splash = installSplashScreen()
 
@@ -77,85 +85,91 @@ class MainActivity : ComponentActivity() {
             splash.setKeepOnScreenCondition { false }
         }
 
-        groupViewModel.init()
-
         enableEdgeToEdge()
         setContent {
 
-            val originalDensity = LocalDensity.current
-            CompositionLocalProvider(
-                LocalDensity provides Density(
-                    density = originalDensity.density,
-                    fontScale = 1.0f // Фиксированный масштаб шрифта
-                )
-            ) {
+            val appState by mainViewModel.appStateHolder.appState.collectAsState()
+            val darkTheme = appState.darkTheme
 
-                Box(modifier = Modifier.Companion.fillMaxSize().background(background)) {
+            ScheduleTheme(darkTheme = darkTheme) {
 
-                    val scope = rememberCoroutineScope()
-                    val navController = rememberNavController()
+                val originalDensity = LocalDensity.current
+                CompositionLocalProvider(
+                    LocalAppDarkTheme provides darkTheme,
+                    LocalDensity provides Density(
+                        density = originalDensity.density,
+                        fontScale = 1.0f // Фиксированный масштаб шрифта
+                    )
+                ) {
 
-                    // true - only once | does not start when recomposes
-                    LaunchedEffect(true) {
+                    Box(modifier = Modifier.Companion.fillMaxSize().background(background)) {
 
-                        requestPermissionsIfNeeded()
+                        val scope = rememberCoroutineScope()
+                        val navController = rememberNavController()
 
-                        scope.launch {
-                            mainViewModel.handleEvent(DataEvent.RestoreCache)
-                            mainViewModel.handleEvent(DataEvent.FetchData)
-                            mainViewModel.handleEvent(DataEvent.SetupCacheUpdater)
+                        // true - only once | does not start when recomposes
+                        LaunchedEffect(true) {
+
+                            requestPermissionsIfNeeded()
+
+                            scope.launch {
+                                mainViewModel.handleEvent(DataEvent.RestoreCache)
+                                mainViewModel.handleEvent(DataEvent.FetchData)
+                                mainViewModel.handleEvent(DataEvent.SetupCacheUpdater)
+                            }
+
+                            RemoteConfigClient.Companion.instance
+                                .getRemoteConfig().addOnSuccessListener { rc ->
+
+                                    try {
+
+                                        val server = rc.getString("ScheduleServer")
+                                        val accessToken = rc.getString("ScheduleServiceAccessToken")
+
+                                        mainViewModel.cacheManager.saveScheduleServerConfiguration(
+                                            CacheManager.ScheduleServerConfiguration(server, "Bearer $accessToken")
+                                        )
+
+                                        Log.i("MainActivity", "Конфигурация сервера получена")
+
+                                        // базовые настройки (дублирование для запроса недели после загрузки)
+                                        // не вызывается при отсутствии интернета (исключение происходит раньше)
+                                        startViewModel.settingsInit()
+
+                                    }
+                                    catch (e: Exception) {
+                                        TracerCrashReport.report(e, issueKey = "RUSTORE_REMOTE_CONFIG")
+                                        Log.e("RemoteConfigService", "Ошибка конфигурации: ${e.message}", e)
+                                    }
+                                }
+                                .addOnFailureListener { e ->
+                                    TracerCrashReport.report(e, issueKey = "RUSTORE_REMOTE_CONFIG")
+                                    Log.e("RuStoreMessagingService", "RemoteConfig fetch failed: ${e.message}", e)
+                                }
+
                         }
 
-                        RemoteConfigClient.Companion.instance
-                            .getRemoteConfig().addOnSuccessListener { rc ->
+                        // базовые настройки (дублирование для обработки отсутствия интернета)
+                        startViewModel.settingsInit()
 
-                                try {
+                        // hide system ui navigation panel
+                        val darkMode = LocalAppDarkTheme.current
+                        WindowCompat.setDecorFitsSystemWindows(window, false)
+                        val insetsController = WindowInsetsControllerCompat(window, window.decorView)
+                        insetsController.hide(WindowInsetsCompat.Type.navigationBars())
+                        insetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                        insetsController.isAppearanceLightStatusBars = !darkMode // dark icons color - true
 
-                                    val server = rc.getString("ScheduleServer")
-                                    val accessToken = rc.getString("ScheduleServiceAccessToken")
-
-                                    mainViewModel.cacheManager.saveScheduleServerConfiguration(
-                                        CacheManager.ScheduleServerConfiguration(server, "Bearer $accessToken")
-                                    )
-
-                                    Log.i("MainActivity", "Конфигурация сервера получена")
-
-                                    // базовые настройки (дублирование для запроса недели после загрузки)
-                                    // не вызывается при отсутствии интернета (исключение происходит раньше)
-                                    startViewModel.settingsInit()
-
-                                }
-                                catch (e: Exception) {
-                                    TracerCrashReport.report(e, issueKey = "RUSTORE_REMOTE_CONFIG")
-                                    Log.e("RemoteConfigService", "Ошибка конфигурации: ${e.message}", e)
-                                }
-                            }
-                            .addOnFailureListener { e ->
-                                TracerCrashReport.report(e, issueKey = "RUSTORE_REMOTE_CONFIG")
-                                Log.e("RuStoreMessagingService", "RemoteConfig fetch failed: ${e.message}", e)
-                            }
+                        AddNavGraph(
+                            navController = navController,
+                            mainViewModel = mainViewModel,
+                            startViewModel = startViewModel,
+                            groupViewModel = groupViewModel,
+                            scheduleViewModel = scheduleViewModel,
+                            settingsViewModel = settingsViewModel
+                        )
 
                     }
-
-                    // базовые настройки (дублирование для обработки отсутствия интернета)
-                    startViewModel.settingsInit()
-
-                    // hide system ui navigation panel
-                    val darkMode = isSystemInDarkTheme()
-                    WindowCompat.setDecorFitsSystemWindows(window, false)
-                    val insetsController = WindowInsetsControllerCompat(window, window.decorView)
-                    insetsController.hide(WindowInsetsCompat.Type.navigationBars())
-                    insetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                    insetsController.isAppearanceLightStatusBars = !darkMode // dark icons color - true
-
-                    AddNavGraph(
-                        navController = navController,
-                        mainViewModel = mainViewModel,
-                        startViewModel = startViewModel,
-                        groupViewModel = groupViewModel,
-                        scheduleViewModel = scheduleViewModel,
-                        settingsViewModel = settingsViewModel
-                    )
 
                 }
 

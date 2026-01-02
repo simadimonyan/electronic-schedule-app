@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
 import com.mycollege.schedule.shared.ui.theme.backgroundDark
 import com.mycollege.schedule.shared.ui.theme.buttons
 import com.mycollege.schedule.shared.ui.theme.secondaryDark
@@ -31,7 +32,7 @@ import com.mycollege.schedule.shared.ui.theme.tertiaryDark
 @Composable
 fun CardSettings(painter: Painter, title: String, checkedState: Boolean, onChanged: (Boolean) -> Unit) {
 
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
 
     Card(
         modifier = Modifier
@@ -81,7 +82,7 @@ fun CardSettings(painter: Painter, title: String, checkedState: Boolean, onChang
 @Composable
 fun CardSettings(painter: ImageVector, title: String, checkedState: Boolean, onChanged: (Boolean) -> Unit) {
 
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
 
     Card(
         modifier = Modifier

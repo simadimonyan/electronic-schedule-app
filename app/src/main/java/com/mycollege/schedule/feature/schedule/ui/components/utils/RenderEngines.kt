@@ -26,6 +26,7 @@ import com.mycollege.schedule.feature.schedule.ui.components.schedule.WeekendUni
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleEvent
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleState
 import com.mycollege.schedule.feature.settings.ui.state.SettingsState
+import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
 
 @SuppressLint("MutableCollectionMutableState")
 @Composable
@@ -40,7 +41,7 @@ fun WeekScheduleRender(
         handleEvent(ScheduleEvent.WeekCountChanged)
     }
 
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
 
     LazyColumn(
         modifier = Modifier
@@ -118,7 +119,7 @@ fun TodayScheduleRender(
     handleEvent: (ScheduleEvent) -> Unit
 ) {
 
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
 
     LaunchedEffect(settingsState.weekCount) {
         handleEvent(ScheduleEvent.WeekCountChanged)

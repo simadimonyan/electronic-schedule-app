@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mycollege.schedule.app.activity.ui.state.AppStateHolder
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.feature.settings.domain.usecase.GetWeekParityUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,6 +17,7 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val cacheManager: CacheManager,
     val settingsStateHolder: SettingsStateHolder,
+    val appStateHolder: AppStateHolder,
     private val getWeekParityUseCase: GetWeekParityUseCase
 ) : ViewModel() {
 
@@ -39,6 +41,7 @@ class SettingsViewModel @Inject constructor(
         cacheManager.saveActualSettings(
             settingsStateHolder.settingsState.value
         )
+        cacheManager.saveAppTheme(appStateHolder.appState.value.darkTheme)
         Log.d("Settings", "after save: " + cacheManager.loadLastSettings().toString())
     }
 

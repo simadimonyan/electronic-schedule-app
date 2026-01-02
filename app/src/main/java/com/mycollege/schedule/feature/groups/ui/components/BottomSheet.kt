@@ -49,6 +49,7 @@ import com.mycollege.schedule.R
 import com.mycollege.schedule.app.activity.domain.models.LoadingState
 import com.mycollege.schedule.feature.groups.ui.state.GroupEvent
 import com.mycollege.schedule.feature.groups.ui.state.GroupState
+import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
 import com.mycollege.schedule.shared.ui.theme.background
 import com.mycollege.schedule.shared.ui.theme.backgroundDark
 import com.mycollege.schedule.shared.ui.theme.buttons
@@ -72,7 +73,7 @@ fun BottomSheetContent(
 ) {
     val context: Context = LocalContext.current
     val animatedProgress = animateFloatAsState(targetValue = progress / 100f, label = "progress")
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(
@@ -152,7 +153,7 @@ fun CourseKeys(
     updateValue: (String) -> Unit
 ) {
 
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
 
     coursesToDisplay.forEachIndexed { index, key ->
         if (coursesToDisplay.isEmpty()) return@forEachIndexed
@@ -193,7 +194,7 @@ fun SpecialityKeys(
     updateValue: (String) -> Unit
 ) {
 
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
 
     specialitiesToDisplay.forEachIndexed { index, speciality ->
         if (index != 0) {
@@ -261,7 +262,7 @@ fun GroupListContent(
     sheetState: SheetState
 ) {
 
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
     val scope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf("") }
     var chipSelected by remember { mutableStateOf(false) }
@@ -401,7 +402,7 @@ fun DepartmentListContent(
     updateValue: (String) -> Unit
 ) {
 
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
 
     LazyColumn {
         itemsIndexed(departmentsToDisplay.sortedBy { -it.length }, key = { _, department -> department }) { index, department ->
@@ -451,7 +452,7 @@ fun TeacherListContent(
     sheetState: SheetState
 ) {
 
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
     val scope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf("") }
     var chipSelected by remember { mutableStateOf(false) }

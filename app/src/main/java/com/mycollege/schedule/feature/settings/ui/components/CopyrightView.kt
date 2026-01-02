@@ -44,6 +44,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowInsetsControllerCompat
+import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -55,7 +56,7 @@ import kotlin.coroutines.cancellation.CancellationException
 fun CopyrightView(onDisposable: () -> Unit) {
 
     val scope = rememberCoroutineScope()
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
 
     var visible by remember { mutableStateOf(false) }
     var showTopBar by remember { mutableStateOf(true) }

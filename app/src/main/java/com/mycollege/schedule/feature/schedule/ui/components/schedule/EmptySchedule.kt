@@ -20,11 +20,12 @@ import androidx.compose.ui.unit.sp
 import com.mycollege.schedule.R
 import com.mycollege.schedule.feature.schedule.ui.components.utils.Loader
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleState
+import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
 
 @Composable
 fun DefaultLoadingUnit(scheduleState: ScheduleState) {
     val context: Context = LocalContext.current
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
 
     Row(
         modifier = Modifier

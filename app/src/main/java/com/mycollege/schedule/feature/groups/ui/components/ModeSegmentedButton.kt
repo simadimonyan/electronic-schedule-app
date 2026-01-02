@@ -22,12 +22,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
 import com.mycollege.schedule.shared.ui.theme.buttons
 
 @Composable
 fun ModeSegmentedButton(studentMode: Boolean, onChanged: (Boolean) -> Unit) {
 
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
 
     var selectedIndex by remember { mutableIntStateOf(if (studentMode) 0 else 1) }
     val modes = listOf("Студент", "Преподаватель")

@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,6 +49,7 @@ import com.mycollege.schedule.feature.schedule.ui.state.ScheduleEvent
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleState
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleViewModel
 import com.mycollege.schedule.feature.settings.ui.state.SettingsState
+import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
 import com.mycollege.schedule.shared.ui.theme.ScheduleTheme
 import com.mycollege.schedule.shared.ui.theme.background
 import com.mycollege.schedule.shared.ui.theme.backgroundDark
@@ -102,87 +104,86 @@ fun ScheduleContent(
         handleEvent(ScheduleEvent.ShowIfCachedSchedule)
     }
 
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
 
-    ScheduleTheme {
-        Scaffold(modifier = Modifier.fillMaxSize(), contentWindowInsets = WindowInsets(0), containerColor = if (darkMode) backgroundDark else background) { innerPadding ->
-            Box(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(top = 30.dp)) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(if (darkMode) backgroundDark else background)
-                ) {
-                    if (parseState.scheduleLoading) {
+    Scaffold(modifier = Modifier.fillMaxSize(), contentWindowInsets = WindowInsets(0), containerColor = if (darkMode) backgroundDark else background) { innerPadding ->
+        Box(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(top = 30.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(if (darkMode) backgroundDark else background)
+            ) {
+                if (parseState.scheduleLoading) {
 
-                        Row(
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(25.dp, 45.dp, 80.dp, 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = scheduleState.todayDate,
+                            color = if (darkMode) Color.White else Color.Black,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    val shimmerColors = listOf(
+                        Color.LightGray.copy(alpha = 0.2f),
+                        Color.White.copy(alpha = 0.6f),
+                        Color.LightGray.copy(alpha = 0.2f)
+                    )
+
+                    val infiniteTransition = rememberInfiniteTransition()
+                    val translateAnim by infiniteTransition.animateFloat(
+                        initialValue = -1000f,
+                        targetValue = 1000f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(1600, easing = FastOutSlowInEasing),
+                            repeatMode = RepeatMode.Restart
+                        )
+                    )
+
+                    for (i in 1..3) {
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(25.dp, 45.dp, 80.dp, 10.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = scheduleState.todayDate,
-                                color = if (darkMode) Color.White else Color.Black,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-
-                        val shimmerColors = listOf(
-                            Color.LightGray.copy(alpha = 0.2f),
-                            Color.White.copy(alpha = 0.6f),
-                            Color.LightGray.copy(alpha = 0.2f)
-                        )
-
-                        val infiniteTransition = rememberInfiniteTransition()
-                        val translateAnim by infiniteTransition.animateFloat(
-                            initialValue = -1000f,
-                            targetValue = 1000f,
-                            animationSpec = infiniteRepeatable(
-                                animation = tween(1600, easing = FastOutSlowInEasing),
-                                repeatMode = RepeatMode.Restart
-                            )
-                        )
-
-                        for (i in 1..3) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(130.dp)
-                                    .padding(20.dp, 0.dp, 20.dp, 15.dp)
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(
-                                        brush = Brush.linearGradient(
-                                            colors = shimmerColors,
-                                            start = Offset(translateAnim, 0f),
-                                            end = Offset(translateAnim + 500f, 0f)
-                                        )
+                                .height(130.dp)
+                                .padding(20.dp, 0.dp, 20.dp, 15.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(
+                                    brush = Brush.linearGradient(
+                                        colors = shimmerColors,
+                                        start = Offset(translateAnim, 0f),
+                                        end = Offset(translateAnim + 500f, 0f)
                                     )
-                            )
-                        }
+                                )
+                        )
+                    }
+                }
+                else {
+                    if (settingsState.fullWeekVisibility && ((appState.studentMode && scheduleState.buildScheduleGroupModeFlag)
+                                || (!appState.studentMode && scheduleState.buildScheduleTeacherModeFlag))) {
+                        WeekScheduleRender(appState, scheduleState, settingsState, handleEvent)
+                    }
+                    else if (!settingsState.fullWeekVisibility && ((appState.studentMode && scheduleState.buildScheduleGroupModeFlag)
+                                || (!appState.studentMode && scheduleState.buildScheduleTeacherModeFlag))) {
+                        TodayScheduleRender(appState, scheduleState, settingsState, handleEvent)
                     }
                     else {
-                        if (settingsState.fullWeekVisibility && ((appState.studentMode && scheduleState.buildScheduleGroupModeFlag)
-                                    || (!appState.studentMode && scheduleState.buildScheduleTeacherModeFlag))) {
-                            WeekScheduleRender(appState, scheduleState, settingsState, handleEvent)
-                        }
-                        else if (!settingsState.fullWeekVisibility && ((appState.studentMode && scheduleState.buildScheduleGroupModeFlag)
-                                    || (!appState.studentMode && scheduleState.buildScheduleTeacherModeFlag))) {
-                            TodayScheduleRender(appState, scheduleState, settingsState, handleEvent)
-                        }
-                        else {
-                            DefaultLoadingUnit(scheduleState)
-                        }
+                        DefaultLoadingUnit(scheduleState)
                     }
                 }
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(16.dp)
-                ) {
-                    SettingsButton(navigateToSettings)
-                }
+            }
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp)
+            ) {
+                SettingsButton(navigateToSettings)
             }
         }
     }
+
 }

@@ -23,7 +23,12 @@ data class AppState(
     /**
      * Режим студента / преподавателя
      */
-    val studentMode: Boolean = true
+    val studentMode: Boolean = true,
+
+    /**
+     * Темная тема (светлая по умолчанию)
+     */
+    val darkTheme: Boolean = false,
 
 )
 
@@ -44,6 +49,10 @@ class AppStateHolder @Inject constructor() {
 
     fun updateStudentMode(studentMode: Boolean) {
         _appState.update { it.copy(studentMode = studentMode) }
+    }
+
+    fun updateDarkTheme(darkTheme: Boolean) {
+        _appState.update { it.copy(darkTheme = darkTheme) }
     }
 
 }

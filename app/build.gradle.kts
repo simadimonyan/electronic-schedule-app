@@ -25,7 +25,8 @@ tracer {
         pluginToken = tracerPluginToken
         appToken = tracerAppToken
 
-        uploadMapping = true
+        // true on release
+        uploadMapping = false
     }
 }
 
@@ -87,11 +88,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    kotlinOptions {
-        jvmTarget = "17"
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     buildFeatures {
         compose = true
@@ -101,9 +99,6 @@ android {
         enableStrongSkippingMode = true
         reportsDestination = layout.buildDirectory.dir("compose_compiler")
         metricsDestination = layout.buildDirectory.dir("compose_compiler")
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.15"
     }
     packaging {
         resources {
@@ -116,8 +111,10 @@ android {
 }
 
 dependencies {
+    implementation(libs.coil.compose)
+    implementation(libs.coil.gif)
 
-    implementation("com.my.tracker:mytracker-sdk:3.3.+")
+    implementation(libs.mytracker.sdk)
 
     implementation(libs.appupdate)
 

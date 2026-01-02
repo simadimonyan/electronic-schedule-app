@@ -4,6 +4,7 @@ agp = "8.9.1"
 animation = "1.7.6"
 appupdate = "8.0.0"
 bcprovJdk15on = "1.70"
+coilNetworkOkhttp = "2.7.0"
 conscryptAndroid = "2.5.2"
 converterGson = "2.9.0"
 core = "1.6.1"
@@ -26,6 +27,7 @@ composeBom = "2025.01.00"
 loggingInterceptor = "4.10.0"
 lottieCompose = "6.6.2"
 mobileads = "7.10.2"
+mytrackerSdk = "3.5.0"
 navigationCompose = "2.8.5"
 okhttp = "4.12.0"
 openjsse = "1.1.4"
@@ -65,6 +67,8 @@ androidx-work-testing = { module = "androidx.work:work-testing", version.ref = "
 appupdate = { module = "ru.rustore.sdk:appupdate", version.ref = "appupdate" }
 bcpkix-jdk15on = { module = "org.bouncycastle:bcpkix-jdk15on", version.ref = "bcprovJdk15on" }
 bcprov-jdk15on = { module = "org.bouncycastle:bcprov-jdk15on", version.ref = "bcprovJdk15on" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilNetworkOkhttp" }
+coil-gif = { module = "io.coil-kt:coil-gif", version.ref = "coilNetworkOkhttp" }
 conscrypt-android = { module = "org.conscrypt:conscrypt-android", version.ref = "conscryptAndroid" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 core-ktx = { module = "androidx.test:core-ktx", version.ref = "coreKtxVersion" }
@@ -90,8 +94,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "loggingInterceptor" }
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottieCompose" }
 mobileads = { module = "com.yandex.android:mobileads", version.ref = "mobileads" }
-okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
-openjsse = { module = "org.openjsse:openjsse", version.ref = "openjsse" }
+mytracker-sdk = { module = "com.my.tracker:mytracker-sdk", version.ref = "mytrackerSdk" }
 pushclient = { module = "ru.rustore.sdk:pushclient", version.ref = "pushclient" }
 remoteconfig = { module = "ru.rustore.sdk:remoteconfig", version.ref = "remoteConfig"}
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }

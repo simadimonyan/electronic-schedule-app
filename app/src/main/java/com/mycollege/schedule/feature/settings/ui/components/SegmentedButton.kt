@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
 import com.mycollege.schedule.shared.ui.theme.buttons
 import com.mycollege.schedule.shared.ui.theme.disabledBlue
 import com.mycollege.schedule.shared.ui.theme.disabledDark
@@ -33,7 +34,7 @@ import com.mycollege.schedule.shared.ui.theme.tertiaryDark
 fun SegmentedButton(checkedState: Boolean, enabled: Boolean = true, onChanged: (Boolean) -> Unit) {
     var selectedIndex by remember { mutableIntStateOf(if (!checkedState) 0 else 1) }
     val options = listOf("Неделя 1", "Неделя 2")
-    val darkMode = isSystemInDarkTheme()
+    val darkMode = LocalAppDarkTheme.current
 
     LaunchedEffect(checkedState) {
         selectedIndex = if (!checkedState) 0 else 1
