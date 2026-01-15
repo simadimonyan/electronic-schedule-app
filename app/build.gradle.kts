@@ -18,7 +18,9 @@ val signingKeyPass = properties["signKeyPassword"] as String
 val signingKeyPath = properties["signKeyPath"] as String
 val tracerPluginToken = properties["tracer.pluginToken"] as String
 val tracerAppToken = properties["tracer.appToken"] as String
-val advertisementBannerId = properties["advertisement.bannerId"] as String
+val advertisementBannerId = properties["advertisement.bannerId1"] as String
+val advertisementBannerId2 = properties["advertisement.bannerId2"] as String
+val advertisementBannerId3 = properties["advertisement.bannerId3"] as String
 
 tracer {
     create("defaultConfig") {
@@ -69,6 +71,8 @@ android {
             buildConfigField("String", "REMOTE_CONFIG_APP_ID", "\"$remoteConfigAppId\"")
             buildConfigField("String", "PUSH_CLIENT_PROJECT_ID", "\"$pushClientProjectId\"")
             buildConfigField("String", "ADVERTISEMENT_BANNER_ID", "\"$advertisementBannerId\"")
+            buildConfigField("String", "ADVERTISEMENT_BANNER_ID2", "\"$advertisementBannerId2\"")
+            buildConfigField("String", "ADVERTISEMENT_BANNER_ID3", "\"$advertisementBannerId3\"")
             buildConfigField("String", "MY_TRACKER_SDK_KEY", "\"$myTrackerSdkKey\"")
         }
         release {
@@ -84,6 +88,8 @@ android {
             buildConfigField("String", "REMOTE_CONFIG_APP_ID", "\"$remoteConfigAppId\"")
             buildConfigField("String", "PUSH_CLIENT_PROJECT_ID", "\"$pushClientProjectId\"")
             buildConfigField("String", "ADVERTISEMENT_BANNER_ID", "\"$advertisementBannerId\"")
+            buildConfigField("String", "ADVERTISEMENT_BANNER_ID2", "\"$advertisementBannerId2\"")
+            buildConfigField("String", "ADVERTISEMENT_BANNER_ID3", "\"$advertisementBannerId3\"")
             buildConfigField("String", "MY_TRACKER_SDK_KEY", "\"$myTrackerSdkKey\"")
         }
     }

@@ -1,6 +1,7 @@
 package com.mycollege.schedule.feature.groups.ui
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Scaffold
@@ -266,19 +268,47 @@ fun GroupContent(
             )
 
             if (showAds) {
-                Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp), horizontalArrangement = Arrangement.Center) {
-                    AndroidView(factory = { context ->
-                        BannerAdView(context).apply {
-                            setAdUnitId(BuildConfig.ADVERTISEMENT_BANNER_ID)
-                            setAdSize(BannerAdSize.stickySize(context, 370))
-                            val adRequest = AdRequest.Builder().setPreferredTheme(
-                                if (darkMode) AdTheme.DARK else AdTheme.LIGHT
-                            ).build()
-                            setBannerAdEventListener(YandexAdsListener())
-                            loadAd(adRequest)
+
+                val pagerAdsState = rememberPagerState(
+                    1, 0f,
+                    pageCount = { 3 }
+                )
+
+                LaunchedEffect(pagerAdsState) {
+                    while (true) {
+                        delay(4000)
+                        if (!pagerState.isScrollInProgress) {
+                            val next = (pagerAdsState.currentPage + 1) % 3
+                            pagerAdsState.animateScrollToPage(next, animationSpec = tween(durationMillis = 500))
                         }
-                    })
+                    }
                 }
+
+                val banner = when(pagerState.currentPage) {
+                    1 -> BuildConfig.ADVERTISEMENT_BANNER_ID
+                    2 -> BuildConfig.ADVERTISEMENT_BANNER_ID2
+                    3 -> BuildConfig.ADVERTISEMENT_BANNER_ID3
+                    else -> {BuildConfig.ADVERTISEMENT_BANNER_ID}
+                }
+
+                HorizontalPager(
+                    pagerAdsState
+                ) {
+                    Row(Modifier.fillMaxWidth().padding(vertical = 30.dp, horizontal = 20.dp), horizontalArrangement = Arrangement.Center) {
+                        AndroidView(factory = { context ->
+                            BannerAdView(context).apply {
+                                setAdUnitId(banner)
+                                setAdSize(BannerAdSize.fixedSize(context, 400, 130))
+                                val adRequest = AdRequest.Builder().setPreferredTheme(
+                                    if (darkMode) AdTheme.DARK else AdTheme.LIGHT
+                                ).build()
+                                setBannerAdEventListener(YandexAdsListener())
+                                loadAd(adRequest)
+                            }
+                        })
+                    }
+                }
+
             }
 
             if (groupState.showBottomSheet) {
