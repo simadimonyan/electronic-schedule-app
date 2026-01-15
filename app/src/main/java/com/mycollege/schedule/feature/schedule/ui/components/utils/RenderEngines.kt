@@ -3,6 +3,7 @@ package com.mycollege.schedule.feature.schedule.ui.components.utils
 import android.annotation.SuppressLint
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -30,6 +31,7 @@ import com.mycollege.schedule.feature.schedule.ui.state.ScheduleEvent
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleState
 import com.mycollege.schedule.feature.settings.ui.state.SettingsState
 import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
+import com.mycollege.schedule.shared.ui.theme.disabledWhite
 
 @SuppressLint("MutableCollectionMutableState")
 @Composable
@@ -63,31 +65,50 @@ fun WeekScheduleRender(
                         .padding(25.dp, 15.dp, 80.dp, 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = scheduleState.todayDate,
-                        color = if (darkMode) Color.White else Color.Black,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Column {
+                        Text(
+                            text = scheduleState.todayDate,
+                            color = if (darkMode) Color.White else Color.Black,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Неделя ${if (settingsState.weekCount) 2 else 1}",
+                            color = if (darkMode) disabledWhite else Color.Gray,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
                 WeekendUnit()
             }
             else {
+
                 scheduleState.weekLessons.keys.forEach { dayIndex ->
 
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(25.dp, 20.dp, 80.dp, 10.dp),
+                            .padding(25.dp, 10.dp, 80.dp, 10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         scheduleState.weekDates[dayIndex]?.let {
-                            Text(
-                                text = it,
-                                color = if (darkMode) Color.White else Color.Black,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                            Column {
+                                Text(
+                                    text = it,
+                                    color = if (darkMode) Color.White else Color.Black,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                if (dayIndex == 1) {
+                                    Text(
+                                        text = "Неделя ${if (settingsState.weekCount) 2 else 1}",
+                                        color = if (darkMode) disabledWhite else Color.Gray,
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
                         }
                     }
 
@@ -129,21 +150,30 @@ fun TodayScheduleRender(
         handleEvent(ScheduleEvent.WeekCountChanged)
     }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(25.dp, 45.dp, 80.dp, 10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = scheduleState.todayDate,
-            color = if (darkMode) Color.White else Color.Black,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
-
     if (scheduleState.todayLessons.isEmpty()) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(25.dp, 45.dp, 80.dp, 5.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(
+                    text = scheduleState.todayDate,
+                    color = if (darkMode) Color.White else Color.Black,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Неделя ${if (settingsState.weekCount) 2 else 1}",
+                    color = if (darkMode) disabledWhite else Color.Gray,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+
         WeekendUnit()
     }
     else {
@@ -152,6 +182,31 @@ fun TodayScheduleRender(
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(25.dp, 45.dp, 80.dp, 5.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = scheduleState.todayDate,
+                            color = if (darkMode) Color.White else Color.Black,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Неделя ${if (settingsState.weekCount) 2 else 1}",
+                            color = if (darkMode) disabledWhite else Color.Gray,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+
             itemsIndexed(scheduleState.todayLessons.sortedBy { it.count }) { _, lesson ->
                 ScheduleUnit(lesson)
             }

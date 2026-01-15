@@ -169,7 +169,7 @@ fun ScheduleContent(
                         TodayScheduleRender(scheduleState, settingsState, handleEvent)
                     }
                     else {
-                        DefaultLoadingUnit(scheduleState)
+                        DefaultLoadingUnit(scheduleState, settingsState)
                     }
                 }
             }
