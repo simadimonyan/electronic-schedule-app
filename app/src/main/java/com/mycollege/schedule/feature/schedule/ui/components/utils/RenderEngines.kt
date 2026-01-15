@@ -5,9 +5,12 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -31,7 +34,6 @@ import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
 @SuppressLint("MutableCollectionMutableState")
 @Composable
 fun WeekScheduleRender(
-    appState: AppState,
     scheduleState: ScheduleState,
     settingsState: SettingsState,
     handleEvent: (ScheduleEvent) -> Unit
@@ -106,14 +108,16 @@ fun WeekScheduleRender(
         }
 
         item {
-            Spacer(modifier = Modifier.height(120.dp))
+            val navPadding = WindowInsets.navigationBars.asPaddingValues()
+            val navHeight = navPadding.calculateBottomPadding()
+
+            Spacer(modifier = Modifier.height(if (navHeight > 0.dp) 150.dp else 120.dp))
         }
     }
 }
 
 @Composable
 fun TodayScheduleRender(
-    appState: AppState,
     scheduleState: ScheduleState,
     settingsState: SettingsState,
     handleEvent: (ScheduleEvent) -> Unit
@@ -154,7 +158,10 @@ fun TodayScheduleRender(
 
             if (scheduleState.todayLessons.size > 3) {
                 item {
-                    Spacer(modifier = Modifier.height(120.dp))
+                    val navPadding = WindowInsets.navigationBars.asPaddingValues()
+                    val navHeight = navPadding.calculateBottomPadding()
+
+                    Spacer(modifier = Modifier.height(if (navHeight > 0.dp) 150.dp else 120.dp))
                 }
             }
         }

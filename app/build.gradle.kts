@@ -111,6 +111,10 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
+    implementation(libs.androidx.glance.material)
+
     implementation(libs.coil.compose)
     implementation(libs.coil.gif)
 

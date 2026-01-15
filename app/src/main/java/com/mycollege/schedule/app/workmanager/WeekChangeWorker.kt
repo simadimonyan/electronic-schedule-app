@@ -3,12 +3,15 @@ package com.mycollege.schedule.app.workmanager
 import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.Stable
+import androidx.glance.appwidget.updateAll
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.my.tracker.MyTracker
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.feature.settings.ui.state.SettingsState
+import com.mycollege.schedule.feature.widgets.ui.ScheduleLargeWidget
+import com.mycollege.schedule.feature.widgets.ui.ScheduleSmallWidget
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 
@@ -40,6 +43,9 @@ class WeekChangeWorker @AssistedInject constructor(
             }
             cacheManager.clearDismissedNotifications()
             Log.e("WeekChangerWorker", "Week auto-changing executed!")
+
+            ScheduleLargeWidget().updateAll(applicationContext)
+            ScheduleSmallWidget().updateAll(applicationContext)
             Result.success()
         } catch (e: Exception) {
             Log.e("WeekChangerWorker", "Error in worker", e)

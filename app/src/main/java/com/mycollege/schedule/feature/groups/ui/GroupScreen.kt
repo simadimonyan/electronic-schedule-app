@@ -1,7 +1,6 @@
 package com.mycollege.schedule.feature.groups.ui
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -29,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.glance.appwidget.updateAll
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.my.tracker.MyTracker
 import com.mycollege.schedule.BuildConfig
@@ -43,8 +43,9 @@ import com.mycollege.schedule.feature.groups.ui.components.ModeSegmentedButton
 import com.mycollege.schedule.feature.groups.ui.state.GroupEvent
 import com.mycollege.schedule.feature.groups.ui.state.GroupState
 import com.mycollege.schedule.feature.groups.ui.state.GroupViewModel
+import com.mycollege.schedule.feature.widgets.ui.ScheduleLargeWidget
+import com.mycollege.schedule.feature.widgets.ui.ScheduleSmallWidget
 import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
-import com.mycollege.schedule.shared.ui.theme.ScheduleTheme
 import com.mycollege.schedule.shared.ui.theme.background
 import com.mycollege.schedule.shared.ui.theme.backgroundDark
 import com.yandex.mobile.ads.banner.BannerAdSize
@@ -128,6 +129,7 @@ fun GroupContent(
     cachedTeachers: Map<String, Long>
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val darkMode = LocalAppDarkTheme.current
 
     LaunchedEffect(Unit) {
@@ -139,6 +141,11 @@ fun GroupContent(
 
             ModeSegmentedButton(appState.studentMode) {
                 handleEvent(GroupEvent.ChangeStudentMode(it))
+                scope.launch {
+                    delay(500)
+                    ScheduleLargeWidget().updateAll(context)
+                    ScheduleSmallWidget().updateAll(context)
+                }
             }
 
             // 480.dp is size of height when 80.dp is too big
@@ -159,6 +166,10 @@ fun GroupContent(
                             if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
                             handleEvent(GroupEvent.ShowBottomSheet)
                             handleEvent(GroupEvent.SetSelectedIndex(0))
+                            scope.launch {
+                                ScheduleLargeWidget().updateAll(context)
+                                ScheduleSmallWidget().updateAll(context)
+                            }
                         },
                         darkMode = darkMode
                     )
@@ -171,6 +182,10 @@ fun GroupContent(
                             if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
                             handleEvent(GroupEvent.ShowBottomSheet)
                             handleEvent(GroupEvent.SetSelectedIndex(1))
+                            scope.launch {
+                                ScheduleLargeWidget().updateAll(context)
+                                ScheduleSmallWidget().updateAll(context)
+                            }
                         },
                         darkMode = darkMode
                     )
@@ -183,6 +198,10 @@ fun GroupContent(
                             if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
                             handleEvent(GroupEvent.ShowBottomSheet)
                             handleEvent(GroupEvent.SetSelectedIndex(2))
+                            scope.launch {
+                                ScheduleLargeWidget().updateAll(context)
+                                ScheduleSmallWidget().updateAll(context)
+                            }
                         },
                         darkMode = darkMode
                     )
@@ -197,6 +216,10 @@ fun GroupContent(
                             if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
                             handleEvent(GroupEvent.ShowBottomSheet)
                             handleEvent(GroupEvent.SetSelectedIndex(3))
+                            scope.launch {
+                                ScheduleLargeWidget().updateAll(context)
+                                ScheduleSmallWidget().updateAll(context)
+                            }
                         },
                         darkMode = darkMode
                     )
@@ -209,6 +232,10 @@ fun GroupContent(
                             if (!parserState.networkIssues) handleEvent(GroupEvent.Display)
                             handleEvent(GroupEvent.ShowBottomSheet)
                             handleEvent(GroupEvent.SetSelectedIndex(4))
+                            scope.launch {
+                                ScheduleLargeWidget().updateAll(context)
+                                ScheduleSmallWidget().updateAll(context)
+                            }
                         },
                         darkMode = darkMode
                     )
@@ -228,6 +255,10 @@ fun GroupContent(
                         updateAppStateIndex(1)
                         pagerState
                             .animateScrollToPage(1)
+
+                        delay(500)
+                        ScheduleLargeWidget().updateAll(context)
+                        ScheduleSmallWidget().updateAll(context)
                     }
                 },
                 enabled = if (changeStudentModeFlag) groupState.group != "Выбрать группу" else groupState.teacher != "Выбрать преподавателя",

@@ -3,20 +3,14 @@ package com.mycollege.schedule.app.navigation
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.material.TopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -31,13 +25,10 @@ import com.mycollege.schedule.feature.schedule.ui.ScheduleScreen
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleViewModel
 import com.mycollege.schedule.feature.settings.ui.SettingsScreen
 import com.mycollege.schedule.feature.settings.ui.components.CircleThemeTransition
-import com.mycollege.schedule.feature.settings.ui.components.ThemeToggleButton
-import com.mycollege.schedule.feature.settings.ui.state.SettingsEvent
 import com.mycollege.schedule.feature.settings.ui.state.SettingsViewModel
 import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
 import com.mycollege.schedule.shared.ui.theme.background
 import com.mycollege.schedule.shared.ui.theme.backgroundDark
-import kotlinx.coroutines.launch
 
 @Composable
 fun AppPager(
@@ -58,7 +49,6 @@ fun AppPager(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddNavGraph(
     navController: NavHostController,
@@ -73,7 +63,7 @@ fun AddNavGraph(
 
     NavHost(
         navController = navController,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize()//.windowInsetsPadding(WindowInsets.navigationBars)
             .background(if (darkMode) backgroundDark else background),
         startDestination = Start // if (appState.firstStartUp) Onboarding else Start
     ) {

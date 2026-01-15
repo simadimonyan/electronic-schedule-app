@@ -45,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.glance.appwidget.updateAll
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -61,6 +62,8 @@ import com.mycollege.schedule.feature.settings.ui.components.ThemeToggleButton
 import com.mycollege.schedule.feature.settings.ui.state.SettingsEvent
 import com.mycollege.schedule.feature.settings.ui.state.SettingsState
 import com.mycollege.schedule.feature.settings.ui.state.SettingsViewModel
+import com.mycollege.schedule.feature.widgets.ui.ScheduleLargeWidget
+import com.mycollege.schedule.feature.widgets.ui.ScheduleSmallWidget
 import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
 import com.mycollege.schedule.shared.ui.theme.background
 import com.mycollege.schedule.shared.ui.theme.backgroundDark
@@ -77,7 +80,6 @@ fun SettingsPreview() {
 }
 
 @SuppressLint("ContextCastToActivity")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
@@ -156,6 +158,8 @@ fun SettingsContent(
     onExit: () -> Unit
 ) {
 
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val darkMode = LocalAppDarkTheme.current
 
     Scaffold(modifier = Modifier
@@ -182,6 +186,10 @@ fun SettingsContent(
                     ThemeToggleButton(
                         Modifier.padding(end = 20.dp), {
                             onThemeChange()
+                            scope.launch {
+                                ScheduleLargeWidget().updateAll(context)
+                                ScheduleSmallWidget().updateAll(context)
+                            }
                         },
                         appState.darkTheme
                     )
@@ -189,6 +197,7 @@ fun SettingsContent(
             )
         }
     ) { innerPadding ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -200,6 +209,11 @@ fun SettingsContent(
                 handleEvent(SettingsEvent.SaveSettings)
                 if (it) MyTracker.trackEvent("Переключить расписание на вторую неделю")
                 else MyTracker.trackEvent("Переключить расписание на первую неделю")
+                scope.launch {
+                    delay(500)
+                    ScheduleLargeWidget().updateAll(context)
+                    ScheduleSmallWidget().updateAll(context)
+                }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -227,6 +241,11 @@ fun SettingsContent(
                         handleEvent(SettingsEvent.SaveSettings)
                         if (settingsState.synchronizeWeekParity) MyTracker.trackEvent("Включить синхронизацию недели")
                         else MyTracker.trackEvent("Выключить синхронизацию недели")
+                        scope.launch {
+                            delay(500)
+                            ScheduleLargeWidget().updateAll(context)
+                            ScheduleSmallWidget().updateAll(context)
+                        }
                     }
 
                     HorizontalDivider(Modifier.padding(start = 45.dp, end = 10.dp), color = if (darkMode) tertiaryDark else Color.LightGray)

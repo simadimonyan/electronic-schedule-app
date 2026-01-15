@@ -18,4 +18,8 @@ class GetTeacherUseCase @Inject constructor(
         return@withContext database.persistence().getTeacherBy(id)
     }
 
+    suspend fun getByName(name: String): Teacher? = withContext(Dispatchers.IO) {
+        return@withContext getTeacherBy(database.persistence().findTeacherBy(name))
+    }
+
 }

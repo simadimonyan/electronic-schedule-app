@@ -7,7 +7,6 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,7 +28,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -50,7 +48,6 @@ import com.mycollege.schedule.feature.schedule.ui.state.ScheduleState
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleViewModel
 import com.mycollege.schedule.feature.settings.ui.state.SettingsState
 import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
-import com.mycollege.schedule.shared.ui.theme.ScheduleTheme
 import com.mycollege.schedule.shared.ui.theme.background
 import com.mycollege.schedule.shared.ui.theme.backgroundDark
 
@@ -165,11 +162,11 @@ fun ScheduleContent(
                 else {
                     if (settingsState.fullWeekVisibility && ((appState.studentMode && scheduleState.buildScheduleGroupModeFlag)
                                 || (!appState.studentMode && scheduleState.buildScheduleTeacherModeFlag))) {
-                        WeekScheduleRender(appState, scheduleState, settingsState, handleEvent)
+                        WeekScheduleRender(scheduleState, settingsState, handleEvent)
                     }
                     else if (!settingsState.fullWeekVisibility && ((appState.studentMode && scheduleState.buildScheduleGroupModeFlag)
                                 || (!appState.studentMode && scheduleState.buildScheduleTeacherModeFlag))) {
-                        TodayScheduleRender(appState, scheduleState, settingsState, handleEvent)
+                        TodayScheduleRender(scheduleState, settingsState, handleEvent)
                     }
                     else {
                         DefaultLoadingUnit(scheduleState)

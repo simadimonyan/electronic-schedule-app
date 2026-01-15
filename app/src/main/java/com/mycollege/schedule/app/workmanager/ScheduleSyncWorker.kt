@@ -3,6 +3,7 @@ package com.mycollege.schedule.app.workmanager
 import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.Stable
+import androidx.glance.appwidget.updateAll
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -12,6 +13,8 @@ import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.feature.groups.domain.usecases.student.GetGroupScheduleUseCase
 import com.mycollege.schedule.feature.groups.domain.usecases.teacher.GetTeacherScheduleUseCase
 import com.mycollege.schedule.feature.groups.ui.state.GroupStateHolder
+import com.mycollege.schedule.feature.widgets.ui.ScheduleLargeWidget
+import com.mycollege.schedule.feature.widgets.ui.ScheduleSmallWidget
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 
@@ -76,6 +79,8 @@ class ScheduleSyncWorker @AssistedInject constructor(
 
             }
 
+            ScheduleLargeWidget().updateAll(applicationContext)
+            ScheduleSmallWidget().updateAll(applicationContext)
             Result.success()
         } catch (e: Exception) {
             Log.e("GroupSyncWorker", "Error in worker", e)

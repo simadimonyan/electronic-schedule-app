@@ -1,7 +1,6 @@
 package com.mycollege.schedule.core.db
 
 import android.util.Log
-import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration

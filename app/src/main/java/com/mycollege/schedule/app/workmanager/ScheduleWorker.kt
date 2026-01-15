@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.compose.runtime.Stable
+import androidx.glance.appwidget.updateAll
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -20,6 +21,8 @@ import com.mycollege.schedule.feature.schedule.domain.usecase.GetChosenGroupUseC
 import com.mycollege.schedule.feature.schedule.domain.usecase.GetTodayScheduleUseCase
 import com.mycollege.schedule.feature.settings.domain.usecase.GetWeekParityUseCase
 import com.mycollege.schedule.feature.settings.ui.state.SettingsState
+import com.mycollege.schedule.feature.widgets.ui.ScheduleLargeWidget
+import com.mycollege.schedule.feature.widgets.ui.ScheduleSmallWidget
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
@@ -118,6 +121,9 @@ class ScheduleWorker @AssistedInject constructor(
                 }
 
             }
+
+            ScheduleLargeWidget().updateAll(applicationContext)
+            ScheduleSmallWidget().updateAll(applicationContext)
             Result.success()
         } catch (e: Exception) {
             Log.e("ScheduleWorker", "Error in worker", e)
