@@ -1,5 +1,6 @@
 package com.mycollege.schedule.feature.widgets.ui
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
@@ -12,6 +13,9 @@ import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
+import androidx.glance.appwidget.appWidgetBackground
+import androidx.glance.appwidget.components.Scaffold
+import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.layout.Alignment
@@ -21,9 +25,9 @@ import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
-import androidx.glance.layout.height
 import androidx.glance.layout.width
 import androidx.glance.text.Text
+import androidx.glance.unit.ColorProvider
 import com.mycollege.schedule.app.activity.data.models.Group
 import com.mycollege.schedule.app.activity.data.models.Teacher
 import com.mycollege.schedule.app.activity.ui.MainActivity
@@ -46,6 +50,8 @@ class ScheduleLargeWidget : GlanceAppWidget() {
 
     override val sizeMode = SizeMode.Exact
 
+    @OptIn(ExperimentalGlanceApi::class)
+    @SuppressLint("RestrictedApi")
     override suspend fun provideGlance(
         context: Context,
         id: GlanceId
@@ -103,7 +109,27 @@ class ScheduleLargeWidget : GlanceAppWidget() {
             scheduleError = true
 
         provideContent {
-            TodayWidget(darkTheme, scheduleError, studentMode, if (studentMode) groupSchedule else teacherSchedule, if (studentMode) tomorrowGroupSchedule else tomorrowTeacherSchedule)
+            Scaffold(
+                GlanceModifier
+                    .fillMaxSize()
+                    .clickable(onClick = actionStartActivity<MainActivity>(
+                        activityOptions = Bundle().apply {
+                            putInt("android.activity.splashScreenStyle", 1)
+                        })
+                    )
+                    .cornerRadius(28.dp)
+                    .appWidgetBackground(),
+                backgroundColor = ColorProvider(if (darkTheme) backgroundDark else background)
+            ) {
+                TodayWidget(
+                    darkTheme,
+                    scheduleError,
+                    studentMode,
+                    if (studentMode) groupSchedule else teacherSchedule,
+                    if (studentMode) tomorrowGroupSchedule else tomorrowTeacherSchedule,
+                    context
+                )
+            }
         }
 
     }
@@ -115,7 +141,8 @@ class ScheduleLargeWidget : GlanceAppWidget() {
         scheduleError: Boolean,
         mode: Boolean,
         lessons: List<DataClasses.Lesson>?,
-        tomorrowLessons: List<DataClasses.Lesson>?
+        tomorrowLessons: List<DataClasses.Lesson>?,
+        context: Context
     ) {
 
         if (lessons?.isNotEmpty() == true) {
@@ -158,16 +185,11 @@ class ScheduleLargeWidget : GlanceAppWidget() {
             }
 
             Row(
-                modifier = GlanceModifier.fillMaxSize().background(if (darkTheme) backgroundDark else background)
-                    .clickable(onClick = actionStartActivity<MainActivity>(
-                        activityOptions = Bundle().apply {
-                            putInt("android.activity.splashScreenStyle", 1)
-                        })
-                    ),
+                modifier = GlanceModifier.fillMaxSize().background(if (darkTheme) backgroundDark else background),
                 verticalAlignment = Alignment.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(GlanceModifier.width(15.dp))
+                Spacer(GlanceModifier.width(5.dp))
 
                 Box(GlanceModifier.fillMaxSize()) {
 
@@ -184,14 +206,14 @@ class ScheduleLargeWidget : GlanceAppWidget() {
                     Column(GlanceModifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
 
                         if (currentLesson != null) {
-                            CurrentLesson(darkTheme, mode, currentLesson)
+                            CurrentLesson(darkTheme, mode, currentLesson, context)
 
-                            Spacer(GlanceModifier.height(5.dp))
+                            //Spacer(GlanceModifier.height(2.dp))
                         }
 
                         Log.i("LESSON", nextLesson.toString())
 
-                        NextLesson(darkTheme, mode, nextLesson, tomorrowLessons, currentLesson != null)
+                        NextLesson(darkTheme, mode, nextLesson, tomorrowLessons, currentLesson != null, context)
 
                     }
 
@@ -201,9 +223,9 @@ class ScheduleLargeWidget : GlanceAppWidget() {
 
         }
         else if (scheduleError)
-            ScheduleAlert(darkTheme)
+            ScheduleAlert(darkTheme, context)
         else
-            Weekend(darkTheme)
+            Weekend(darkTheme, context)
 
     }
 

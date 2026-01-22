@@ -294,11 +294,11 @@ fun GroupContent(
                 HorizontalPager(
                     pagerAdsState
                 ) {
-                    Row(Modifier.fillMaxWidth().padding(vertical = 30.dp, horizontal = 20.dp), horizontalArrangement = Arrangement.Center) {
+                    Row(Modifier.fillMaxWidth().padding(vertical = 20.dp, horizontal = 20.dp), horizontalArrangement = Arrangement.Center) {
                         AndroidView(factory = { context ->
                             BannerAdView(context).apply {
                                 setAdUnitId(banner)
-                                setAdSize(BannerAdSize.fixedSize(context, 400, 130))
+                                setAdSize(BannerAdSize.fixedSize(context, 400, 90))
                                 val adRequest = AdRequest.Builder().setPreferredTheme(
                                     if (darkMode) AdTheme.DARK else AdTheme.LIGHT
                                 ).build()

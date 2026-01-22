@@ -1,5 +1,7 @@
 package com.mycollege.schedule.feature.widgets.ui.components
 
+import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -24,37 +26,40 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.mycollege.schedule.R
 import com.mycollege.schedule.feature.schedule.data.models.DataClasses
+import com.mycollege.schedule.shared.utils.ResponsiveTextSize
 import com.mycollege.schedule.shared.ui.theme.buttons
 import com.mycollege.schedule.shared.ui.theme.disabledWhite
 
+@SuppressLint("RestrictedApi")
 @Composable
 fun NextLesson(
     darkTheme: Boolean,
     studentMode: Boolean,
     nextLesson: DataClasses.Lesson?,
     tomorrowLessons: List<DataClasses.Lesson>?,
-    previous: Boolean
+    previous: Boolean,
+    context: Context
 ) {
-
     val homeMode = nextLesson == null
     val tomorrowLessonFlag = !previous && nextLesson == null
     val tomorrowLesson: DataClasses.Lesson? = if (tomorrowLessons?.isEmpty() == true) null else tomorrowLessons?.get(0)
+    val scaleFactor = ResponsiveTextSize.getScaleFactor(context)
 
     if (tomorrowLessonFlag)
-        TomorrowLesson(studentMode, tomorrowLesson)
+        TomorrowLesson(darkTheme, studentMode, tomorrowLesson, context)
     else {
-        Column(GlanceModifier.fillMaxWidth().padding(start = -(2).dp, end = 20.dp)) {
+        Column(GlanceModifier.fillMaxWidth().padding(start = -(2).dp, end = 10.dp)) {
 
             if (!homeMode) {
-                Row(GlanceModifier.fillMaxWidth(), horizontalAlignment = Alignment.End) {
+                Row(GlanceModifier.fillMaxWidth().padding(0), horizontalAlignment = Alignment.End) {
                     Text(
                         text = "СЛЕДУЮЩАЯ ПАРА",
                         style = TextStyle(
                             textAlign = TextAlign.End,
                             color = ColorProvider(if (darkTheme) disabledWhite else Color.DarkGray),
-                            fontSize = 12.sp
+                            fontSize = ((if (previous) 8 else 9) * scaleFactor).toInt().sp
                         ),
-                        modifier = GlanceModifier
+                        modifier = GlanceModifier.padding(0)
                     )
                 }
 
@@ -73,7 +78,7 @@ fun NextLesson(
                 Text(
                     text = nextLesson?.name ?:  "Пары закончились",
                     style = TextStyle(
-                        fontSize = 14.sp,
+                        fontSize = ((if (previous) 10 else 11) * scaleFactor).toInt().sp,
                         color = ColorProvider(if (darkTheme) Color.White else Color.Black),
                         fontWeight = FontWeight.Bold,
                     ),
@@ -82,7 +87,7 @@ fun NextLesson(
                 )
             }
 
-            Spacer(GlanceModifier.height(2.dp))
+            //Spacer(GlanceModifier.height(2.dp))
 
             if (!homeMode) {
                 Row(modifier = GlanceModifier.padding(start = 38.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -93,7 +98,7 @@ fun NextLesson(
                         Image(
                             provider = ImageProvider(R.drawable.person),
                             contentDescription = null,
-                            modifier = GlanceModifier.size(15.dp),
+                            modifier = GlanceModifier.size(if (previous) 12.dp else 13.dp),
                             colorFilter = ColorFilter.tint(ColorProvider(buttons))
                         )
 
@@ -103,7 +108,7 @@ fun NextLesson(
                             text = "$nextLabel",
                             style = TextStyle(
                                 color = ColorProvider(if (darkTheme) disabledWhite else Color.DarkGray),
-                                fontSize = 13.sp
+                                fontSize = ((if (previous) 9 else 10) * scaleFactor).toInt().sp
                             ),
                             maxLines = 1,
                             modifier = GlanceModifier
@@ -119,7 +124,7 @@ fun NextLesson(
                     Image(
                         provider = ImageProvider(R.drawable.time),
                         contentDescription = null,
-                        modifier = GlanceModifier.size(15.dp),
+                        modifier = GlanceModifier.size(if (previous) 12.dp else 13.dp),
                         colorFilter = ColorFilter.tint(ColorProvider(buttons))
                     )
 
@@ -130,7 +135,7 @@ fun NextLesson(
                     text = nextLesson?.time ?: "Можно идти домой 🏡",
                     style = TextStyle(
                         color = ColorProvider(if (darkTheme) disabledWhite else Color.DarkGray),
-                        fontSize = 13.sp
+                        fontSize = ((if (previous) 9 else 10) * scaleFactor).toInt().sp
                     ),
                     modifier = GlanceModifier
                 )
@@ -141,17 +146,17 @@ fun NextLesson(
                     Image(
                         provider = ImageProvider(R.drawable.auditory_label),
                         contentDescription = null,
-                        modifier = GlanceModifier.size(15.dp),
+                        modifier = GlanceModifier.size(if (previous) 12.dp else 13.dp),
                         colorFilter = ColorFilter.tint(ColorProvider(buttons))
                     )
 
                     Spacer(GlanceModifier.width(5.dp))
 
                     Text(
-                        text = nextLesson!!.location.toString(),
+                        text = nextLesson.location.toString(),
                         style = TextStyle(
                             color = ColorProvider(if (darkTheme) disabledWhite else Color.DarkGray),
-                            fontSize = 13.sp
+                            fontSize = ((if (previous) 9 else 10) * scaleFactor).toInt().sp
                         ),
                         modifier = GlanceModifier
                     )

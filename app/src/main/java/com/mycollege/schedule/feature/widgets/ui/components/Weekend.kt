@@ -1,6 +1,7 @@
 package com.mycollege.schedule.feature.widgets.ui.components
 
-import android.os.Bundle
+import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -9,8 +10,6 @@ import androidx.glance.ExperimentalGlanceApi
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
-import androidx.glance.action.actionStartActivity
-import androidx.glance.action.clickable
 import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
@@ -27,26 +26,24 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.mycollege.schedule.R
-import com.mycollege.schedule.app.activity.ui.MainActivity
+import com.mycollege.schedule.shared.utils.ResponsiveTextSize
 import com.mycollege.schedule.shared.ui.theme.background
 import com.mycollege.schedule.shared.ui.theme.backgroundDark
 import com.mycollege.schedule.shared.ui.theme.buttons
 import com.mycollege.schedule.shared.ui.theme.disabledWhite
 
+@SuppressLint("RestrictedApi")
 @OptIn(ExperimentalGlanceApi::class)
 @Composable
-fun Weekend(darkTheme: Boolean) {
+fun Weekend(darkTheme: Boolean, context: Context) {
+    val scaleFactor = ResponsiveTextSize.getScaleFactor(context)
 
     Row(
-        modifier = GlanceModifier.fillMaxSize().background(if (darkTheme) backgroundDark else background).clickable(onClick = actionStartActivity<MainActivity>(
-            activityOptions = Bundle().apply {
-                putInt("android.activity.splashScreenStyle", 1)
-            })
-        ),
+        modifier = GlanceModifier.fillMaxSize().background(if (darkTheme) backgroundDark else background),
         verticalAlignment = Alignment.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(GlanceModifier.width(15.dp))
+        Spacer(GlanceModifier.width(5.dp))
 
         Box(GlanceModifier.fillMaxSize()) {
 
@@ -60,7 +57,7 @@ fun Weekend(darkTheme: Boolean) {
                 }
             }
 
-            Column(GlanceModifier.fillMaxSize().padding(start = -(2).dp, top = 0.dp, end = 20.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(GlanceModifier.fillMaxSize().padding(start = -(2).dp, top = 0.dp, end = 10.dp), verticalAlignment = Alignment.CenterVertically) {
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Image(
@@ -74,7 +71,7 @@ fun Weekend(darkTheme: Boolean) {
                     Text(
                         text = "Выходной",
                         style = TextStyle(
-                            fontSize = 15.sp,
+                            fontSize = (11 * scaleFactor).toInt().sp,
                             color = ColorProvider(if (darkTheme) Color.White else Color.Black),
                             fontWeight = FontWeight.Bold,
                         ),
@@ -88,7 +85,8 @@ fun Weekend(darkTheme: Boolean) {
                     Text(
                         text = "Сегодня можно отдыхать 🏖️",
                         style = TextStyle(
-                            color = ColorProvider(if (darkTheme) disabledWhite else Color.DarkGray)
+                            color = ColorProvider(if (darkTheme) disabledWhite else Color.DarkGray),
+                            fontSize = (10 * scaleFactor).toInt().sp,
                         ),
                         modifier = GlanceModifier
                     )

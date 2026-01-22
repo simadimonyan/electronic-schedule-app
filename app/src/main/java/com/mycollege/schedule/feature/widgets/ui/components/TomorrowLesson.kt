@@ -1,5 +1,7 @@
 package com.mycollege.schedule.feature.widgets.ui.components
 
+import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -25,17 +27,23 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.mycollege.schedule.R
 import com.mycollege.schedule.feature.schedule.data.models.DataClasses
+import com.mycollege.schedule.shared.utils.ResponsiveTextSize
 import com.mycollege.schedule.shared.ui.theme.buttons
+import com.mycollege.schedule.shared.ui.theme.disabledWhite
 
+@SuppressLint("RestrictedApi")
 @Composable
 fun TomorrowLesson(
+    darkTheme: Boolean,
     studentMode: Boolean,
     tomorrowLesson: DataClasses.Lesson?,
+    context: Context
 ) {
 
     val weekendFlag = tomorrowLesson == null
+    val scaleFactor = ResponsiveTextSize.getScaleFactor(context)
 
-    Column(GlanceModifier.fillMaxSize().padding(start = -(2).dp, end = 20.dp), verticalAlignment = Alignment.CenterVertically) {
+    Column(GlanceModifier.fillMaxSize().padding(start = -(2).dp, end = 10.dp), verticalAlignment = Alignment.CenterVertically) {
 
         if (!weekendFlag) {
             Row(GlanceModifier.fillMaxWidth(), horizontalAlignment = Alignment.End) {
@@ -43,9 +51,8 @@ fun TomorrowLesson(
                     text = "СЛЕДУЮЩАЯ ПАРА",
                     style = TextStyle(
                         textAlign = TextAlign.End,
-                        color = ColorProvider(Color.DarkGray),
-                        fontSize = 12.sp
-                    ),
+                        color = ColorProvider(if (darkTheme) disabledWhite else Color.DarkGray),
+                        fontSize = (11 * scaleFactor).toInt().sp),
                     modifier = GlanceModifier
                 )
             }
@@ -56,7 +63,7 @@ fun TomorrowLesson(
                     style = TextStyle(
                         textAlign = TextAlign.End,
                         color = ColorProvider(buttons),
-                        fontSize = 11.sp
+                        fontSize = (10 * scaleFactor).toInt().sp,
                     ),
                     modifier = GlanceModifier
                 )
@@ -77,8 +84,9 @@ fun TomorrowLesson(
             Text(
                 text = tomorrowLesson?.name ?: "Завтра нет пар",
                 style = TextStyle(
-                    fontSize = 15.sp,
+                    fontSize = (11 * scaleFactor).toInt().sp,
                     fontWeight = FontWeight.Bold,
+                    color = ColorProvider(if (darkTheme) Color.White else Color.Black)
                 ),
                 modifier = GlanceModifier,
                 maxLines = 2
@@ -94,7 +102,7 @@ fun TomorrowLesson(
                     Image(
                         provider = ImageProvider(R.drawable.person),
                         contentDescription = null,
-                        modifier = GlanceModifier.size(15.dp),
+                        modifier = GlanceModifier.size(14.dp),
                         colorFilter = ColorFilter.tint(ColorProvider(buttons))
                     )
 
@@ -103,7 +111,8 @@ fun TomorrowLesson(
                     Text(
                         text = "$nextLabel",
                         style = TextStyle(
-                            color = ColorProvider(Color.DarkGray)
+                            color = ColorProvider(if (darkTheme) disabledWhite else Color.DarkGray),
+                            fontSize = (10 * scaleFactor).toInt().sp
                         ),
                         maxLines = 1,
                         modifier = GlanceModifier
@@ -119,7 +128,7 @@ fun TomorrowLesson(
                 Image(
                     provider = ImageProvider(R.drawable.time),
                     contentDescription = null,
-                    modifier = GlanceModifier.size(15.dp),
+                    modifier = GlanceModifier.size(14.dp),
                     colorFilter = ColorFilter.tint(ColorProvider(buttons))
                 )
 
@@ -129,7 +138,8 @@ fun TomorrowLesson(
             Text(
                 text = tomorrowLesson?.time ?: "Можно выспаться и отдохнуть 🏖️",
                 style = TextStyle(
-                    color = ColorProvider(Color.DarkGray)
+                    color = ColorProvider(if (darkTheme) disabledWhite else Color.DarkGray),
+                    fontSize = (10 * scaleFactor).toInt().sp
                 ),
                 modifier = GlanceModifier
             )
@@ -140,16 +150,17 @@ fun TomorrowLesson(
                 Image(
                     provider = ImageProvider(R.drawable.auditory_label),
                     contentDescription = null,
-                    modifier = GlanceModifier.size(15.dp),
+                    modifier = GlanceModifier.size(14.dp),
                     colorFilter = ColorFilter.tint(ColorProvider(buttons))
                 )
 
                 Spacer(GlanceModifier.width(5.dp))
 
                 Text(
-                    text = tomorrowLesson!!.location.toString(),
+                    text = tomorrowLesson.location.toString(),
                     style = TextStyle(
-                        color = ColorProvider(Color.DarkGray)
+                        color = ColorProvider(if (darkTheme) disabledWhite else Color.DarkGray),
+                        fontSize = (10 * scaleFactor).toInt().sp
                     ),
                     modifier = GlanceModifier
                 )

@@ -1,8 +1,10 @@
 package com.mycollege.schedule.feature.widgets.ui.components
 
+import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
@@ -29,32 +31,36 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.mycollege.schedule.R
 import com.mycollege.schedule.feature.schedule.data.models.DataClasses
+import com.mycollege.schedule.shared.utils.ResponsiveTextSize
 import com.mycollege.schedule.shared.ui.theme.buttons
 import com.mycollege.schedule.shared.ui.theme.disabledWhite
 import java.time.Duration
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
+@SuppressLint("RestrictedApi")
 @Composable
 fun CurrentLesson(
     darkTheme: Boolean,
     studentMode: Boolean,
-    currentLesson: DataClasses.Lesson
+    currentLesson: DataClasses.Lesson,
+    context: Context
 ) {
 
-    var currentLessonProgress by remember { mutableIntStateOf(0) }
+    var currentLessonProgress by remember { mutableFloatStateOf(0f) }
+    val scaleFactor = ResponsiveTextSize.getScaleFactor(context)
 
-    Column(GlanceModifier.fillMaxWidth().padding(start = -(2).dp, top = 0.dp, end = 20.dp)) {
+    Column(GlanceModifier.fillMaxWidth().padding(start = -(2).dp, top = 0.dp, end = 10.dp)) {
 
-        Row(GlanceModifier.fillMaxWidth(), horizontalAlignment = Alignment.End) {
+        Row(GlanceModifier.fillMaxWidth().padding(0), horizontalAlignment = Alignment.End) {
             Text(
                 text = "СЕЙЧАС ИДЕТ",
                 style = TextStyle(
                     textAlign = TextAlign.End,
                     color = ColorProvider(if (darkTheme) disabledWhite else Color.DarkGray),
-                    fontSize = 12.sp
+                    fontSize = (8 * scaleFactor).toInt().sp
                 ),
-                modifier = GlanceModifier
+                modifier = GlanceModifier.padding(0)
             )
         }
 
@@ -70,7 +76,7 @@ fun CurrentLesson(
             Text(
                 text = "${currentLesson.name}",
                 style = TextStyle(
-                    fontSize = 14.sp,
+                    fontSize = (10 * scaleFactor).toInt().sp,
                     fontWeight = FontWeight.Bold,
                     color = ColorProvider(if (darkTheme) Color.White else Color.Black)
                 ),
@@ -79,7 +85,7 @@ fun CurrentLesson(
             )
         }
 
-        Spacer(GlanceModifier.height(2.dp))
+        //Spacer(GlanceModifier.height(1.dp))
 
         Row(
             modifier = GlanceModifier.padding(start = 38.dp),
@@ -92,7 +98,7 @@ fun CurrentLesson(
                 Image(
                     provider = ImageProvider(R.drawable.person),
                     contentDescription = null,
-                    modifier = GlanceModifier.size(15.dp),
+                    modifier = GlanceModifier.size(12.dp),
                     colorFilter = ColorFilter.tint(ColorProvider(buttons))
                 )
 
@@ -102,7 +108,7 @@ fun CurrentLesson(
                     text = "$firstLabel",
                     style = TextStyle(
                         color = ColorProvider(if (darkTheme) disabledWhite else Color.DarkGray),
-                        fontSize = 13.sp
+                        fontSize = (9 * scaleFactor).toInt().sp
                     ),
                     maxLines = 1,
                     modifier = GlanceModifier
@@ -120,7 +126,7 @@ fun CurrentLesson(
             Image(
                 provider = ImageProvider(R.drawable.time),
                 contentDescription = null,
-                modifier = GlanceModifier.size(15.dp),
+                modifier = GlanceModifier.size(12.dp),
                 colorFilter = ColorFilter.tint(ColorProvider(buttons))
             )
 
@@ -130,7 +136,7 @@ fun CurrentLesson(
                 text = currentLesson.time,
                 style = TextStyle(
                     color = ColorProvider(if (darkTheme) disabledWhite else Color.DarkGray),
-                    fontSize = 13.sp
+                    fontSize = (9 * scaleFactor).toInt().sp
                 ),
                 modifier = GlanceModifier
             )
@@ -140,7 +146,7 @@ fun CurrentLesson(
             Image(
                 provider = ImageProvider(R.drawable.auditory_label),
                 contentDescription = null,
-                modifier = GlanceModifier.size(15.dp),
+                modifier = GlanceModifier.size(12.dp),
                 colorFilter = ColorFilter.tint(ColorProvider(buttons))
             )
 
@@ -150,7 +156,7 @@ fun CurrentLesson(
                 text = currentLesson.location.toString(),
                 style = TextStyle(
                     color = ColorProvider(if (darkTheme) disabledWhite else Color.DarkGray),
-                    fontSize = 13.sp
+                    fontSize = (9 * scaleFactor).toInt().sp
                 ),
                 modifier = GlanceModifier
             )
@@ -163,19 +169,19 @@ fun CurrentLesson(
             val startTime = LocalTime.parse(time[0], formatter)
             val endTime = LocalTime.parse(time[1], formatter)
 
-            val totalMinutes = Duration.between(startTime, endTime).toMinutes()
-            val passedMinutes = Duration.between(startTime, LocalTime.now()).toMinutes()
-            currentLessonProgress = (passedMinutes * 100 / totalMinutes).toInt()
+            val totalMinutes = Duration.between(startTime, endTime).toMinutes().toFloat()
+            val passedMinutes = Duration.between(startTime, LocalTime.now()).toMinutes().toFloat()
+            currentLessonProgress = (passedMinutes / totalMinutes).toFloat()
 
             Column {
-                Spacer(GlanceModifier.height(4.dp))
-                GlanceProgressBar(currentLessonProgress)
                 Spacer(GlanceModifier.height(2.dp))
+                GlanceProgressBar(currentLessonProgress)
+                Spacer(GlanceModifier.height(1.dp))
                 Text(
-                    text = "$currentLessonProgress%",
+                    text = "${(currentLessonProgress * 100).toInt()}%",
                     style = TextStyle(
                         color = ColorProvider(if (darkTheme) disabledWhite else Color.DarkGray),
-                        fontSize = 14.sp
+                        fontSize = (9 * scaleFactor).toInt().sp
                     ),
                     modifier = GlanceModifier
                 )
