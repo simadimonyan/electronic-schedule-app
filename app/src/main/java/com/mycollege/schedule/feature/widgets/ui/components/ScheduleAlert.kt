@@ -40,7 +40,7 @@ fun ScheduleAlert(darkTheme: Boolean, context: Context) {
         Text(
             text = "Нет расписания",
             style = TextStyle(
-                fontSize = (14 * scaleFactor).toInt().sp
+                fontSize = (12 * scaleFactor).toInt().sp
             ),
             modifier = GlanceModifier.Companion.padding(12.dp)
         )

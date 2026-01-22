@@ -68,7 +68,9 @@ class ScheduleLargeWidget : GlanceAppWidget() {
         val tomorrowDayWeek: String = DayWeek.findById(LocalDate.now().plusDays(1).dayOfWeek.value)?.long ?: "Понедельник"
 
         var scheduleError = false
-        val parity = if (storage.getCacheManager().loadLastSettings().weekCount) 2 else 1
+
+        val settings = storage.getCacheManager().loadLastSettings()
+        val parity = if (settings != null && settings.weekCount) 2 else 1
 
         val group: Group?
         val teacher: Teacher?
@@ -80,7 +82,7 @@ class ScheduleLargeWidget : GlanceAppWidget() {
 
         val configuration = storage.getCacheManager().loadLastConfiguration()
 
-        if (configuration != null) {
+        if (configuration != null && settings != null) {
             if (studentMode) {
                 group = storage.getChosenGroupUseCase().getByName(configuration.group)
 
