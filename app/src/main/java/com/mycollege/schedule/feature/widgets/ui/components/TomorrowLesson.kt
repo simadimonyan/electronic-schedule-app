@@ -52,7 +52,7 @@ fun TomorrowLesson(
                     style = TextStyle(
                         textAlign = TextAlign.End,
                         color = ColorProvider(if (darkTheme) disabledWhite else Color.DarkGray),
-                        fontSize = (11 * scaleFactor).toInt().sp),
+                        fontSize = (9 * scaleFactor).toInt().sp),
                     modifier = GlanceModifier
                 )
             }
@@ -63,7 +63,7 @@ fun TomorrowLesson(
                     style = TextStyle(
                         textAlign = TextAlign.End,
                         color = ColorProvider(buttons),
-                        fontSize = (10 * scaleFactor).toInt().sp,
+                        fontSize = (8 * scaleFactor).toInt().sp,
                     ),
                     modifier = GlanceModifier
                 )
