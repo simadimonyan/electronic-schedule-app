@@ -206,9 +206,6 @@ fun SettingsContent(
 
     Scaffold(modifier = Modifier
         .fillMaxSize(), containerColor = if (darkMode) backgroundDark else background,
-        bottomBar = {
-            ContactLabel()
-        },
         topBar = {
             TopAppBar(
                 title = {
@@ -449,6 +446,14 @@ fun SettingsContent(
                         )
                     }
                 }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(30.dp))
+
+                ContactLabel()
+
+                Spacer(modifier = Modifier.height(30.dp))
             }
 
         }
