@@ -58,7 +58,7 @@ fun CurrentLesson(
                 style = TextStyle(
                     textAlign = TextAlign.End,
                     color = ColorProvider(if (darkTheme) disabledWhite else Color.DarkGray),
-                    fontSize = (9 * scaleFactor).toInt().sp
+                    fontSize = (8 * scaleFactor).toInt().sp
                 ),
                 modifier = GlanceModifier.padding(0)
             )

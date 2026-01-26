@@ -52,7 +52,7 @@ fun TomorrowLesson(
                     style = TextStyle(
                         textAlign = TextAlign.End,
                         color = ColorProvider(if (darkTheme) disabledWhite else Color.DarkGray),
-                        fontSize = (9 * scaleFactor).toInt().sp),
+                        fontSize = (8 * scaleFactor).toInt().sp),
                     modifier = GlanceModifier
                 )
             }
@@ -84,7 +84,7 @@ fun TomorrowLesson(
             Text(
                 text = tomorrowLesson?.name ?: "Завтра нет пар",
                 style = TextStyle(
-                    fontSize = (11 * scaleFactor).toInt().sp,
+                    fontSize = (10 * scaleFactor).toInt().sp,
                     fontWeight = FontWeight.Bold,
                     color = ColorProvider(if (darkTheme) Color.White else Color.Black)
                 ),
@@ -112,7 +112,7 @@ fun TomorrowLesson(
                         text = "$nextLabel",
                         style = TextStyle(
                             color = ColorProvider(if (darkTheme) disabledWhite else Color.DarkGray),
-                            fontSize = (10 * scaleFactor).toInt().sp
+                            fontSize = (9 * scaleFactor).toInt().sp
                         ),
                         maxLines = 1,
                         modifier = GlanceModifier
@@ -139,7 +139,7 @@ fun TomorrowLesson(
                 text = tomorrowLesson?.time ?: "Можно выспаться и отдохнуть 🏖️",
                 style = TextStyle(
                     color = ColorProvider(if (darkTheme) disabledWhite else Color.DarkGray),
-                    fontSize = (10 * scaleFactor).toInt().sp
+                    fontSize = (9 * scaleFactor).toInt().sp
                 ),
                 modifier = GlanceModifier
             )
@@ -160,7 +160,7 @@ fun TomorrowLesson(
                     text = tomorrowLesson.location.toString(),
                     style = TextStyle(
                         color = ColorProvider(if (darkTheme) disabledWhite else Color.DarkGray),
-                        fontSize = (10 * scaleFactor).toInt().sp
+                        fontSize = (9 * scaleFactor).toInt().sp
                     ),
                     modifier = GlanceModifier
                 )
