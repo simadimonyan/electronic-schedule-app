@@ -28,7 +28,7 @@ tracer {
         appToken = tracerAppToken
 
         // true on release
-        uploadMapping = false
+        uploadMapping = true
     }
 }
 
