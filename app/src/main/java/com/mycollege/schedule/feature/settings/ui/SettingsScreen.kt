@@ -156,8 +156,8 @@ fun SettingsScreen(
 
     SettingsContent(appState, settingsState, handleEvent, onAboutToggle, openCopyrights, openPrivacyPolicy, openUserAgreement, onThemeChange, onExit)
 
-    var privacyPolicy by remember { mutableStateOf("https://yandex.ru") }
-    var userAgreement by remember { mutableStateOf("https://yandex.ru") }
+    var privacyPolicy by remember { mutableStateOf("https://myimsit.ru") }
+    var userAgreement by remember { mutableStateOf("https://myimsit.ru") }
 
     RemoteConfigClient.instance.getRemoteConfig().addOnSuccessListener { rc ->
         privacyPolicy = rc.getString("PrivacyPolicy")
