@@ -3,10 +3,8 @@ package com.mycollege.schedule.app.navigation
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
@@ -91,8 +89,11 @@ fun AddNavGraph(
                 )
             }
         ) {
+
+            val scrollState = rememberLazyListState()
+
             CircleThemeTransition(settingsViewModel) {
-                SettingsScreen(settingsViewModel, navController)
+                SettingsScreen(settingsViewModel, navController, scrollState)
             }
         }
     }

@@ -1,7 +1,10 @@
 package com.mycollege.schedule.feature.settings.ui.components
 import android.annotation.SuppressLint
+import android.util.Log
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.BackEventCompat
+import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -43,7 +46,9 @@ import com.mycollege.schedule.shared.ui.theme.background
 import com.mycollege.schedule.shared.ui.theme.backgroundDark
 import com.mycollege.schedule.shared.ui.theme.disabledWhite
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("ContextCastToActivity")
@@ -55,6 +60,19 @@ fun WebViewScreen(label: String, link: String, onDisposable: () -> Unit) {
 
     var visible by remember { mutableStateOf(false) }
     var showTopBar by remember { mutableStateOf(true) }
+
+    PredictiveBackHandler(true) { progress: Flow<BackEventCompat> ->
+        try {
+            progress.collect { backEvent -> }
+            scope.launch {
+                visible = !visible
+                delay(250L)
+                onDisposable()
+            }
+        } catch (e: CancellationException) {
+            Log.w("PostCreateSwipe", e)
+        }
+    }
 
     LaunchedEffect(Unit) {
         visible = true

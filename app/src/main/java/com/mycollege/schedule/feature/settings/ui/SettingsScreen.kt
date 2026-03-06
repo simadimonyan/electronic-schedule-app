@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -49,7 +50,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.glance.appwidget.lazy.LazyColumn
 import androidx.glance.appwidget.updateAll
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -78,20 +78,22 @@ import com.mycollege.schedule.shared.ui.theme.secondaryDark
 import com.mycollege.schedule.shared.ui.theme.tertiaryDark
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import ru.rustore.sdk.remoteconfig.RemoteConfig
 import ru.rustore.sdk.remoteconfig.RemoteConfigClient
 
 @Preview
 @Composable
 fun SettingsPreview() {
-    SettingsContent(AppState(), SettingsState(), {}, {}, {}, {}, {}, {}, {})
+    SettingsContent(AppState(), SettingsState(), {}, {}, {}, {}, {}, {}, {},
+        rememberLazyListState()
+    )
 }
 
 @SuppressLint("ContextCastToActivity")
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
-    navController: NavHostController
+    navController: NavHostController,
+    scrollState: LazyListState
 ) {
 
     val scope = rememberCoroutineScope()
@@ -154,7 +156,7 @@ fun SettingsScreen(
         AboutBottomSheet(onAboutToggle)
     }
 
-    SettingsContent(appState, settingsState, handleEvent, onAboutToggle, openCopyrights, openPrivacyPolicy, openUserAgreement, onThemeChange, onExit)
+    SettingsContent(appState, settingsState, handleEvent, onAboutToggle, openCopyrights, openPrivacyPolicy, openUserAgreement, onThemeChange, onExit, scrollState)
 
     var privacyPolicy by remember { mutableStateOf("https://myimsit.ru") }
     var userAgreement by remember { mutableStateOf("https://myimsit.ru") }
@@ -197,7 +199,8 @@ fun SettingsContent(
     openPrivacyPolicy: () -> Unit,
     openUserAgreement: () -> Unit,
     onThemeChange: () -> Unit,
-    onExit: () -> Unit
+    onExit: () -> Unit,
+    scrollState: LazyListState
 ) {
 
     val scope = rememberCoroutineScope()
@@ -238,7 +241,7 @@ fun SettingsContent(
     ) { innerPadding ->
 
         LazyColumn(
-            state = rememberLazyListState(),
+            state = scrollState,
             modifier = Modifier.fillMaxSize().padding(innerPadding)
         ) {
 
