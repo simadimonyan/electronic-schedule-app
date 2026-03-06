@@ -98,14 +98,43 @@
 
 Основные технологии проекта:
 
-- Kotlin / Jetpack Compose
-- Room 
-- Hilt
-- MyTracker
-- RuStore SDK
-- Gradle
+- Kotlin | 2.0.0
+- Jetpack Compose |
+- Room | 
+- Hilt | 
+- MyTracker |
+- Tracer SDK |  
+- RuStore SDK | 
+- Gradle | 
+- Minimum SDK | 21
+- Target SDK | 34
 
-Дополнительно могут использоваться библиотеки для работы с сетью, хранением данных и отображением пользовательского интерфейса.
+Секретные ключи и токены:
+
+- MyTracker - UX аналитика
+- Tracer - Аналитика ошибок
+- RuStore Remote Config - Удаленная конфигурация приложения
+- Yandex Ads - Рекламная интеграция
+
+```
+tracer.pluginToken=YOUR_TOKEN
+tracer.appToken=YOUR_TOKEN
+
+remoteconfig.appId=YOUR_APP_ID
+advertisement.bannerId=YOUR_BANNER_ID
+
+mytracker.sdk.key=YOUR_KEY
+```
+
+Поля удаленного конфига: 
+
+- `UserAgreement` - Пользовательское соглашение приложения с ссылкой на внешний сайт
+- `PrivacyPolicy` - Политика конфиденциальности приложения с ссылкой на внешний сайт
+
+- `ScheduleServiceAccessToken` - Токен доступа к серверу расписания
+
+- `Advertisement` - Разрешение для приложения показывать рекламу на всех устройствах
+- `ScheduleServer` - IP адрес сервера для просмотра расписания
 
 ---
 
