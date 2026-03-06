@@ -389,3 +389,4 @@ mytracker.sdk.key=YOUR_KEY
 
 Dimitri Simonyan | work@dsimonyan.ru
 
+© Исходный код [защищен](docs/copyright/2025617277.eod.pdf) авторским правом в Федеральной службе по интеллектуальной собственности Российской Федерации
