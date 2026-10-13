@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.google.gson.GsonBuilder
 import com.mycollege.schedule.core.network.api.configs.ConfigsApi
 import com.mycollege.schedule.core.network.api.groups.GroupsApi
+import com.mycollege.schedule.core.network.api.quizzes.QuizzesApi
 import com.mycollege.schedule.core.network.api.teachers.TeachersApi
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -61,6 +62,10 @@ class RetrofitClient(private val urlString: String) {
 
     val teachersApi: TeachersApi by lazy {
         retrofit.create(TeachersApi::class.java)
+    }
+
+    val quizzesApi: QuizzesApi by lazy {
+        retrofit.create(QuizzesApi::class.java)
     }
 
 }

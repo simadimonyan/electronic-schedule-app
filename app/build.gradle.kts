@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -21,6 +23,20 @@ val tracerAppToken = properties["tracer.appToken"] as String
 val advertisementBannerId = properties["advertisement.bannerId1"] as String
 val advertisementBannerId2 = properties["advertisement.bannerId2"] as String
 val advertisementBannerId3 = properties["advertisement.bannerId3"] as String
+
+// Отладка опросов (только debug): ключи из local.properties или -P<ключ>=…
+//   surveys.debugBaseUrl   — base URL стенда опросов, напр. http://10.0.2.2:8080/ (пусто = прод из RemoteConfig)
+//   surveys.debugToken     — токен для стенда (без "Bearer "), пусто = токен из RemoteConfig
+//   surveys.debugForceShow — true: показывать лист опроса при каждом запуске, игнорируя лимиты
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+fun surveysDebugProperty(key: String): String =
+    (project.findProperty(key)?.toString() ?: localProperties.getProperty(key) ?: "").trim()
+val surveysDebugBaseUrl = surveysDebugProperty("surveys.debugBaseUrl")
+val surveysDebugToken = surveysDebugProperty("surveys.debugToken")
+val surveysDebugForceShow = surveysDebugProperty("surveys.debugForceShow").toBoolean()
 
 tracer {
     create("defaultConfig") {
@@ -74,6 +90,12 @@ android {
             buildConfigField("String", "ADVERTISEMENT_BANNER_ID2", "\"$advertisementBannerId2\"")
             buildConfigField("String", "ADVERTISEMENT_BANNER_ID3", "\"$advertisementBannerId3\"")
             buildConfigField("String", "MY_TRACKER_SDK_KEY", "\"$myTrackerSdkKey\"")
+
+            // не compile-time константы: иначе Kotlin их инлайнит и после правки local.properties
+            // инкрементальная сборка оставляет старые значения
+            buildConfigField("String", "SURVEYS_DEBUG_BASE_URL", "String.valueOf(\"$surveysDebugBaseUrl\")")
+            buildConfigField("String", "SURVEYS_DEBUG_TOKEN", "String.valueOf(\"$surveysDebugToken\")")
+            buildConfigField("boolean", "SURVEYS_DEBUG_FORCE_SHOW", "Boolean.parseBoolean(\"$surveysDebugForceShow\")")
         }
         release {
             isMinifyEnabled = true //R8 compiler
@@ -91,6 +113,11 @@ android {
             buildConfigField("String", "ADVERTISEMENT_BANNER_ID2", "\"$advertisementBannerId2\"")
             buildConfigField("String", "ADVERTISEMENT_BANNER_ID3", "\"$advertisementBannerId3\"")
             buildConfigField("String", "MY_TRACKER_SDK_KEY", "\"$myTrackerSdkKey\"")
+
+            // в релизе отладка опросов всегда выключена
+            buildConfigField("String", "SURVEYS_DEBUG_BASE_URL", "\"\"")
+            buildConfigField("String", "SURVEYS_DEBUG_TOKEN", "\"\"")
+            buildConfigField("boolean", "SURVEYS_DEBUG_FORCE_SHOW", "false")
         }
     }
     compileOptions {

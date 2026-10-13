@@ -18,6 +18,9 @@ import com.mycollege.schedule.app.activity.ui.state.StartViewModel
 import com.mycollege.schedule.app.navigation.AppPager
 import com.mycollege.schedule.feature.groups.ui.state.GroupViewModel
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleViewModel
+import com.mycollege.schedule.feature.surveys.ui.SurveyHost
+import com.mycollege.schedule.feature.surveys.ui.state.SurveyEvent
+import com.mycollege.schedule.feature.surveys.ui.state.SurveyViewModel
 import com.mycollege.schedule.shared.ui.components.ModeTransition
 import com.mycollege.schedule.shared.ui.components.CustomAppBar
 import kotlinx.coroutines.delay
@@ -27,7 +30,8 @@ fun StartScreen(
     viewModel: StartViewModel = hiltViewModel(),
     globalGraph: NavHostController,
     groupsViewModel: GroupViewModel,
-    scheduleViewModel: ScheduleViewModel
+    scheduleViewModel: ScheduleViewModel,
+    surveyViewModel: SurveyViewModel = hiltViewModel()
 ) {
     val settingsState by viewModel.settingsStateHolder.settingsState.collectAsState()
     val appState by viewModel.appStateHolder.appState.collectAsState()
@@ -60,6 +64,16 @@ fun StartScreen(
     if (!settingsState.navigationInvisibility) {
         CustomAppBar(groupsViewModel, pagerState)
     }
+
+    // опрос: проверка при открытии экрана расписания (лимиты — в SurveyScheduleUseCase),
+    // в debug с surveys.debugForceShow — сразу при старте
+    LaunchedEffect(pagerState.currentPage) {
+        if (pagerState.currentPage == 1 || surveyViewModel.forceShow) {
+            surveyViewModel.handleEvent(SurveyEvent.AutoCheck)
+        }
+    }
+
+    SurveyHost(surveyViewModel)
 
     if (transitionModeFlag) {
         Box(

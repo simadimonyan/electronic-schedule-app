@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -68,6 +69,9 @@ import com.mycollege.schedule.feature.settings.ui.components.WebViewScreen
 import com.mycollege.schedule.feature.settings.ui.state.SettingsEvent
 import com.mycollege.schedule.feature.settings.ui.state.SettingsState
 import com.mycollege.schedule.feature.settings.ui.state.SettingsViewModel
+import com.mycollege.schedule.feature.surveys.ui.SurveyHost
+import com.mycollege.schedule.feature.surveys.ui.state.SurveyEvent
+import com.mycollege.schedule.feature.surveys.ui.state.SurveyViewModel
 import com.mycollege.schedule.feature.widgets.ui.ScheduleLargeWidget
 import com.mycollege.schedule.feature.widgets.ui.ScheduleSmallWidget
 import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
@@ -93,7 +97,8 @@ fun SettingsPreview() {
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
     navController: NavHostController,
-    scrollState: LazyListState
+    scrollState: LazyListState,
+    surveyViewModel: SurveyViewModel = hiltViewModel()
 ) {
 
     val scope = rememberCoroutineScope()
@@ -156,7 +161,14 @@ fun SettingsScreen(
         AboutBottomSheet(onAboutToggle)
     }
 
-    SettingsContent(appState, settingsState, handleEvent, onAboutToggle, openCopyrights, openPrivacyPolicy, openUserAgreement, onThemeChange, onExit, scrollState)
+    // «Оставить отзыв»: текущий опрос или «Сейчас опросов нет»
+    val openFeedback: () -> Unit = {
+        surveyViewModel.handleEvent(SurveyEvent.OpenManually)
+    }
+
+    SettingsContent(appState, settingsState, handleEvent, onAboutToggle, openCopyrights, openPrivacyPolicy, openUserAgreement, onThemeChange, onExit, scrollState, openFeedback)
+
+    SurveyHost(surveyViewModel)
 
     var privacyPolicy by remember { mutableStateOf("https://myimsit.ru") }
     var userAgreement by remember { mutableStateOf("https://myimsit.ru") }
@@ -200,7 +212,8 @@ fun SettingsContent(
     openUserAgreement: () -> Unit,
     onThemeChange: () -> Unit,
     onExit: () -> Unit,
-    scrollState: LazyListState
+    scrollState: LazyListState,
+    openFeedback: () -> Unit = {}
 ) {
 
     val scope = rememberCoroutineScope()
@@ -342,6 +355,32 @@ fun SettingsContent(
                         modifier = Modifier.padding(start = 17.dp, top = 10.dp),
                         color = if (darkMode) Color.White else Color.Black
                     )
+
+                    Row(
+                        modifier = Modifier
+                            .clickable {
+                                openFeedback()
+                            }
+                            .height(60.dp)
+                            .fillMaxWidth()
+                            .padding(start = 15.dp, end = 15.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Outlined.ThumbUp,
+                            contentDescription = "Оставить отзыв",
+                            tint = buttons,
+                            modifier = Modifier.size(25.dp).offset(1.dp)
+                        )
+                        Spacer(modifier = Modifier.width(15.dp))
+                        Text(
+                            text = "Оставить отзыв",
+                            fontSize = 15.sp,
+                            color = if (darkMode) Color.White else Color.Black
+                        )
+                    }
+
+                    HorizontalDivider(modifier = Modifier.padding(start = 55.dp, end = 20.dp), color = if (darkMode) tertiaryDark else Color.LightGray)
 
                     Row(
                         modifier = Modifier
