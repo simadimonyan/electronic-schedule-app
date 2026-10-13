@@ -5,6 +5,10 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.my.tracker.MyTracker
+import com.mycollege.schedule.BuildConfig
+import com.mycollege.schedule.core.network.dto.quizzes.Quiz
+import com.mycollege.schedule.feature.surveys.data.models.QuestionType
+import com.mycollege.schedule.feature.surveys.data.models.SurveyAnswers
 import com.mycollege.schedule.feature.surveys.data.models.SURVEY_TEXT_LIMIT
 import com.mycollege.schedule.feature.surveys.data.repository.SurveyApiException
 import com.mycollege.schedule.feature.surveys.domain.usecase.GetActiveSurveyUseCase
@@ -12,6 +16,7 @@ import com.mycollege.schedule.feature.surveys.domain.usecase.SubmitSurveyUseCase
 import com.mycollege.schedule.feature.surveys.domain.usecase.SurveyScheduleUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -69,6 +74,7 @@ class SurveyViewModel @Inject constructor(
                     forcedShown = force
                     MyTracker.trackEvent("Показать опрос")
                     _state.value = SurveyState(phase = SurveyPhase.Form, quiz = quiz, automatic = true)
+                    applyDemo(quiz)
                 }
             } catch (e: SurveyApiException) {
                 // тихо: автопоказ не должен мешать расписанию
@@ -86,8 +92,41 @@ class SurveyViewModel @Inject constructor(
                 val quiz = getActiveSurveyUseCase.getActiveSurvey()
                 _state.value = if (quiz == null) SurveyState(phase = SurveyPhase.Empty)
                 else SurveyState(phase = SurveyPhase.Form, quiz = quiz)
+                if (quiz != null) applyDemo(quiz)
             } catch (e: SurveyApiException) {
                 _state.value = SurveyState(phase = SurveyPhase.LoadError, error = e.message)
+            }
+        }
+    }
+
+    /**
+     * Только debug (surveys.debugDemoFill / surveys.debugDemoSubmit): демо-ответы для скриншотов —
+     * кириллицу через adb input text не ввести
+     */
+    private fun applyDemo(quiz: Quiz) {
+        if (!BuildConfig.DEBUG) return
+        if (BuildConfig.SURVEYS_DEBUG_DEMO_FILL) {
+            val texts = ArrayDeque(listOf(
+                "Удобно, что расписание открывается сразу, без интернета",
+                "Иногда виджет обновляется с задержкой"
+            ))
+            val choices = mutableMapOf<Long, Set<Long>>()
+            val values = mutableMapOf<Long, String>()
+            quiz.questions.orEmpty().forEach { q ->
+                when (QuestionType.of(q)) {
+                    QuestionType.RATING -> values[q.id] = (q.scale ?: 5).coerceIn(2, 10).toString()
+                    QuestionType.TEXT -> texts.removeFirstOrNull()?.let { values[q.id] = it }
+                    QuestionType.SINGLE, QuestionType.MULTIPLE ->
+                        q.answers?.firstOrNull()?.let { choices[q.id] = setOf(it.id) }
+                    QuestionType.UNKNOWN -> Unit
+                }
+            }
+            _state.update { it.copy(answers = SurveyAnswers(choices, values), demoFilled = true) }
+        }
+        if (BuildConfig.SURVEYS_DEBUG_DEMO_SUBMIT) {
+            viewModelScope.launch {
+                delay(2000)
+                submit()
             }
         }
     }

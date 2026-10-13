@@ -33,7 +33,9 @@ data class SurveyState(
     val error: String? = null,
     val completionMessage: String? = null,
     /** лист показан автоматически (закрытие = «Не сейчас») */
-    val automatic: Boolean = false
+    val automatic: Boolean = false,
+    /** debug: форма заполнена демо-ответами — прокрутить к «Отправить» */
+    val demoFilled: Boolean = false
 ) {
     val canSubmit: Boolean
         get() = phase == SurveyPhase.Form && quiz != null && answers.isComplete(quiz.questions.orEmpty())

@@ -28,6 +28,8 @@ val advertisementBannerId3 = properties["advertisement.bannerId3"] as String
 //   surveys.debugBaseUrl   — base URL стенда опросов, напр. http://10.0.2.2:8080/ (пусто = прод из RemoteConfig)
 //   surveys.debugToken     — токен для стенда (без "Bearer "), пусто = токен из RemoteConfig
 //   surveys.debugForceShow — true: показывать лист опроса при каждом запуске, игнорируя лимиты
+//   surveys.debugDemoFill  — true: заполнить форму демо-ответами (для скриншотов)
+//   surveys.debugDemoSubmit — true: через 2 с после показа нажать «Отправить»
 val localProperties = Properties().apply {
     val file = rootProject.file("local.properties")
     if (file.exists()) file.inputStream().use { load(it) }
@@ -37,6 +39,9 @@ fun surveysDebugProperty(key: String): String =
 val surveysDebugBaseUrl = surveysDebugProperty("surveys.debugBaseUrl")
 val surveysDebugToken = surveysDebugProperty("surveys.debugToken")
 val surveysDebugForceShow = surveysDebugProperty("surveys.debugForceShow").toBoolean()
+// для скриншотов: автозаполнение формы и автоотправка через 2 с
+val surveysDebugDemoFill = surveysDebugProperty("surveys.debugDemoFill").toBoolean()
+val surveysDebugDemoSubmit = surveysDebugProperty("surveys.debugDemoSubmit").toBoolean()
 
 tracer {
     create("defaultConfig") {
@@ -96,6 +101,8 @@ android {
             buildConfigField("String", "SURVEYS_DEBUG_BASE_URL", "String.valueOf(\"$surveysDebugBaseUrl\")")
             buildConfigField("String", "SURVEYS_DEBUG_TOKEN", "String.valueOf(\"$surveysDebugToken\")")
             buildConfigField("boolean", "SURVEYS_DEBUG_FORCE_SHOW", "Boolean.parseBoolean(\"$surveysDebugForceShow\")")
+            buildConfigField("boolean", "SURVEYS_DEBUG_DEMO_FILL", "Boolean.parseBoolean(\"$surveysDebugDemoFill\")")
+            buildConfigField("boolean", "SURVEYS_DEBUG_DEMO_SUBMIT", "Boolean.parseBoolean(\"$surveysDebugDemoSubmit\")")
         }
         release {
             isMinifyEnabled = true //R8 compiler
@@ -118,6 +125,8 @@ android {
             buildConfigField("String", "SURVEYS_DEBUG_BASE_URL", "\"\"")
             buildConfigField("String", "SURVEYS_DEBUG_TOKEN", "\"\"")
             buildConfigField("boolean", "SURVEYS_DEBUG_FORCE_SHOW", "false")
+            buildConfigField("boolean", "SURVEYS_DEBUG_DEMO_FILL", "false")
+            buildConfigField("boolean", "SURVEYS_DEBUG_DEMO_SUBMIT", "false")
         }
     }
     compileOptions {

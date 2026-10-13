@@ -60,6 +60,8 @@ import com.mycollege.schedule.shared.ui.theme.disabledDark
 import com.mycollege.schedule.shared.ui.theme.disabledWhite
 import com.mycollege.schedule.shared.ui.theme.tertiaryDark
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 
 /**
@@ -117,11 +119,20 @@ fun SurveyContent(
 ) {
     val darkMode = LocalAppDarkTheme.current
     val textColor = if (darkMode) Color.White else Color.Black
+    val scrollState = rememberScrollState()
+
+    // debug-демо: после автозаполнения показать кнопку «Отправить»
+    LaunchedEffect(state.demoFilled) {
+        if (state.demoFilled) {
+            delay(400)
+            scrollState.animateScrollTo(scrollState.maxValue)
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
     ) {
         Text(
             text = "Пара вопросов о приложении",
