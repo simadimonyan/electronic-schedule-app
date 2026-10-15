@@ -15,6 +15,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,6 +66,18 @@ fun StartScreen(
     val pagerState = rememberPagerState(
         initialPage = if (appState.pagerIndex == 1) 1 else 0
     ) { 2 }
+
+    // главный экран нового дизайна — «Сегодня»: если расписание уже выбрано, при запуске открываем его,
+    // а не экран выбора группы
+    var startPageResolved by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        if (!startPageResolved) {
+            startPageResolved = true
+            val g = groupsViewModel.groupStateHolder.groupState.value
+            val chosen = if (appState.studentMode) g.group != "Выбрать группу" else g.teacher != "Выбрать преподавателя"
+            if (chosen && appState.pagerIndex == 0) groupsViewModel.appStateHolder.updateIndex(1)
+        }
+    }
 
     // страница пейджера следует за pagerIndex (выбор группы ↔ расписание)
     LaunchedEffect(appState.pagerIndex) {
