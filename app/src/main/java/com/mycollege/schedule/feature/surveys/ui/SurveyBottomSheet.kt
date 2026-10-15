@@ -1,35 +1,32 @@
 package com.mycollege.schedule.feature.surveys.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -37,32 +34,34 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mycollege.schedule.R
 import com.mycollege.schedule.core.network.dto.quizzes.Quiz
 import com.mycollege.schedule.core.network.dto.quizzes.QuizAnswer
 import com.mycollege.schedule.core.network.dto.quizzes.QuizQuestion
 import com.mycollege.schedule.feature.surveys.ui.components.SurveyQuestion
 import com.mycollege.schedule.feature.surveys.ui.components.surveyErrorColor
-import com.mycollege.schedule.feature.surveys.ui.components.surveySecondaryText
 import com.mycollege.schedule.feature.surveys.ui.state.SurveyEvent
 import com.mycollege.schedule.feature.surveys.ui.state.SurveyPhase
 import com.mycollege.schedule.feature.surveys.ui.state.SurveyState
 import com.mycollege.schedule.feature.surveys.ui.state.SurveyViewModel
-import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
-import com.mycollege.schedule.shared.ui.theme.backgroundDark
-import com.mycollege.schedule.shared.ui.theme.buttons
-import com.mycollege.schedule.shared.ui.theme.disabledBlue
-import com.mycollege.schedule.shared.ui.theme.disabledDark
-import com.mycollege.schedule.shared.ui.theme.disabledWhite
-import com.mycollege.schedule.shared.ui.theme.tertiaryDark
-import kotlinx.coroutines.launch
+import com.mycollege.schedule.shared.ui.design.EyebrowPill
+import com.mycollege.schedule.shared.ui.design.MaIcon
+import com.mycollege.schedule.shared.ui.design.MaIcons
+import com.mycollege.schedule.shared.ui.design.OutlineButton
+import com.mycollege.schedule.shared.ui.design.PrimaryButton
+import com.mycollege.schedule.shared.ui.design.maClick
+import com.mycollege.schedule.shared.ui.theme.Ma
+import com.mycollege.schedule.shared.ui.theme.MaBrand
+import com.mycollege.schedule.shared.ui.theme.MaType
+import com.mycollege.schedule.shared.ui.theme.ScheduleTheme
 import kotlinx.coroutines.delay
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import kotlinx.coroutines.launch
 
 /**
  * Хост листа опроса: рисует лист, пока фаза не Hidden
@@ -81,7 +80,7 @@ fun SurveyBottomSheet(
     state: SurveyState,
     handleEvent: (SurveyEvent) -> Unit
 ) {
-    val darkMode = LocalAppDarkTheme.current
+    val c = Ma.colors
     val scope = rememberCoroutineScope()
     val currentPhase by rememberUpdatedState(state.phase)
 
@@ -96,29 +95,103 @@ fun SurveyBottomSheet(
     }
 
     ModalBottomSheet(
-        modifier = Modifier
-            .wrapContentHeight()
-            .padding(10.dp, 30.dp, 10.dp, 15.dp)
-            .imePadding(),
+        modifier = Modifier.statusBarsPadding().imePadding(),
         sheetState = sheetState,
-        shape = RoundedCornerShape(17.dp),
-        contentColor = if (darkMode) Color.White else Color.Black,
-        containerColor = if (darkMode) backgroundDark else Color.White,
-        dragHandle = { BottomSheetDefaults.DragHandle(color = if (darkMode) Color.White else Color.Black) },
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        containerColor = c.sheet,
+        contentColor = c.fg,
+        scrimColor = Color(0x570F172A),
+        dragHandle = {
+            Box(Modifier.padding(top = 8.dp).size(36.dp, 5.dp).clip(RoundedCornerShape(3.dp)).background(c.borderStrong))
+        },
         onDismissRequest = { handleEvent(SurveyEvent.NotNow) }
     ) {
         SurveyContent(state, handleEvent, hideThen)
     }
 }
 
+private val monthNom = listOf("январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь")
+private val monthPrep = listOf("январе", "феврале", "марте", "апреле", "мае", "июне", "июле", "августе", "сентябре", "октябре", "ноябре", "декабре")
+
+/** месяц опроса из period «2026-10» */
+private fun periodMonth(period: String?): Int? = period?.split("-")?.getOrNull(1)?.toIntOrNull()?.takeIf { it in 1..12 }
+
+/**
+ * Содержимое листа (Survey.dc.html): форма, «спасибо», «опросов нет», ошибка
+ */
 @Composable
 fun SurveyContent(
     state: SurveyState,
     handleEvent: (SurveyEvent) -> Unit,
     hideThen: (SurveyEvent) -> Unit
 ) {
-    val darkMode = LocalAppDarkTheme.current
-    val textColor = if (darkMode) Color.White else Color.Black
+    val c = Ma.colors
+    val month = periodMonth(state.quiz?.period)
+    val formPhase = state.phase == SurveyPhase.Form || state.phase == SurveyPhase.Submitting
+
+    Column(Modifier.fillMaxWidth().navigationBarsPadding()) {
+        // шапка: «Опрос · месяц» и закрыть
+        Row(Modifier.fillMaxWidth().padding(start = 22.dp, end = 14.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            EyebrowPill(if (month != null) "Опрос · ${monthNom[month - 1]}" else "Опрос", size = 10.sp)
+            Box(Modifier.weight(1f))
+            Box(
+                Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(c.sunk)
+                    .maClick(enabled = state.phase != SurveyPhase.Submitting) { hideThen(if (formPhase) SurveyEvent.NotNow else SurveyEvent.Close) },
+                contentAlignment = Alignment.Center
+            ) { MaIcon(MaIcons.close, c.fg, 16.dp, 2.2f) }
+        }
+
+        when (state.phase) {
+            SurveyPhase.Hidden -> Unit
+
+            SurveyPhase.Loading -> Box(Modifier.fillMaxWidth().height(260.dp), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = MaBrand.primary, strokeWidth = 3.dp, modifier = Modifier.size(36.dp))
+            }
+
+            SurveyPhase.Empty -> InfoBlock(
+                image = R.drawable.ill_survey_empty,
+                title = "Сейчас опросов нет",
+                text = "Загляните позже — когда появится новый опрос, мы спросим сами.",
+                primary = "Понятно" to { hideThen(SurveyEvent.Close) }
+            )
+
+            SurveyPhase.LoadError -> InfoBlock(
+                image = R.drawable.ill_survey_error,
+                title = "Не удалось загрузить опрос",
+                text = state.error?.takeIf { it.isNotBlank() } ?: "Проверьте подключение к интернету и попробуйте ещё раз.",
+                primary = "Повторить" to { handleEvent(SurveyEvent.Retry) },
+                secondary = "Закрыть" to { hideThen(SurveyEvent.Close) }
+            )
+
+            SurveyPhase.Success -> {
+                val next = if (state.quiz?.recurrence == "monthly" && month != null) "Следующий короткий опрос — в ${monthPrep[month % 12]}." else null
+                InfoBlock(
+                    image = R.drawable.ill_survey_done,
+                    title = state.completionMessage?.takeIf { it.isNotBlank() } ?: "Спасибо! Читаем каждый отзыв",
+                    text = next,
+                    primary = "Готово" to { hideThen(SurveyEvent.Close) },
+                    big = true
+                )
+            }
+
+            SurveyPhase.Form, SurveyPhase.Submitting -> SurveyForm(state, handleEvent, hideThen)
+        }
+    }
+}
+
+@Composable
+private fun androidx.compose.foundation.layout.ColumnScope.SurveyForm(
+    state: SurveyState,
+    handleEvent: (SurveyEvent) -> Unit,
+    hideThen: (SurveyEvent) -> Unit
+) {
+    val quiz = state.quiz ?: return
+    val c = Ma.colors
+    val questions = quiz.questions.orEmpty()
+    val submitting = state.phase == SurveyPhase.Submitting
     val scrollState = rememberScrollState()
 
     // debug-демо: после автозаполнения показать кнопку «Отправить»
@@ -130,222 +203,96 @@ fun SurveyContent(
     }
 
     Column(
-        modifier = Modifier
+        Modifier
             .fillMaxWidth()
+            .weight(1f, fill = false)
             .verticalScroll(scrollState)
+            .padding(start = 22.dp, end = 22.dp, top = 12.dp, bottom = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(22.dp)
     ) {
-        Text(
-            text = "Пара вопросов о приложении",
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
-            textAlign = TextAlign.Center,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = textColor
-        )
-
-        when (state.phase) {
-            SurveyPhase.Hidden -> Unit
-
-            SurveyPhase.Loading -> Box(
-                modifier = Modifier.fillMaxWidth().height(220.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = buttons)
+        Column {
+            Text(quiz.name.orEmpty().ifBlank { "Пара вопросов о приложении" }, style = MaType.display(25.sp, FontWeight.ExtraBold, 29.sp), color = c.fg)
+            if (!quiz.description.isNullOrBlank()) {
+                Text(quiz.description, style = MaType.body(13.5.sp, lineHeight = 20.sp), color = c.soft, modifier = Modifier.padding(top = 6.dp))
             }
-
-            SurveyPhase.Empty -> MessageBlock(
-                icon = { Icon(Icons.Outlined.Info, null, tint = buttons, modifier = Modifier.size(52.dp)) },
-                title = "Сейчас опросов нет",
-                subtitle = "Загляните позже — когда появится новый опрос, мы спросим сами",
-                primary = "Закрыть" to { hideThen(SurveyEvent.Close) }
-            )
-
-            SurveyPhase.LoadError -> MessageBlock(
-                icon = { Icon(Icons.Outlined.Info, null, tint = surveyErrorColor, modifier = Modifier.size(52.dp)) },
-                title = "Не удалось загрузить опрос",
-                subtitle = state.error,
-                primary = "Повторить" to { handleEvent(SurveyEvent.Retry) },
-                secondary = "Закрыть" to { hideThen(SurveyEvent.Close) }
-            )
-
-            SurveyPhase.Success -> MessageBlock(
-                icon = { Icon(Icons.Filled.CheckCircle, null, tint = buttons, modifier = Modifier.size(56.dp)) },
-                title = state.completionMessage ?: "Спасибо за ответы!",
-                subtitle = null,
-                primary = "Готово" to { hideThen(SurveyEvent.Close) }
-            )
-
-            SurveyPhase.Form, SurveyPhase.Submitting -> SurveyForm(state, handleEvent, hideThen)
         }
-
-        Spacer(Modifier.height(10.dp))
-    }
-}
-
-@Composable
-private fun SurveyForm(
-    state: SurveyState,
-    handleEvent: (SurveyEvent) -> Unit,
-    hideThen: (SurveyEvent) -> Unit
-) {
-    val quiz = state.quiz ?: return
-    val questions = quiz.questions.orEmpty()
-    val darkMode = LocalAppDarkTheme.current
-    val submitting = state.phase == SurveyPhase.Submitting
-
-    if (!quiz.name.isNullOrBlank()) {
-        Text(
-            text = quiz.name,
-            modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 6.dp),
-            textAlign = TextAlign.Center,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Medium,
-            color = buttons
-        )
-    }
-    if (!quiz.description.isNullOrBlank()) {
-        Text(
-            text = quiz.description,
-            modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 4.dp),
-            textAlign = TextAlign.Center,
-            fontSize = 14.sp,
-            lineHeight = 18.sp,
-            color = surveySecondaryText
-        )
-    }
-
-    Spacer(Modifier.height(10.dp))
-
-    questions.forEachIndexed { index, question ->
-        if (index != 0) {
-            HorizontalDivider(
-                thickness = 1.dp,
-                modifier = Modifier.padding(horizontal = 25.dp, vertical = 4.dp),
-                color = if (darkMode) Color.DarkGray else disabledWhite
+        questions.forEach { question ->
+            SurveyQuestion(
+                question = question,
+                answers = state.answers,
+                enabled = !submitting,
+                onSelectSingle = { handleEvent(SurveyEvent.SelectSingle(question.id, it)) },
+                onToggleMultiple = { handleEvent(SurveyEvent.ToggleMultiple(question.id, it)) },
+                onValueChange = { handleEvent(SurveyEvent.ChangeValue(question.id, it)) }
             )
         }
-        SurveyQuestion(
-            index = index + 1,
-            question = question,
-            answers = state.answers,
-            enabled = !submitting,
-            onSelectSingle = { handleEvent(SurveyEvent.SelectSingle(question.id, it)) },
-            onToggleMultiple = { handleEvent(SurveyEvent.ToggleMultiple(question.id, it)) },
-            onValueChange = { handleEvent(SurveyEvent.ChangeValue(question.id, it)) }
-        )
-    }
-
-    if (questions.any { it.required == true }) {
-        Text(
-            text = "* — обязательный вопрос",
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
-            fontSize = 12.sp,
-            color = surveySecondaryText
-        )
-    }
-
-    if (!state.error.isNullOrBlank()) {
-        Text(
-            text = state.error,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 6.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(surveyErrorColor.copy(alpha = 0.12f))
-                .padding(12.dp),
-            fontSize = 14.sp,
-            color = surveyErrorColor,
-            textAlign = TextAlign.Center
-        )
-    }
-
-    Spacer(Modifier.height(8.dp))
-
-    PrimaryButton(
-        text = "Отправить",
-        enabled = state.canSubmit,
-        loading = submitting,
-        onClick = { handleEvent(SurveyEvent.Submit) }
-    )
-
-    TextButton(
-        onClick = { hideThen(SurveyEvent.NotNow) },
-        enabled = !submitting,
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)
-    ) {
-        Text("Не сейчас", fontSize = 15.sp, color = if (darkMode) Color.White.copy(alpha = 0.7f) else surveySecondaryText)
-    }
-}
-
-@Composable
-private fun PrimaryButton(
-    text: String,
-    enabled: Boolean,
-    loading: Boolean = false,
-    onClick: () -> Unit
-) {
-    val darkMode = LocalAppDarkTheme.current
-    Button(
-        onClick = onClick,
-        enabled = enabled && !loading,
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).height(50.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = buttons,
-            contentColor = Color.White,
-            disabledContainerColor = if (loading) buttons else if (darkMode) disabledDark else disabledBlue.copy(alpha = 0.35f),
-            disabledContentColor = if (loading) Color.White else if (darkMode) tertiaryDark else Color.White
-        )
-    ) {
-        if (loading) {
-            CircularProgressIndicator(color = Color.White, strokeWidth = 2.dp, modifier = Modifier.size(22.dp))
-        } else {
-            Text(text, fontSize = 16.sp, fontWeight = FontWeight.Medium)
-        }
-    }
-}
-
-@Composable
-private fun MessageBlock(
-    icon: @Composable () -> Unit,
-    title: String,
-    subtitle: String?,
-    primary: Pair<String, () -> Unit>,
-    secondary: Pair<String, () -> Unit>? = null
-) {
-    val darkMode = LocalAppDarkTheme.current
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(top = 24.dp, bottom = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        icon()
-        Text(
-            text = title,
-            modifier = Modifier.padding(horizontal = 24.dp),
-            textAlign = TextAlign.Center,
-            fontSize = 17.sp,
-            lineHeight = 23.sp,
-            fontWeight = FontWeight.Medium,
-            color = if (darkMode) Color.White else Color.Black
-        )
-        if (!subtitle.isNullOrBlank()) {
+        if (!state.error.isNullOrBlank()) {
             Text(
-                text = subtitle,
-                modifier = Modifier.padding(horizontal = 24.dp),
+                state.error,
+                style = MaType.body(13.5.sp, lineHeight = 19.sp),
+                color = surveyErrorColor,
                 textAlign = TextAlign.Center,
-                fontSize = 14.sp,
-                lineHeight = 18.sp,
-                color = surveySecondaryText
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(surveyErrorColor.copy(alpha = 0.12f))
+                    .padding(12.dp)
             )
         }
-        Spacer(Modifier.height(6.dp))
-        PrimaryButton(text = primary.first, enabled = true, onClick = primary.second)
-        if (secondary != null) {
-            TextButton(onClick = secondary.second, modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
-                Text(secondary.first, fontSize = 15.sp, color = surveySecondaryText)
-            }
-        }
+    }
+
+    // подвал: «Не сейчас» и «Отправить»
+    Box(Modifier.fillMaxWidth().height(1.dp).background(c.border))
+    Row(
+        Modifier.fillMaxWidth().padding(start = 22.dp, end = 22.dp, top = 10.dp, bottom = 30.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        OutlineButton(
+            "Не сейчас", { hideThen(SurveyEvent.NotNow) },
+            height = 50.dp, fontSize = 14.5.sp, color = c.muted, background = c.surface, enabled = !submitting
+        )
+        PrimaryButton(
+            text = "Отправить",
+            onClick = { handleEvent(SurveyEvent.Submit) },
+            enabled = state.canSubmit || submitting,
+            height = 50.dp,
+            fontSize = 15.sp,
+            modifier = Modifier.weight(1f),
+            content = if (submitting) ({
+                CircularProgressIndicator(color = Color.White, strokeWidth = 2.dp, modifier = Modifier.size(22.dp))
+            }) else null
+        )
+    }
+}
+
+@Composable
+private fun InfoBlock(
+    image: Int,
+    title: String,
+    text: String?,
+    primary: Pair<String, () -> Unit>,
+    secondary: Pair<String, () -> Unit>? = null,
+    big: Boolean = false,
+) {
+    val c = Ma.colors
+    Column(
+        Modifier.fillMaxWidth().heightIn(min = 300.dp).padding(horizontal = 30.dp).padding(top = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Image(painterResource(image), null, Modifier.size(if (big) 150.dp else 132.dp))
+        Text(title, style = MaType.display(if (big) 23.sp else 22.sp, FontWeight.ExtraBold, 27.sp), color = c.fg, textAlign = TextAlign.Center)
+        if (!text.isNullOrBlank()) Text(text, style = MaType.body(14.sp, lineHeight = 21.7.sp), color = c.soft, textAlign = TextAlign.Center)
+    }
+    Column(
+        Modifier.fillMaxWidth().padding(start = 22.dp, end = 22.dp, top = 16.dp, bottom = 30.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        PrimaryButton(primary.first, primary.second, Modifier.fillMaxWidth(), height = 52.dp, fontSize = 15.sp)
+        if (secondary != null) Box(
+            Modifier.fillMaxWidth().height(44.dp).clip(CircleShape).maClick(onClick = secondary.second),
+            contentAlignment = Alignment.Center
+        ) { Text(secondary.first, style = MaType.body(14.sp, FontWeight.SemiBold), color = c.muted) }
     }
 }
 
@@ -362,7 +309,9 @@ fun SurveyPreview() {
             QuizQuestion(3, "Что нравится? Похвалите нас 🙂", null, "TEXT", false, null, emptyList())
         )
     )
-    Column(Modifier.background(Color.White)) {
-        SurveyContent(SurveyState(phase = SurveyPhase.Form, quiz = quiz), {}, {})
+    ScheduleTheme(false) {
+        Column(Modifier.background(Ma.colors.sheet)) {
+            SurveyContent(SurveyState(phase = SurveyPhase.Form, quiz = quiz), {}, {})
+        }
     }
 }

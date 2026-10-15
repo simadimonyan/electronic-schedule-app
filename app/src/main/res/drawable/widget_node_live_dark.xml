@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- узел таймлайна «идёт сейчас»: белая точка с акцентной обводкой и свечением -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:width="19dp" android:height="19dp">
+        <shape android:shape="oval"><solid android:color="#2E4CA4FB" /></shape>
+    </item>
+    <item android:left="3dp" android:top="3dp" android:width="13dp" android:height="13dp">
+        <shape android:shape="oval">
+            <solid android:color="#FFFFFFFF" />
+            <stroke android:width="3dp" android:color="#FF60A5FA" />
+        </shape>
+    </item>
+</layer-list>

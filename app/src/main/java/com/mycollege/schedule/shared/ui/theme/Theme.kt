@@ -1,61 +1,59 @@
 package com.mycollege.schedule.shared.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 
-private val DarkColorScheme = darkColorScheme(
-    primary = backgroundDark,
-    secondary = buttonsDark,
-    tertiary = disabledWhite
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = background,
-    secondary = buttons,
-    tertiary = disabledWhite
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+private fun schemeOf(c: MaColors) = if (c.isDark) darkColorScheme(
+    primary = MaBrand.primary,
     onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    secondary = c.accent,
+    background = c.bg,
+    onBackground = c.fg,
+    surface = c.surface,
+    onSurface = c.fg,
+    surfaceVariant = c.sunk,
+    onSurfaceVariant = c.soft,
+    outline = c.borderStrong,
+    outlineVariant = c.border,
+    error = MaBrand.red,
+) else lightColorScheme(
+    primary = MaBrand.primary,
+    onPrimary = Color.White,
+    secondary = c.accent,
+    background = c.bg,
+    onBackground = c.fg,
+    surface = c.surface,
+    onSurface = c.fg,
+    surfaceVariant = c.sunk,
+    onSurfaceVariant = c.soft,
+    outline = c.borderStrong,
+    outlineVariant = c.border,
+    error = MaBrand.red,
 )
 
 val LocalAppDarkTheme = staticCompositionLocalOf { false }
 
+/**
+ * Тема приложения: токены «Моя Академия» для светлой и тёмной темы.
+ * Динамические цвета Material You отключены — у приложения свой фирменный набор.
+ */
 @Composable
 fun ScheduleTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    val colors = if (darkTheme) DarkMaColors else LightMaColors
+    CompositionLocalProvider(LocalMaColors provides colors) {
+        MaterialTheme(
+            colorScheme = schemeOf(colors),
+            typography = Typography,
+            content = content
+        )
     }
-
-
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
 }

@@ -59,7 +59,7 @@ fun ModeTransition(studentMode: Boolean) {
         exit = fadeOut(animationSpec = tween(700))
     ) {
         Box(
-            modifier = Modifier.fillMaxSize().background(if (darkMode) backgroundDark else Color.White),
+            modifier = Modifier.fillMaxSize().background(com.mycollege.schedule.shared.ui.theme.Ma.colors.bg),
             contentAlignment = Alignment.CenterStart
         ) {
             AnimatedVisibility(
@@ -77,17 +77,12 @@ fun ModeTransition(studentMode: Boolean) {
                     contentAlignment = Alignment.Center
                 ) {
                     Column(Modifier.padding(bottom = 40.dp), horizontalAlignment = Alignment.Start) {
+                        com.mycollege.schedule.shared.ui.design.EyebrowPill("Режим")
                         Text(
-                            text = "РЕЖИМ",
-                            color = if (darkMode) Color.White else Color.Black,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 20.sp,
-                        )
-                        Text(
-                            text = if (studentMode) "СТУДЕНТА" else "ПРЕПОДАВАТЕЛЯ",
-                            color = if (darkMode) Color.White else Color.Black,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 38.sp
+                            text = if (studentMode) "Студента" else "Преподавателя",
+                            color = com.mycollege.schedule.shared.ui.theme.Ma.colors.fg,
+                            style = com.mycollege.schedule.shared.ui.theme.MaType.display(38.sp, FontWeight.ExtraBold),
+                            modifier = Modifier.padding(top = 10.dp)
                         )
                     }
                 }

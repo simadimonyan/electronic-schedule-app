@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Schedule.Light" parent="android:Theme.Material.Light.NoActionBar"/>
-    <style name="Theme.Schedule.Dark" parent="android:Theme.Material.NoActionBar"/>
+    <!-- фон окна = фон экранов «Моя Академия», чтобы не мигал белый/чёрный между сплэшем и Compose -->
+    <style name="Theme.Schedule.Light" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/ma_bg_light</item>
+    </style>
+    <style name="Theme.Schedule.Dark" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/ma_bg_dark</item>
+    </style>
 </resources>
