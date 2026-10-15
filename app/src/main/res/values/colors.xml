@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ma_bg_light">#FFF8FAFC</color>
+    <color name="ma_bg_dark">#FF0A0F1E</color>
+</resources>

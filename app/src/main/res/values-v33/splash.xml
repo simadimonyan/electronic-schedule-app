@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.Schedule.SplashScreen" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">#FFFFFF</item>
-        <item name="windowSplashScreenIconBackgroundColor">#FFFFFF</item>
+        <item name="windowSplashScreenBackground">#F8FAFC</item>
+        <item name="windowSplashScreenIconBackgroundColor">#F8FAFC</item>
         <item name="windowSplashScreenAnimationDuration">1000</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash_myacademy_avd_light</item>
         <item name="postSplashScreenTheme">@style/Theme.Schedule.Light</item>
