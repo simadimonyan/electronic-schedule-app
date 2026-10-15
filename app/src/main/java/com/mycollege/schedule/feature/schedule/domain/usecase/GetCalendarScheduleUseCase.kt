@@ -55,15 +55,15 @@ class GetCalendarScheduleUseCase @Inject constructor(
     }
 
     private inline fun build(rows: List<Schedule>, map: (List<Schedule>) -> List<DataClasses.Lesson>): ScheduleCalendar {
-        val template = rows.filter { it.lessonDate == null }
+        val template = rows.filter { it.pinnedDate.isEmpty() }
         val templates = (1..2).associateWith { parity ->
             (1..7).associateWith { day ->
                 val name = DataClasses.DayWeek.findById(day)!!.long
                 LessonOrder.normalize(map(template.filter { it.weekCount == parity && it.dayWeek == name }))
             }
         }
-        val dated = rows.filter { it.lessonDate != null }
-            .groupBy { runCatching { LocalDate.parse(it.lessonDate) }.getOrNull() }
+        val dated = rows.filter { it.pinnedDate.isNotEmpty() }
+            .groupBy { runCatching { LocalDate.parse(it.pinnedDate) }.getOrNull() }
             .filterKeys { it != null }
             .map { (date, day) -> date!! to LessonOrder.normalize(map(day)) as List<DataClasses.Lesson> }
             .toMap()

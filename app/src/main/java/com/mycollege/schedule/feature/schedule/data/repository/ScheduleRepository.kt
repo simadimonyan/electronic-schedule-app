@@ -11,10 +11,10 @@ interface ScheduleRepository {
      * Пары на конкретный день: шаблон по дню недели и чётности (строки без даты)
      * плюс датированные занятия на эту дату (заочное обучение). date — yyyy-MM-dd или null.
      */
-    @Query("SELECT * FROM schedule WHERE group_id = :id AND ((lesson_date IS NULL AND day_week = :dayWeek AND week_count = :weekCount) OR lesson_date = :date)")
+    @Query("SELECT * FROM schedule WHERE group_id = :id AND ((pinned_date = '' AND day_week = :dayWeek AND week_count = :weekCount) OR pinned_date = :date)")
     fun getDaySchedule(id: String, dayWeek: String, weekCount: Int, date: String?): List<Schedule>
 
-    @Query("SELECT * FROM schedule WHERE teacher_id = :id AND ((lesson_date IS NULL AND day_week = :dayWeek AND week_count = :weekCount) OR lesson_date = :date)")
+    @Query("SELECT * FROM schedule WHERE teacher_id = :id AND ((pinned_date = '' AND day_week = :dayWeek AND week_count = :weekCount) OR pinned_date = :date)")
     fun getDayTeacherSchedule(id: String, dayWeek: String, weekCount: Int, date: String?): List<Schedule>
 
     /** всё расписание группы (шаблон обеих недель и датированные занятия) — для календаря */

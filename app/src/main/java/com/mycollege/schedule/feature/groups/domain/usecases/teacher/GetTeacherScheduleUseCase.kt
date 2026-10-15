@@ -62,7 +62,7 @@ class GetTeacherScheduleUseCase @Inject constructor(
                         schedule.lessonType,
                         schedule.eiosLink,
                         schedule.auditory
-                    ).also { it.lessonDate = LessonDateParser.resolve(schedule.lessonDate, schedule.pinnedDate) })
+                    ).also { it.pinnedDate = LessonDateParser.resolve(schedule.lessonDate, schedule.pinnedDate).orEmpty() })
                 }
             }
 

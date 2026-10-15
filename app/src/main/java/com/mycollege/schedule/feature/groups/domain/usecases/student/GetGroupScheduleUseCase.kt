@@ -71,7 +71,7 @@ class GetGroupScheduleUseCase @Inject constructor(
                         schedule.lessonType,
                         schedule.eiosLink,
                         schedule.auditory
-                    ).also { it.lessonDate = lessonDate })
+                    ).also { it.pinnedDate = lessonDate.orEmpty() })
                 }
             }
 

@@ -36,11 +36,11 @@ abstract class Database : RoomDatabase() {
             }
         }
 
-        /** дата занятия для заочного расписания */
+        /** дата занятия для заочного расписания (та же схема, что в рабочей копии с полосой-календарём) */
         val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 try {
-                    database.execSQL("ALTER TABLE schedule ADD COLUMN lesson_date TEXT DEFAULT NULL")
+                    database.execSQL("ALTER TABLE schedule ADD COLUMN pinned_date TEXT NOT NULL DEFAULT ''")
                 } catch (e: Exception) {
                     TracerCrashReport.report(e, issueKey = "DATABASE_MIGRATION")
                     Log.e("Migration", "Error adding column: ${e.message}")
