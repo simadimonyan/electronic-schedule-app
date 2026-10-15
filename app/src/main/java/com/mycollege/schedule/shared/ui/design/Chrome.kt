@@ -81,12 +81,12 @@ private fun DrawScope.ellipse(g: Glow, solid: Boolean = false) {
     val rx = size.width * g.rx
     val ry = size.height * g.ry
     withTransform({ scale(1f, ry / rx, pivot = center) }) {
-        drawCircle(
-            brush = Brush.radialGradient(0f to g.color, g.stop to Color.Transparent, center = center, radius = rx),
-            radius = rx,
-            center = center,
-            blendMode = if (solid) BlendMode.DstIn else BlendMode.SrcOver
-        )
+        val brush = Brush.radialGradient(0f to g.color, g.stop to Color.Transparent, center = center, radius = rx)
+        if (solid) {
+            // маска должна закрыть всю область, а не только круг
+            val k = rx / ry
+            drawRect(brush, topLeft = Offset(-size.width, center.y - size.height * k * 2), size = androidx.compose.ui.geometry.Size(size.width * 3, size.height * k * 4), blendMode = BlendMode.DstIn)
+        } else drawCircle(brush = brush, radius = rx, center = center)
     }
 }
 
@@ -268,5 +268,14 @@ fun BoxScope.MaToastHost(state: MaToastState, bottom: Dp = 104.dp) {
 /** Экранный контейнер: фон темы во весь экран */
 @Composable
 fun MaScreen(modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
-    Box(modifier.fillMaxSize().background(Ma.colors.bg), content = content)
+    Box(modifier.fillMaxSize().background(Ma.colors.bg)) {
+        content()
+        // подложка под статус-бар: прокручиваемый контент не наезжает на системные значки
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(statusBarTop())
+                .background(Brush.verticalGradient(listOf(Ma.colors.bg, Ma.colors.bg.copy(alpha = 0.85f))))
+        )
+    }
 }

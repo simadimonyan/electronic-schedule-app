@@ -232,7 +232,6 @@ fun MaSegmented(
     val c = Ma.colors
     Row(
         modifier
-            .alpha(if (enabled) 1f else 0.45f)
             .clip(RoundedCornerShape(radius))
             .background(c.sunk)
             .padding(3.dp),

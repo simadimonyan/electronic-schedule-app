@@ -12,6 +12,16 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import com.mycollege.schedule.shared.ui.design.MaIcons
+import com.mycollege.schedule.shared.ui.design.MatIconButton
+import com.mycollege.schedule.shared.ui.design.statusBarTop
+import com.mycollege.schedule.shared.ui.theme.Ma
+import com.mycollege.schedule.shared.ui.theme.MaType
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -141,33 +151,28 @@ fun WebViewScreen(label: String, link: String, onDisposable: () -> Unit) {
                         targetOffsetY = { -it }
                     ),
                 ) {
-                    TopAppBar(
-                        title = {
-                            Text(label, fontSize = 18.sp, color = if (darkMode) Color.White else Color.Black)
-                            Column {
-                                Spacer(Modifier.height(20.dp))
-                                Text(link, fontSize = 15.sp, color = if (darkMode) disabledWhite else Color.Gray)
+                    // шапка в стиле макетов: круглая кнопка «назад», заголовок и адрес
+                    val c = Ma.colors
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .background(c.bg)
+                            .padding(start = 16.dp, end = 16.dp, top = statusBarTop() + 10.dp, bottom = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        MatIconButton(MaIcons.back, "Назад", {
+                            scope.launch {
+                                visible = !visible
+                                delay(250L)
+                                onDisposable()
                             }
-                        },
-                        navigationIcon = {
-                            IconButton(onClick = {
-                                scope.launch {
-                                    visible = !visible
-                                    delay(250L)
-                                    onDisposable()
-                                }
-                            }) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "Назад",
-                                    tint = if (darkMode) Color.White else Color.Black
-                                )
-                            }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = if (darkMode) backgroundDark else background
-                        )
-                    )
+                        }, iconSize = 20.dp, stroke = 2.2f)
+                        Column(Modifier.weight(1f)) {
+                            Text(label, style = MaType.display(16.sp, FontWeight.Bold, tracking = -0.01f), color = c.fg, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text(link, style = MaType.mono(11.5.sp, FontWeight.Normal), color = c.faint, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
+                    }
                 }
             }
         }
@@ -181,7 +186,7 @@ fun WebViewContent(link: String) {
 
     Column {
 
-        Spacer(Modifier.height(90.dp))
+        Spacer(Modifier.height(statusBarTop() + 64.dp))
 
         AndroidView(
             factory = { context ->

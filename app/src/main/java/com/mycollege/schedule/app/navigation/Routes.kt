@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -96,7 +98,8 @@ fun AddNavGraph(
             val scrollState = rememberLazyListState()
 
             CircleThemeTransition(settingsViewModel) {
-                SettingsScreen(settingsViewModel, navController, scrollState)
+                val groupState by groupViewModel.groupStateHolder.groupState.collectAsState()
+                SettingsScreen(settingsViewModel, navController, scrollState, groupState)
             }
         }
     }

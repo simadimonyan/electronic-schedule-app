@@ -124,8 +124,9 @@ val DarkMaColors = MaColors(
 val LocalMaColors = staticCompositionLocalOf { LightMaColors }
 
 object Ma {
+    /** цвета по текущей теме приложения (учитывает подмену темы во время анимации смены темы) */
     val colors: MaColors
-        @Composable @ReadOnlyComposable get() = LocalMaColors.current
+        @Composable @ReadOnlyComposable get() = if (LocalAppDarkTheme.current) DarkMaColors else LightMaColors
 }
 
 /**
