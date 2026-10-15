@@ -19,6 +19,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -100,8 +102,11 @@ fun ScheduleContent(
     val context = LocalContext.current
     val toast = rememberMaToast()
 
+    // пока не проверен кеш, показываем загрузку, а не «ошибку» (иначе она мелькает при запуске)
+    var cacheChecked by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         handleEvent(ScheduleEvent.ShowIfCachedSchedule)
+        cacheChecked = true
     }
 
     val student = appState.studentMode
@@ -125,11 +130,15 @@ fun ScheduleContent(
     }
 
     var selectedDay by rememberSaveable { mutableIntStateOf(LocalDate.now().dayOfWeek.value - 1) }
+    // вкладка «Сегодня» всегда открывается на текущем дне
+    LaunchedEffect(tab) {
+        if (tab == MainTab.Today) selectedDay = LocalDate.now().dayOfWeek.value - 1
+    }
 
     MaScreen {
         ScreenBackdrop(height = if (tab == MainTab.Week) 360.dp else 380.dp, gridHeight = if (tab == MainTab.Week) 320.dp else 340.dp)
 
-        val showContent = built || parseState.scheduleLoading
+        val showContent = built || parseState.scheduleLoading || !cacheChecked
         AnimatedContent(
             targetState = if (!showContent) -1 else tab.ordinal,
             transitionSpec = { fadeIn(tween(250)) togetherWith fadeOut(tween(150)) },
@@ -148,7 +157,7 @@ fun ScheduleContent(
                         weekLessons = scheduleState.weekLessons,
                         todayLessons = scheduleState.todayLessons,
                         parity = parity,
-                        loading = parseState.scheduleLoading,
+                        loading = parseState.scheduleLoading || !built,
                         onCopyEios = copyEios
                     )
                     else -> TodayContent(
@@ -156,7 +165,7 @@ fun ScheduleContent(
                         weekLessons = scheduleState.weekLessons,
                         parity = parity,
                         teacherMode = !student,
-                        loading = parseState.scheduleLoading,
+                        loading = parseState.scheduleLoading || !built,
                         offline = parseState.networkIssues && built,
                         selectedDay = selectedDay,
                         onSelectDay = { selectedDay = it },

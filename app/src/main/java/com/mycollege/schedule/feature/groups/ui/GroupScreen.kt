@@ -399,7 +399,8 @@ private fun ChipRow(options: List<String>, selected: String, primary: Boolean, o
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    o,
+                    // «Кафедра информационных систем» → «Информационных систем»
+                    if (!primary && o.startsWith("Кафедра ")) o.removePrefix("Кафедра ").replaceFirstChar { it.uppercase() } else o,
                     style = MaType.body(if (primary) 13.sp else 12.5.sp, FontWeight.SemiBold),
                     color = when {
                         primary && on -> Color.White
