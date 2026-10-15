@@ -207,6 +207,7 @@ fun ScheduleContent(
                         selectedDate = selectedDate,
                         onSelectDate = { selectedEpoch = it.toEpochDay() },
                         onOpenDatePicker = { datePickerOpen = true },
+                        sessionMode = calendar.datedOnly,
                         nextStudyDate = nextStudyDate,
                         onOpenWeek = { actions.onSelectTab(MainTab.Week) },
                         onRetry = actions.onRetryNetwork,
@@ -226,7 +227,7 @@ fun ScheduleContent(
             },
             modifier = Modifier.padding(top = statusBarTop() + MaInsets.headTop)
         ) {
-            if (built && tab == MainTab.Today) ParityChip(parityOf(selectedDate)) { actions.onSelectTab(MainTab.Week) }
+            if (built && tab == MainTab.Today && !calendar.datedOnly) ParityChip(parityOf(selectedDate)) { actions.onSelectTab(MainTab.Week) }
             if (built) MatIconButton(MaIcons.calendar, "Календарь", { calendarOpen = true })
             if (settingsState.navigationInvisibility) MatIconButton(MaIcons.settings, "Настройки", actions.onOpenSettings)
         }

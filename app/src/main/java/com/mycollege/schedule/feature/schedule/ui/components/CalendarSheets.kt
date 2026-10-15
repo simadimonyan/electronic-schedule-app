@@ -177,6 +177,7 @@ private fun DayCell(
     val fg = when {
         selected -> Color.White
         isToday -> c.accent
+        highlight -> c.fg
         weekend -> c.faint
         bold -> c.fg
         else -> c.soft
@@ -296,11 +297,11 @@ private fun SwipeMonths(
 }
 
 @Composable
-private fun LegendDot(color: Color, label: String, ring: Boolean = false) {
+private fun LegendDot(color: Color, label: String, ring: Boolean = false, size: androidx.compose.ui.unit.Dp = 8.dp) {
     val c = Ma.colors
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         Box(
-            Modifier.size(8.dp).clip(CircleShape)
+            Modifier.size(size).clip(CircleShape)
                 .then(if (ring) Modifier.border(1.5.dp, color, CircleShape) else Modifier.background(color))
         )
         Text(label, style = MaType.body(12.sp), color = c.soft)
@@ -386,7 +387,7 @@ fun CalendarSheet(
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                if (sessionMode) LegendDot(c.accent, "День сессии")
+                if (sessionMode) LegendDot(c.accentSoft2, "День сессии", size = 12.dp)
                 LegendDot(c.accent, "Лекция")
                 LegendDot(MaBrand.green, "Практика")
                 LegendDot(MaBrand.amber, "Лабораторная")

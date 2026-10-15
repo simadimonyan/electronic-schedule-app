@@ -58,6 +58,8 @@ fun TodayContent(
     selectedDate: LocalDate,
     onSelectDate: (LocalDate) -> Unit,
     onOpenDatePicker: () -> Unit,
+    /** заочка: расписание на датах сессии, чётность недель не показываем */
+    sessionMode: Boolean,
     nextStudyDate: (LocalDate) -> LocalDate?,
     onOpenWeek: () -> Unit,
     onRetry: () -> Unit,
@@ -90,7 +92,7 @@ fun TodayContent(
     val sunday = selectedDay == 6
 
     // заголовок
-    EyebrowPill("${RuDates.weekFull[selectedDay]} · Неделя $parity")
+    EyebrowPill("${RuDates.weekFull[selectedDay]} · " + if (sessionMode) "Сессия" else "Неделя $parity")
     val title = when {
         isToday -> "Сегодня"
         sunday && lessons.isEmpty() -> "Выходной"
