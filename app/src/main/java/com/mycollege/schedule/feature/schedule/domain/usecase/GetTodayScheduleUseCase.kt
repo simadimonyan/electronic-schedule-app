@@ -9,6 +9,7 @@ import com.mycollege.schedule.core.db.Database
 import com.mycollege.schedule.feature.schedule.data.models.DataClasses
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,10 +21,14 @@ class GetTodayScheduleUseCase @Inject constructor(
     private val getGroupUseCase: GetGroupUseCase
 ) {
 
-    suspend fun getTodaySchedule(group: Group, dayWeek: String, weekCount: Int): List<DataClasses.Lesson> =
+    /**
+     * @param date календарная дата дня: к шаблону по чётности добавляются датированные занятия
+     * этой даты (заочное обучение). Без даты — только шаблон, как раньше.
+     */
+    suspend fun getTodaySchedule(group: Group, dayWeek: String, weekCount: Int, date: LocalDate? = null): List<DataClasses.Lesson> =
         withContext(Dispatchers.IO) {
             MyTracker.trackEvent("Открыть расписание группы на сегодня")
-            val schedule = database.schedule().getDaySchedule(group.id.toString(), dayWeek, weekCount)
+            val schedule = database.schedule().getDaySchedule(group.id.toString(), dayWeek, weekCount, date?.toString())
             Log.d("TODAY", "${group.name} $dayWeek $weekCount $schedule")
             val result = ArrayList<DataClasses.Lesson>()
 
@@ -43,17 +48,17 @@ class GetTodayScheduleUseCase @Inject constructor(
                 ))
             }
             Log.d("TODAY2", result.toString())
-        return@withContext result
+        return@withContext LessonOrder.normalize(result)
     }
 
-    suspend fun getTodayTeacherSchedule(teacher: String, dayWeek: String, weekCount: Int): List<DataClasses.Lesson> =
+    suspend fun getTodayTeacherSchedule(teacher: String, dayWeek: String, weekCount: Int, date: LocalDate? = null): List<DataClasses.Lesson> =
         withContext(Dispatchers.IO) {
             MyTracker.trackEvent("Открыть расписание преподавателя на сегодня")
             val teacher = database.teachers().getTeachersBy(teacher).first()
 
             if (false) return@withContext emptyList()
 
-            val schedule = database.schedule().getDayTeacherSchedule(teacher.id.toString(), dayWeek, weekCount)
+            val schedule = database.schedule().getDayTeacherSchedule(teacher.id.toString(), dayWeek, weekCount, date?.toString())
             Log.d("TODAY", "${teacher.name} id: ${teacher.id}, $dayWeek $weekCount $schedule")
             val result = ArrayList<DataClasses.Lesson>()
 
@@ -84,7 +89,7 @@ class GetTodayScheduleUseCase @Inject constructor(
                 }
             }
             Log.d("TODAY2", result.toString())
-            return@withContext result
+            return@withContext LessonOrder.normalize(result)
         }
 
 }

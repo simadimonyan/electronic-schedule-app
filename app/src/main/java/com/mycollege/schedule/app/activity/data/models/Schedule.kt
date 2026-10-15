@@ -69,6 +69,10 @@ class Schedule {
     @ColumnInfo(name = "location")
     var location: String = ""
 
+    // календарная дата занятия yyyy-MM-dd (заочное обучение); NULL — пара из шаблона по чётности недели
+    @ColumnInfo(name = "lesson_date", defaultValue = "NULL")
+    var lessonDate: String? = null
+
     constructor(
         teacher: Long?,
         group: Long,

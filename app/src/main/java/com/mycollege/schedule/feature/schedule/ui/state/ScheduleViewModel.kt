@@ -21,6 +21,7 @@ import com.mycollege.schedule.core.db.Database
 import com.mycollege.schedule.feature.groups.ui.state.GroupStateHolder
 import com.mycollege.schedule.feature.schedule.data.models.DataClasses
 import com.mycollege.schedule.feature.schedule.data.models.DataClasses.DayWeek
+import com.mycollege.schedule.feature.schedule.domain.usecase.GetCalendarScheduleUseCase
 import com.mycollege.schedule.feature.schedule.domain.usecase.GetChosenGroupUseCase
 import com.mycollege.schedule.feature.schedule.domain.usecase.GetTodayScheduleUseCase
 import com.mycollege.schedule.feature.schedule.domain.usecase.GetWeekScheduleUseCase
@@ -60,6 +61,7 @@ class ScheduleViewModel @Inject constructor(
     private val getChosenGroupUseCase: GetChosenGroupUseCase,
     private val getWeekScheduleUseCase: GetWeekScheduleUseCase,
     private val getTodayScheduleUseCase: GetTodayScheduleUseCase,
+    private val getCalendarScheduleUseCase: GetCalendarScheduleUseCase,
 
     // database
     private val database: Database
@@ -74,6 +76,7 @@ class ScheduleViewModel @Inject constructor(
             is ScheduleEvent.ShowTodaySchedule -> getTodayLessons()
             is ScheduleEvent.ShowWeekSchedule -> getWeekLessons()
             is ScheduleEvent.ShowIfCachedSchedule -> showScheduleIfCached()
+            is ScheduleEvent.LoadCalendar -> loadCalendar()
         }
     }
 
@@ -125,18 +128,35 @@ class ScheduleViewModel @Inject constructor(
 
             if (appStateHolder.appState.value.studentMode) {
                 if (chosenGroup != null) {
-                    scheduleStateHolder.showWeekLessons(getWeekScheduleUseCase.getWeekSchedule(chosenGroup, count))
+                    scheduleStateHolder.showWeekLessons(getWeekScheduleUseCase.getWeekSchedule(chosenGroup, count, currentMonday()))
                     scheduleStateHolder.updateWeekDates(getCurrentWeekDate())
                 }
             }
             else {
                 if (!chosenTeacher.equals("Выбрать преподавателя")) {
-                    scheduleStateHolder.showWeekLessons(getWeekScheduleUseCase.getWeekTeacherSchedule(chosenTeacher, count))
+                    scheduleStateHolder.showWeekLessons(getWeekScheduleUseCase.getWeekTeacherSchedule(chosenTeacher, count, currentMonday()))
                     scheduleStateHolder.updateWeekDates(getCurrentWeekDate())
                 }
             }
         }
     }
+
+    /**
+     * Загрузить всё сохранённое расписание для календаря (из базы, без запросов к серверу)
+     */
+    private fun loadCalendar() {
+        viewModelScope.launch {
+            val calendar = if (appStateHolder.appState.value.studentMode) {
+                getChosenGroupUseCase.getByName(groupStateHolder.groupState.value.group)?.let { getCalendarScheduleUseCase.forGroup(it) }
+            } else {
+                val teacher = groupStateHolder.groupState.value.teacher
+                if (teacher != "Выбрать преподавателя") getCalendarScheduleUseCase.forTeacher(teacher) else null
+            }
+            if (calendar != null) scheduleStateHolder.showCalendar(calendar)
+        }
+    }
+
+    private fun currentMonday(): LocalDate = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
 
     /**
      * Обновить расписание на день
@@ -150,14 +170,16 @@ class ScheduleViewModel @Inject constructor(
                     val lessons = getTodayScheduleUseCase.getTodaySchedule(
                         getChosenGroupUseCase.getByName(groupStateHolder.groupState.value.group)!!,
                         DayWeek.findById(LocalDate.now().dayOfWeek.value)?.long ?: "Понедельник",
-                        if (settingsStateHolder.settingsState.value.weekCount) 2 else 1
+                        if (settingsStateHolder.settingsState.value.weekCount) 2 else 1,
+                        LocalDate.now()
                     )
                     today.addAll(lessons)
                 } else {
                     val lessons = getTodayScheduleUseCase.getTodayTeacherSchedule(
                         groupStateHolder.groupState.value.teacher,
                         DayWeek.findById(LocalDate.now().dayOfWeek.value)?.long ?: "Понедельник",
-                        if (settingsStateHolder.settingsState.value.weekCount) 2 else 1
+                        if (settingsStateHolder.settingsState.value.weekCount) 2 else 1,
+                        LocalDate.now()
                     )
                     today.addAll(lessons)
                 }

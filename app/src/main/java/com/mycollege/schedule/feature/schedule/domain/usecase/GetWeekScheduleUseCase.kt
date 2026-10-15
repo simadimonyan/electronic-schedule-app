@@ -8,6 +8,7 @@ import com.mycollege.schedule.core.db.Database
 import com.mycollege.schedule.feature.schedule.data.models.DataClasses
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -19,14 +20,15 @@ class GetWeekScheduleUseCase @Inject constructor(
     private val getGroupUseCase: GetGroupUseCase
 ) {
 
-    suspend fun getWeekSchedule(group: Group, weekCount: Int): HashMap<Int, ArrayList<DataClasses.Lesson>> =
+    /** @param monday понедельник недели — для датированных занятий (заочка); без него только шаблон */
+    suspend fun getWeekSchedule(group: Group, weekCount: Int, monday: LocalDate? = null): HashMap<Int, ArrayList<DataClasses.Lesson>> =
         withContext(Dispatchers.IO) {
             MyTracker.trackEvent("Открыть расписание группы на неделю")
             val week = HashMap<Int, ArrayList<DataClasses.Lesson>>()
 
             for (day in 1..6) {
                 val lessons: List<Schedule> = database.schedule().getDaySchedule(group.id.toString(),
-                    DataClasses.DayWeek.findById(day)!!.long, weekCount)
+                    DataClasses.DayWeek.findById(day)!!.long, weekCount, monday?.plusDays(day - 1L)?.toString())
                 val result = ArrayList<DataClasses.Lesson>()
 
                 for (lesson in lessons) {
@@ -44,13 +46,13 @@ class GetWeekScheduleUseCase @Inject constructor(
                         lesson.location
                     ))
                 }
-                week.put(day, result)
+                week.put(day, LessonOrder.normalize(result))
             }
 
             return@withContext week
         }
 
-    suspend fun getWeekTeacherSchedule(teacher: String, weekCount: Int): HashMap<Int, ArrayList<DataClasses.Lesson>> =
+    suspend fun getWeekTeacherSchedule(teacher: String, weekCount: Int, monday: LocalDate? = null): HashMap<Int, ArrayList<DataClasses.Lesson>> =
         withContext(Dispatchers.IO) {
             MyTracker.trackEvent("Открыть расписание преподавателя на неделю")
             val week = HashMap<Int, ArrayList<DataClasses.Lesson>>()
@@ -61,7 +63,7 @@ class GetWeekScheduleUseCase @Inject constructor(
 
             for (day in 1..6) {
                 val lessons: List<Schedule> = database.schedule().getDayTeacherSchedule(teacher.id.toString(),
-                    DataClasses.DayWeek.findById(day)!!.long, weekCount)
+                    DataClasses.DayWeek.findById(day)!!.long, weekCount, monday?.plusDays(day - 1L)?.toString())
                 val result = ArrayList<DataClasses.Lesson>()
 
                 val scheduleSorted = lessons.sortedWith(compareBy({ it.lessonCount }, { it.time }))
@@ -90,7 +92,7 @@ class GetWeekScheduleUseCase @Inject constructor(
                         )
                     }
                 }
-                week.put(day, result)
+                week.put(day, LessonOrder.normalize(result))
             }
 
             return@withContext week

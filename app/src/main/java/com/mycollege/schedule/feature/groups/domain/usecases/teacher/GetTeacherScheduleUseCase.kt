@@ -8,6 +8,7 @@ import com.mycollege.schedule.app.activity.data.models.Schedule
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.core.db.Database
 import com.mycollege.schedule.core.network.RetrofitClient
+import com.mycollege.schedule.feature.schedule.domain.calendar.LessonDateParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -61,7 +62,7 @@ class GetTeacherScheduleUseCase @Inject constructor(
                         schedule.lessonType,
                         schedule.eiosLink,
                         schedule.auditory
-                    ))
+                    ).also { it.lessonDate = LessonDateParser.resolve(schedule.lessonDate, schedule.pinnedDate) })
                 }
             }
 

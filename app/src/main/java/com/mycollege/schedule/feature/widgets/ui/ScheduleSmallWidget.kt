@@ -73,9 +73,9 @@ class ScheduleSmallWidget : GlanceAppWidget() {
                 group = storage.getChosenGroupUseCase().getByName(configuration.group)
 
                 if (group != null) {
-                    if (dayWeek != "Воскресенье") groupSchedule = storage.getTodayScheduleUseCase().getTodaySchedule(group, dayWeek, parity)
-                    if (tomorrowDayWeek != "Воскресенье") tomorrowGroupSchedule = storage.getTodayScheduleUseCase().getTodaySchedule(group, tomorrowDayWeek, parity)
-                    if (tomorrowDayWeek == "Воскресенье") tomorrowGroupSchedule = storage.getTodayScheduleUseCase().getTodaySchedule(group, tomorrowDayWeek, if (parity == 1) 2 else 1)
+                    if (dayWeek != "Воскресенье") groupSchedule = storage.getTodayScheduleUseCase().getTodaySchedule(group, dayWeek, parity, LocalDate.now())
+                    if (tomorrowDayWeek != "Воскресенье") tomorrowGroupSchedule = storage.getTodayScheduleUseCase().getTodaySchedule(group, tomorrowDayWeek, parity, LocalDate.now().plusDays(1))
+                    if (tomorrowDayWeek == "Воскресенье") tomorrowGroupSchedule = storage.getTodayScheduleUseCase().getTodaySchedule(group, tomorrowDayWeek, if (parity == 1) 2 else 1, LocalDate.now().plusDays(1))
                 }
                 else
                     scheduleError = true
@@ -84,9 +84,9 @@ class ScheduleSmallWidget : GlanceAppWidget() {
                 teacher = storage.getChosenTeacherUseCase().getByName(configuration.teacher)
 
                 if (teacher != null) {
-                    if (dayWeek != "Воскресенье") teacherSchedule = storage.getTodayScheduleUseCase().getTodayTeacherSchedule(teacher.name, dayWeek, parity)
-                    if (tomorrowDayWeek != "Воскресенье") tomorrowTeacherSchedule = storage.getTodayScheduleUseCase().getTodayTeacherSchedule(teacher.name, tomorrowDayWeek, parity)
-                    if (tomorrowDayWeek == "Воскресенье") tomorrowTeacherSchedule = storage.getTodayScheduleUseCase().getTodayTeacherSchedule(teacher.name, tomorrowDayWeek,if (parity == 1) 2 else 1)
+                    if (dayWeek != "Воскресенье") teacherSchedule = storage.getTodayScheduleUseCase().getTodayTeacherSchedule(teacher.name, dayWeek, parity, LocalDate.now())
+                    if (tomorrowDayWeek != "Воскресенье") tomorrowTeacherSchedule = storage.getTodayScheduleUseCase().getTodayTeacherSchedule(teacher.name, tomorrowDayWeek, parity, LocalDate.now().plusDays(1))
+                    if (tomorrowDayWeek == "Воскресенье") tomorrowTeacherSchedule = storage.getTodayScheduleUseCase().getTodayTeacherSchedule(teacher.name, tomorrowDayWeek,if (parity == 1) 2 else 1, LocalDate.now().plusDays(1))
                 }
                 else
                     scheduleError = true
