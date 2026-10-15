@@ -1,90 +1,89 @@
 package com.mycollege.schedule.feature.schedule.ui
 
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
 import com.my.tracker.MyTracker
 import com.mycollege.schedule.app.activity.domain.models.LoadingState
 import com.mycollege.schedule.app.activity.ui.state.AppState
-import com.mycollege.schedule.app.navigation.Settings
-import com.mycollege.schedule.feature.schedule.ui.components.schedule.DefaultLoadingUnit
-import com.mycollege.schedule.feature.schedule.ui.components.settings.SettingsButton
-import com.mycollege.schedule.feature.schedule.ui.components.utils.TodayScheduleRender
-import com.mycollege.schedule.feature.schedule.ui.components.utils.WeekScheduleRender
+import com.mycollege.schedule.feature.groups.ui.state.GroupState
+import com.mycollege.schedule.feature.schedule.ui.components.ParityChip
+import com.mycollege.schedule.feature.schedule.ui.components.ScheduleHeader
+import com.mycollege.schedule.feature.schedule.ui.components.TodayContent
+import com.mycollege.schedule.feature.schedule.ui.components.WeekContent
+import com.mycollege.schedule.feature.schedule.ui.components.ScheduleErrorContent
+import com.mycollege.schedule.feature.schedule.ui.components.NoChoiceContent
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleEvent
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleState
 import com.mycollege.schedule.feature.schedule.ui.state.ScheduleViewModel
 import com.mycollege.schedule.feature.settings.ui.state.SettingsState
-import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
-import com.mycollege.schedule.shared.ui.theme.background
-import com.mycollege.schedule.shared.ui.theme.backgroundDark
+import com.mycollege.schedule.shared.ui.design.MaIcons
+import com.mycollege.schedule.shared.ui.design.MaInsets
+import com.mycollege.schedule.shared.ui.design.MaScreen
+import com.mycollege.schedule.shared.ui.design.MaToastHost
+import com.mycollege.schedule.shared.ui.design.MainTab
+import com.mycollege.schedule.shared.ui.design.MatIconButton
+import com.mycollege.schedule.shared.ui.design.ScreenBackdrop
+import com.mycollege.schedule.shared.ui.design.navBarBottom
+import com.mycollege.schedule.shared.ui.design.rememberMaToast
+import com.mycollege.schedule.shared.ui.design.statusBarTop
+import com.mycollege.schedule.shared.ui.theme.ScheduleTheme
+import java.time.LocalDate
+
+/** Действия экрана расписания, которые ведут в другие разделы */
+class ScheduleActions(
+    val onOpenSelect: () -> Unit = {},
+    val onOpenSettings: () -> Unit = {},
+    val onSelectTab: (MainTab) -> Unit = {},
+    /** повторная загрузка расписания выбранной группы (GroupEvent.ChooseGroup) */
+    val onRetry: () -> Unit = {},
+    /** повторная проверка связи (GroupEvent.Display) */
+    val onRetryNetwork: () -> Unit = {},
+)
 
 @Preview
 @Composable
 fun SchedulePreview() {
-    ScheduleContent(SettingsState(), AppState(), ScheduleState(), LoadingState(scheduleLoading = true), {}) {}
+    ScheduleTheme(false) {
+        ScheduleContent(SettingsState(), AppState(), ScheduleState(), LoadingState(), GroupState(), MainTab.Today, ScheduleActions()) {}
+    }
 }
 
 @Composable
 fun ScheduleScreen(
     viewModel: ScheduleViewModel = hiltViewModel(),
-    globalGraph: NavHostController
+    tab: MainTab,
+    actions: ScheduleActions,
 ) {
-
     val appState by viewModel.appStateHolder.appState.collectAsState()
     val settingsState by viewModel.settingsStateHolder.settingsState.collectAsState()
     val scheduleState by viewModel.scheduleStateHolder.scheduleState.collectAsState()
     val parseState by viewModel.parserStateHolder.loadingState.collectAsState()
+    val groupState by viewModel.groupStateHolder.groupState.collectAsState()
 
-    val handleEvent: (ScheduleEvent) -> Unit = { event ->
-        viewModel.handleEvent(event)
-    }
-
-    val navigateToSettings = { // навигация в настройки
-        MyTracker.trackEvent("Перейти в экран настроек")
-        globalGraph.navigate(route = Settings) {
-            popUpTo(globalGraph.graph.findStartDestination().id
-            ) {
-                saveState = true
-            }
-            launchSingleTop = true
-            restoreState = true
-        }
-    }
-
-    ScheduleContent(settingsState, appState, scheduleState, parseState, handleEvent, navigateToSettings)
+    ScheduleContent(settingsState, appState, scheduleState, parseState, groupState, tab, actions) { viewModel.handleEvent(it) }
 }
 
 @Composable
@@ -93,94 +92,96 @@ fun ScheduleContent(
     appState: AppState,
     scheduleState: ScheduleState,
     parseState: LoadingState,
+    groupState: GroupState,
+    tab: MainTab,
+    actions: ScheduleActions,
     handleEvent: (ScheduleEvent) -> Unit,
-    navigateToSettings: () -> Unit
 ) {
+    val context = LocalContext.current
+    val toast = rememberMaToast()
 
     LaunchedEffect(Unit) {
         handleEvent(ScheduleEvent.ShowIfCachedSchedule)
     }
 
-    val darkMode = LocalAppDarkTheme.current
+    val student = appState.studentMode
+    val built = (student && scheduleState.buildScheduleGroupModeFlag) || (!student && scheduleState.buildScheduleTeacherModeFlag)
+    val owner = if (student) groupState.group else groupState.teacher
+    val chosen = if (student) owner != "Выбрать группу" else owner != "Выбрать преподавателя"
+    val parity = if (settingsState.weekCount) 2 else 1
 
-    Scaffold(modifier = Modifier.fillMaxSize(), contentWindowInsets = WindowInsets(0), containerColor = if (darkMode) backgroundDark else background) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(top = 30.dp)) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(if (darkMode) backgroundDark else background)
-            ) {
-                if (parseState.scheduleLoading) {
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(25.dp, 45.dp, 80.dp, 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = scheduleState.todayDate,
-                            color = if (darkMode) Color.White else Color.Black,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    val shimmerColors = listOf(
-                        Color.LightGray.copy(alpha = 0.2f),
-                        Color.White.copy(alpha = 0.6f),
-                        Color.LightGray.copy(alpha = 0.2f)
-                    )
-
-                    val infiniteTransition = rememberInfiniteTransition()
-                    val translateAnim by infiniteTransition.animateFloat(
-                        initialValue = -1000f,
-                        targetValue = 1000f,
-                        animationSpec = infiniteRepeatable(
-                            animation = tween(1600, easing = FastOutSlowInEasing),
-                            repeatMode = RepeatMode.Restart
-                        )
-                    )
-
-                    for (i in 1..3) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(130.dp)
-                                .padding(20.dp, 0.dp, 20.dp, 15.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(
-                                    brush = Brush.linearGradient(
-                                        colors = shimmerColors,
-                                        start = Offset(translateAnim, 0f),
-                                        end = Offset(translateAnim + 500f, 0f)
-                                    )
-                                )
-                        )
-                    }
-                }
-                else {
-                    if (settingsState.fullWeekVisibility && ((appState.studentMode && scheduleState.buildScheduleGroupModeFlag)
-                                || (!appState.studentMode && scheduleState.buildScheduleTeacherModeFlag))) {
-                        WeekScheduleRender(scheduleState, settingsState, handleEvent)
-                    }
-                    else if (!settingsState.fullWeekVisibility && ((appState.studentMode && scheduleState.buildScheduleGroupModeFlag)
-                                || (!appState.studentMode && scheduleState.buildScheduleTeacherModeFlag))) {
-                        TodayScheduleRender(scheduleState, settingsState, handleEvent)
-                    }
-                    else {
-                        DefaultLoadingUnit(scheduleState, settingsState)
-                    }
-                }
-            }
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(16.dp)
-            ) {
-                SettingsButton(navigateToSettings)
-            }
+    // единая точка обновления: расписание на сегодня (как раньше) и неделя для полосы дней и вкладки «Неделя»
+    LaunchedEffect(built, settingsState.weekCount, owner, student) {
+        if (built) {
+            handleEvent(ScheduleEvent.WeekCountChanged)
+            handleEvent(ScheduleEvent.ShowWeekSchedule)
         }
     }
 
+    val copyEios: (String) -> Unit = { link ->
+        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        clipboard.setPrimaryClip(ClipData.newPlainText("eios", link))
+        toast.show("Ссылка eios скопирована", "вставьте в браузер")
+    }
+
+    var selectedDay by rememberSaveable { mutableIntStateOf(LocalDate.now().dayOfWeek.value - 1) }
+
+    MaScreen {
+        ScreenBackdrop(height = if (tab == MainTab.Week) 360.dp else 380.dp, gridHeight = if (tab == MainTab.Week) 320.dp else 340.dp)
+
+        val showContent = built || parseState.scheduleLoading
+        AnimatedContent(
+            targetState = if (!showContent) -1 else tab.ordinal,
+            transitionSpec = { fadeIn(tween(250)) togetherWith fadeOut(tween(150)) },
+            label = "tab"
+        ) { target ->
+            val scroll = rememberScrollState()
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scroll)
+                    .padding(start = 16.dp, end = 16.dp, top = statusBarTop() + MaInsets.contentTop, bottom = MaInsets.navScrollBottom + navBarBottom())
+            ) {
+                when (target) {
+                    -1 -> if (chosen) ScheduleErrorContent(actions.onRetry) else NoChoiceContent(student, actions.onOpenSelect)
+                    MainTab.Week.ordinal -> WeekContent(
+                        weekLessons = scheduleState.weekLessons,
+                        todayLessons = scheduleState.todayLessons,
+                        parity = parity,
+                        loading = parseState.scheduleLoading,
+                        onCopyEios = copyEios
+                    )
+                    else -> TodayContent(
+                        todayLessons = scheduleState.todayLessons,
+                        weekLessons = scheduleState.weekLessons,
+                        parity = parity,
+                        teacherMode = !student,
+                        loading = parseState.scheduleLoading,
+                        offline = parseState.networkIssues && built,
+                        selectedDay = selectedDay,
+                        onSelectDay = { selectedDay = it },
+                        onOpenWeek = { actions.onSelectTab(MainTab.Week) },
+                        onRetry = actions.onRetryNetwork,
+                        onCopyEios = copyEios
+                    )
+                }
+            }
+        }
+
+        // шапка
+        ScheduleHeader(
+            title = if (chosen) owner else if (student) "Выбрать группу" else "Выбрать преподавателя",
+            teacher = !student && chosen,
+            onOpenSelect = {
+                MyTracker.trackEvent("Перейти на главный экран")
+                actions.onOpenSelect()
+            },
+            modifier = Modifier.padding(top = statusBarTop() + MaInsets.headTop)
+        ) {
+            if (built && tab == MainTab.Today) ParityChip(parity) { actions.onSelectTab(MainTab.Week) }
+            if (settingsState.navigationInvisibility) MatIconButton(MaIcons.settings, "Настройки", actions.onOpenSettings)
+        }
+
+        MaToastHost(toast)
+    }
 }

@@ -55,8 +55,8 @@ import com.mycollege.schedule.feature.schedule.ui.state.ScheduleViewModel
 import com.mycollege.schedule.feature.settings.ui.state.SettingsViewModel
 import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
 import com.mycollege.schedule.shared.ui.theme.ScheduleTheme
-import com.mycollege.schedule.shared.ui.theme.background
-import com.mycollege.schedule.shared.ui.theme.backgroundDark
+import com.mycollege.schedule.shared.ui.theme.DarkMaColors
+import com.mycollege.schedule.shared.ui.theme.LightMaColors
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -115,7 +115,7 @@ class MainActivity : ComponentActivity() {
                     )
                 ) {
 
-                    Box(modifier = Modifier.Companion.fillMaxSize().background(background)) {
+                    Box(modifier = Modifier.Companion.fillMaxSize().background(if (darkTheme) DarkMaColors.bg else LightMaColors.bg)) {
 
                         val scope = rememberCoroutineScope()
                         val navController = rememberNavController()

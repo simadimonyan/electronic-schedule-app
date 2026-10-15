@@ -25,15 +25,18 @@ import com.mycollege.schedule.feature.settings.ui.SettingsScreen
 import com.mycollege.schedule.feature.settings.ui.components.CircleThemeTransition
 import com.mycollege.schedule.feature.settings.ui.state.SettingsViewModel
 import com.mycollege.schedule.shared.ui.theme.LocalAppDarkTheme
-import com.mycollege.schedule.shared.ui.theme.background
-import com.mycollege.schedule.shared.ui.theme.backgroundDark
+import com.mycollege.schedule.feature.schedule.ui.ScheduleActions
+import com.mycollege.schedule.shared.ui.design.MainTab
+import com.mycollege.schedule.shared.ui.theme.DarkMaColors
+import com.mycollege.schedule.shared.ui.theme.LightMaColors
 
 @Composable
 fun AppPager(
     pagerState: PagerState,
     groupViewModel: GroupViewModel,
     scheduleViewModel: ScheduleViewModel,
-    globalNavHostController: NavHostController
+    tab: MainTab,
+    scheduleActions: ScheduleActions
 ) {
     HorizontalPager(
         state = pagerState,
@@ -42,7 +45,7 @@ fun AppPager(
     ) { page ->
         when (page) {
             0 -> GroupScreen(groupViewModel, pagerState)
-            1 -> ScheduleScreen(scheduleViewModel, globalNavHostController)
+            1 -> ScheduleScreen(scheduleViewModel, tab, scheduleActions)
         }
     }
 }
@@ -62,7 +65,7 @@ fun AddNavGraph(
     NavHost(
         navController = navController,
         modifier = Modifier.fillMaxSize()//.windowInsetsPadding(WindowInsets.navigationBars)
-            .background(if (darkMode) backgroundDark else background),
+            .background(if (darkMode) DarkMaColors.bg else LightMaColors.bg),
         startDestination = Start // if (appState.firstStartUp) Onboarding else Start
     ) {
         composable<Onboarding>() {
