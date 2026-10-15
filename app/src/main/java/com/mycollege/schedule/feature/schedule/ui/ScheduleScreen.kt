@@ -18,7 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,6 +31,10 @@ import com.my.tracker.MyTracker
 import com.mycollege.schedule.app.activity.domain.models.LoadingState
 import com.mycollege.schedule.app.activity.ui.state.AppState
 import com.mycollege.schedule.feature.groups.ui.state.GroupState
+import com.mycollege.schedule.feature.schedule.data.models.DataClasses
+import com.mycollege.schedule.feature.schedule.domain.calendar.WeekParity
+import com.mycollege.schedule.feature.schedule.ui.components.CalendarSheet
+import com.mycollege.schedule.feature.schedule.ui.components.DatePickerSheet
 import com.mycollege.schedule.feature.schedule.ui.components.ParityChip
 import com.mycollege.schedule.feature.schedule.ui.components.ScheduleHeader
 import com.mycollege.schedule.feature.schedule.ui.components.TodayContent
@@ -120,7 +124,25 @@ fun ScheduleContent(
         if (built) {
             handleEvent(ScheduleEvent.WeekCountChanged)
             handleEvent(ScheduleEvent.ShowWeekSchedule)
+            handleEvent(ScheduleEvent.LoadCalendar)
         }
+    }
+
+    // пары на любую дату: текущая неделя — из актуальных «Сегодня»/«Неделя», остальное — из календаря
+    // (дата → чётность недели → день недели → пары шаблона; у заочников — занятия этой даты)
+    val today = LocalDate.now()
+    val thisMonday = WeekParity.monday(today)
+    val calendar = scheduleState.calendar
+    val lessonsOn: (LocalDate) -> List<DataClasses.Lesson> = { d ->
+        when {
+            d == today -> scheduleState.todayLessons
+            WeekParity.monday(d) == thisMonday && d.dayOfWeek.value <= 6 -> scheduleState.weekLessons[d.dayOfWeek.value].orEmpty()
+            else -> calendar.lessonsOn(d, today, parity)
+        }
+    }
+    val parityOf: (LocalDate) -> Int = { d -> WeekParity.of(d, today, parity) }
+    val nextStudyDate: (LocalDate) -> LocalDate? = { from ->
+        (1L..120L).asSequence().map { from.plusDays(it) }.firstOrNull { lessonsOn(it).isNotEmpty() }
     }
 
     val copyEios: (String) -> Unit = { link ->
@@ -129,11 +151,26 @@ fun ScheduleContent(
         toast.show("Ссылка eios скопирована", "вставьте в браузер")
     }
 
-    var selectedDay by rememberSaveable { mutableIntStateOf(LocalDate.now().dayOfWeek.value - 1) }
+    var selectedEpoch by rememberSaveable { mutableLongStateOf(LocalDate.now().toEpochDay()) }
+    val selectedDate = LocalDate.ofEpochDay(selectedEpoch)
+    // переход к дате из календаря на вкладке «Неделя»: не сбрасывать выбранную дату при смене вкладки
+    var keepDate by rememberSaveable { mutableStateOf(false) }
     // вкладка «Сегодня» всегда открывается на текущем дне
     LaunchedEffect(tab) {
-        if (tab == MainTab.Today) selectedDay = LocalDate.now().dayOfWeek.value - 1
+        if (tab == MainTab.Today) {
+            if (!keepDate) selectedEpoch = LocalDate.now().toEpochDay()
+            keepDate = false
+        }
     }
+    val openDate: (LocalDate) -> Unit = { d ->
+        selectedEpoch = d.toEpochDay()
+        if (tab != MainTab.Today) {
+            keepDate = true
+            actions.onSelectTab(MainTab.Today)
+        }
+    }
+    var calendarOpen by rememberSaveable { mutableStateOf(false) }
+    var datePickerOpen by rememberSaveable { mutableStateOf(false) }
 
     MaScreen {
         ScreenBackdrop(height = if (tab == MainTab.Week) 360.dp else 380.dp, gridHeight = if (tab == MainTab.Week) 320.dp else 340.dp)
@@ -158,17 +195,19 @@ fun ScheduleContent(
                         todayLessons = scheduleState.todayLessons,
                         parity = parity,
                         loading = parseState.scheduleLoading || !built,
-                        onCopyEios = copyEios
+                        onCopyEios = copyEios,
+                        onOpenDatePicker = { datePickerOpen = true }
                     )
                     else -> TodayContent(
-                        todayLessons = scheduleState.todayLessons,
-                        weekLessons = scheduleState.weekLessons,
-                        parity = parity,
+                        lessonsOn = lessonsOn,
+                        parityOf = parityOf,
                         teacherMode = !student,
                         loading = parseState.scheduleLoading || !built,
                         offline = parseState.networkIssues && built,
-                        selectedDay = selectedDay,
-                        onSelectDay = { selectedDay = it },
+                        selectedDate = selectedDate,
+                        onSelectDate = { selectedEpoch = it.toEpochDay() },
+                        onOpenDatePicker = { datePickerOpen = true },
+                        nextStudyDate = nextStudyDate,
                         onOpenWeek = { actions.onSelectTab(MainTab.Week) },
                         onRetry = actions.onRetryNetwork,
                         onCopyEios = copyEios
@@ -187,10 +226,27 @@ fun ScheduleContent(
             },
             modifier = Modifier.padding(top = statusBarTop() + MaInsets.headTop)
         ) {
-            if (built && tab == MainTab.Today) ParityChip(parity) { actions.onSelectTab(MainTab.Week) }
+            if (built && tab == MainTab.Today) ParityChip(parityOf(selectedDate)) { actions.onSelectTab(MainTab.Week) }
+            if (built) MatIconButton(MaIcons.calendar, "Календарь", { calendarOpen = true })
             if (settingsState.navigationInvisibility) MatIconButton(MaIcons.settings, "Настройки", actions.onOpenSettings)
         }
 
         MaToastHost(toast)
     }
+
+    if (calendarOpen) CalendarSheet(
+        initial = if (tab == MainTab.Today) selectedDate else today,
+        today = today,
+        lessonsOn = lessonsOn,
+        sessionMode = calendar.datedOnly,
+        onShow = openDate,
+        onDismiss = { calendarOpen = false }
+    )
+    if (datePickerOpen) DatePickerSheet(
+        initial = selectedDate,
+        today = today,
+        hasLessons = { lessonsOn(it).isNotEmpty() },
+        onPick = openDate,
+        onDismiss = { datePickerOpen = false }
+    )
 }

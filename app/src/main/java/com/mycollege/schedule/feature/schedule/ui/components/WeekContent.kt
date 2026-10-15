@@ -22,6 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -51,6 +53,8 @@ fun WeekContent(
     parity: Int,
     loading: Boolean,
     onCopyEios: (String) -> Unit,
+    /** выбор даты из шапки недели */
+    onOpenDatePicker: (() -> Unit)? = null,
 ) {
     val c = Ma.colors
     val today = LocalDate.now()
@@ -64,7 +68,18 @@ fun WeekContent(
     val studyDays = days.count { it.isNotEmpty() }
 
     EyebrowPill("${monday.dayOfMonth} – ${RuDates.dayMonth(monday.plusDays(5))}")
-    Text("Неделя $parity", style = MaType.display(36.sp, FontWeight.ExtraBold, 38.sp), color = c.fg, modifier = Modifier.padding(top = 10.dp))
+    Row(
+        Modifier
+            .padding(top = 6.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .then(if (onOpenDatePicker != null) Modifier.maClick(onClick = onOpenDatePicker).semantics(mergeDescendants = true) { onClick(label = "Выбрать дату") { onOpenDatePicker(); true } } else Modifier)
+            .padding(top = 4.dp, bottom = 4.dp, end = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text("Неделя $parity", style = MaType.display(36.sp, FontWeight.ExtraBold, 38.sp), color = c.fg)
+        if (onOpenDatePicker != null) MaIcon(MaIcons.chevDown, c.soft, 20.dp, 2.2f)
+    }
     Text(
         "${all.size} ${RuDates.pairsWord(all.size)} · $studyDays ${if (studyDays == 1) "учебный день" else if (studyDays in 2..4) "учебных дня" else "учебных дней"}",
         style = MaType.body(14.sp), color = c.soft, modifier = Modifier.padding(top = 4.dp)
