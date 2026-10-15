@@ -7,11 +7,22 @@ import com.mycollege.schedule.app.activity.data.models.Schedule
 @Dao
 interface ScheduleRepository {
 
-    @Query("SELECT * FROM schedule WHERE group_id = :id AND day_week = :dayWeek AND week_count = :weekCount")
-    fun getDaySchedule(id: String, dayWeek: String, weekCount: Int): List<Schedule>
+    /**
+     * Пары на конкретный день: шаблон по дню недели и чётности (строки без даты)
+     * плюс датированные занятия на эту дату (заочное обучение). date — yyyy-MM-dd или null.
+     */
+    @Query("SELECT * FROM schedule WHERE group_id = :id AND ((pinned_date = '' AND day_week = :dayWeek AND week_count = :weekCount) OR pinned_date = :date)")
+    fun getDaySchedule(id: String, dayWeek: String, weekCount: Int, date: String?): List<Schedule>
 
-    @Query("SELECT * FROM schedule WHERE teacher_id = :id AND day_week = :dayWeek AND week_count = :weekCount")
-    fun getDayTeacherSchedule(id: String, dayWeek: String, weekCount: Int): List<Schedule>
+    @Query("SELECT * FROM schedule WHERE teacher_id = :id AND ((pinned_date = '' AND day_week = :dayWeek AND week_count = :weekCount) OR pinned_date = :date)")
+    fun getDayTeacherSchedule(id: String, dayWeek: String, weekCount: Int, date: String?): List<Schedule>
+
+    /** всё расписание группы (шаблон обеих недель и датированные занятия) — для календаря */
+    @Query("SELECT * FROM schedule WHERE group_id = :id")
+    fun getAllSchedule(id: String): List<Schedule>
+
+    @Query("SELECT * FROM schedule WHERE teacher_id = :id")
+    fun getAllTeacherSchedule(id: String): List<Schedule>
 
     @Query("SELECT * FROM schedule WHERE group_id = :id AND week_count = :weekCount")
     fun getWeekSchedule(id: String, weekCount: Int): List<Schedule>

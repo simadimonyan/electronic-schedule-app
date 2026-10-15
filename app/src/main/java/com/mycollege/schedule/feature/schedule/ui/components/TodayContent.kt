@@ -20,6 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -29,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mycollege.schedule.R
 import com.mycollege.schedule.feature.schedule.data.models.DataClasses
+import com.mycollege.schedule.shared.ui.design.AccentChipButton
 import com.mycollege.schedule.shared.ui.design.EyebrowPill
 import com.mycollege.schedule.shared.ui.design.MaIcon
 import com.mycollege.schedule.shared.ui.design.MaIcons
@@ -47,23 +50,30 @@ import java.time.LocalDate
  */
 @Composable
 fun TodayContent(
-    todayLessons: List<DataClasses.Lesson>,
-    weekLessons: Map<Int, List<DataClasses.Lesson>>,
-    parity: Int,
+    lessonsOn: (LocalDate) -> List<DataClasses.Lesson>,
+    parityOf: (LocalDate) -> Int,
     teacherMode: Boolean,
     loading: Boolean,
     offline: Boolean,
-    selectedDay: Int,
-    onSelectDay: (Int) -> Unit,
+    selectedDate: LocalDate,
+    onSelectDate: (LocalDate) -> Unit,
+    onOpenDatePicker: () -> Unit,
+    /** заочка: расписание на датах сессии, чётность недель не показываем */
+    sessionMode: Boolean,
+    nextStudyDate: (LocalDate) -> LocalDate?,
     onOpenWeek: () -> Unit,
     onRetry: () -> Unit,
     onCopyEios: (String) -> Unit,
 ) {
     val c = Ma.colors
     val today = LocalDate.now()
-    val todayIndex = today.dayOfWeek.value - 1
-    val monday = RuDates.monday(today)
+    // полоса дней показывает неделю выбранной даты (из календаря можно уйти на любую неделю)
+    val monday = RuDates.monday(selectedDate)
     val dates = (0..6).map { monday.plusDays(it.toLong()) }
+    val currentWeek = monday == RuDates.monday(today)
+    val todayIndex = if (currentWeek) today.dayOfWeek.value - 1 else -1
+    val selectedDay = selectedDate.dayOfWeek.value - 1
+    val parity = parityOf(selectedDate)
 
     // минутные «часы» для текущей пары
     var nowMin by remember { mutableIntStateOf(RuDates.nowMinutes()) }
@@ -74,8 +84,7 @@ fun TodayContent(
         }
     }
 
-    fun lessonsOf(i: Int): List<LessonUi> =
-        if (i == todayIndex) todayLessons.toUiSorted() else weekLessons[i + 1].orEmpty().toUiSorted()
+    fun lessonsOf(i: Int): List<LessonUi> = lessonsOn(dates[i]).toUiSorted()
 
     val isToday = selectedDay == todayIndex
     val lessons = lessonsOf(selectedDay)
@@ -83,15 +92,24 @@ fun TodayContent(
     val sunday = selectedDay == 6
 
     // заголовок
-    EyebrowPill("${RuDates.weekFull[selectedDay]} · Неделя $parity")
+    EyebrowPill("${RuDates.weekFull[selectedDay]} · " + if (sessionMode) "Сессия" else "Неделя $parity")
     val title = when {
         isToday -> "Сегодня"
         sunday && lessons.isEmpty() -> "Выходной"
         else -> RuDates.weekFull[selectedDay]
     }
-    Text(title, style = MaType.displayFor(title, 36.sp, FontWeight.ExtraBold, 38.sp), color = c.fg, modifier = Modifier.padding(top = 10.dp))
+    // заголовок дня — вход в выбор даты
+    Column(
+        Modifier
+            .padding(top = 6.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .maClick(onClick = onOpenDatePicker)
+            .semantics(mergeDescendants = true) { onClick(label = "Выбрать дату") { onOpenDatePicker(); true } }
+            .padding(top = 4.dp, bottom = 4.dp, end = 8.dp)
+    ) {
+    Text(title, style = MaType.displayFor(title, 36.sp, FontWeight.ExtraBold, 38.sp), color = c.fg)
     val sub = buildString {
-        append(RuDates.dayMonth(date))
+        append(dayMonthMaybeYear(date, today))
         if (lessons.isNotEmpty()) {
             append(" · ${lessons.size} ${RuDates.pairsWord(lessons.size)}")
             val first = lessons.first().start
@@ -99,7 +117,13 @@ fun TodayContent(
             if (first.isNotEmpty() && last.isNotEmpty()) append(", $first–$last")
         } else if (!loading) append(if (sunday) " · можно выдохнуть" else " · пар нет")
     }
-    Text(sub, style = MaType.body(14.sp), color = c.soft, modifier = Modifier.padding(top = 4.dp))
+    Row(Modifier.padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(sub, style = MaType.body(14.sp), color = c.soft, modifier = Modifier.weight(1f, fill = false))
+        MaIcon(MaIcons.chevDown, c.soft, 14.dp, 2.2f)
+    }
+    }
+
+    if (!isToday) AccentChipButton("Вернуться к сегодня", { onSelectDate(today) }, Modifier.padding(top = 10.dp), height = 36.dp)
 
     if (teacherMode && lessons.isNotEmpty()) {
         val groups = lessons.flatMap { it.who.split(",").map(String::trim) }.filter { it.isNotEmpty() }.toSet().size
@@ -114,7 +138,10 @@ fun TodayContent(
     if (offline) OfflineBanner(onRetry)
 
     Spacer(Modifier.padding(top = 16.dp))
-    DayStrip(dates, selectedDay, todayIndex, { i -> lessonsOf(i).isNotEmpty() }, onSelectDay)
+    DayStrip(
+        dates, selectedDay, todayIndex, { i -> lessonsOf(i).isNotEmpty() }, { i -> onSelectDate(dates[i]) },
+        onSwipeWeek = { dir -> onSelectDate(selectedDate.plusWeeks(dir.toLong())) }
+    )
 
     if (loading) {
         ScheduleSkeleton()
@@ -157,7 +184,7 @@ fun TodayContent(
 
     // «Завтра» — первая пара следующего дня этой недели
     if (isToday && lessons.isNotEmpty() && todayIndex < 5) {
-        val tomorrow = weekLessons[todayIndex + 2].orEmpty().toUiSorted().firstOrNull()
+        val tomorrow = lessonsOf(todayIndex + 1).firstOrNull()
         if (tomorrow != null) {
             val tDate = dates[todayIndex + 1]
             Row(
@@ -166,7 +193,7 @@ fun TodayContent(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp))
                     .dashedBorder(c.borderStrong, 16.dp)
-                    .maClick { onSelectDay(todayIndex + 1) }
+                    .maClick { onSelectDate(dates[todayIndex + 1]) }
                     .padding(horizontal = 14.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -185,13 +212,15 @@ fun TodayContent(
         if (sunday) WeekendCard(onOpenWeek) else {
             // ближайшая пара на этой неделе после выбранного дня
             val next = ((selectedDay + 1)..5).firstNotNullOfOrNull { d -> lessonsOf(d).firstOrNull()?.let { d to it } }
-            DayOffCard(next, onOpenWeek)
+            // на этой неделе пар больше нет — ближайший учебный день из календаря (у заочников — следующий день сессии)
+            val later = if (next == null) nextStudyDate(date) else null
+            DayOffCard(next, later, onOpenWeek, onJump = onSelectDate)
         }
     }
 }
 
 @Composable
-private fun DayOffCard(next: Pair<Int, LessonUi>?, onOpenWeek: () -> Unit) {
+private fun DayOffCard(next: Pair<Int, LessonUi>?, later: LocalDate?, onOpenWeek: () -> Unit, onJump: (LocalDate) -> Unit) {
     val c = Ma.colors
     Column(
         Modifier.padding(top = 16.dp).fillMaxWidth().maCard(20.dp, c.shSm).padding(18.dp),
@@ -206,10 +235,12 @@ private fun DayOffCard(next: Pair<Int, LessonUi>?, onOpenWeek: () -> Unit) {
                 withStyle(SpanStyle(fontFamily = MaFonts.mono, fontSize = 12.5.sp)) { append(l.start) }
                 append(", ${l.subject}, ауд. ")
                 withStyle(SpanStyle(fontFamily = MaFonts.mono, fontSize = 12.5.sp)) { append(l.room) }
-            } else append("На этой неделе пар больше нет")
+            } else if (later != null) append("Ближайший учебный день — ${RuDates.weekFull[later.dayOfWeek.value - 1].lowercase()}, ${dayMonthMaybeYear(later)}")
+            else append("На этой неделе пар больше нет")
         }
         Text(text, style = MaType.body(13.5.sp, lineHeight = 20.sp), color = c.soft, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 6.dp))
-        OutlineButton("Открыть неделю", onOpenWeek, Modifier.padding(top = 14.dp))
+        if (next == null && later != null) OutlineButton("Перейти к ${dayMonthMaybeYear(later)}", { onJump(later) }, Modifier.padding(top = 14.dp), height = 44.dp, color = c.accent, borderColor = c.accentBorder)
+        else OutlineButton("Открыть неделю", onOpenWeek, Modifier.padding(top = 14.dp), height = 44.dp)
     }
 }
 

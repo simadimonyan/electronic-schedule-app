@@ -19,6 +19,13 @@ interface GroupsApi {
     @GET("api/v1/groups/schedule")
     suspend fun schedule(@Header("Authorization") accessToken: String, @Query("group") group: String, @Query("weekCount") weekCount: Int): Schedule
 
+    /**
+     * Расписание группы с календарными датами занятий (`date=full`): у заочных групп в ответе
+     * появляются `lessonDate`/`pinnedDate` и `group.studyForm`. Тот же запрос, что делает iOS-приложение.
+     */
+    @GET("api/v1/groups/schedule")
+    suspend fun schedule(@Header("Authorization") accessToken: String, @Query("group") group: String, @Query("weekCount") weekCount: Int, @Query("date") date: String): Schedule
+
     @GET("api/v1/groups/schedule")
     suspend fun schedule(@Header("Authorization") accessToken: String, @Query("group") group: String, @Query("dayWeek") dayWeek: String, @Query("weekCount") weekCount: Int): Schedule
 

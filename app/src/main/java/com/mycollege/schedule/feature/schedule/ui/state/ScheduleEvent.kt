@@ -22,4 +22,9 @@ sealed class ScheduleEvent {
      */
     object ShowIfCachedSchedule : ScheduleEvent()
 
+    /**
+     * Загрузить расписание для календаря (шаблон обеих недель и даты заочников)
+     */
+    object LoadCalendar : ScheduleEvent()
+
 }

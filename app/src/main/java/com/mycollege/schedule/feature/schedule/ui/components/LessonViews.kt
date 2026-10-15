@@ -29,7 +29,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -267,12 +277,22 @@ fun DayStrip(
     todayIndex: Int,
     hasLessons: (Int) -> Boolean,
     onPick: (Int) -> Unit,
+    /** свайп по полосе: −1 — предыдущая неделя, +1 — следующая */
+    onSwipeWeek: ((Int) -> Unit)? = null,
 ) {
     val c = Ma.colors
+    var drag by remember { mutableStateOf(0f) }
     Row(
         Modifier
             .fillMaxWidth()
             .maCard(20.dp, c.shSm)
+            .then(if (onSwipeWeek != null) Modifier.pointerInput(dates.first()) {
+                detectHorizontalDragGestures(
+                    onDragStart = { drag = 0f },
+                    onDragEnd = { if (kotlin.math.abs(drag) > 56.dp.toPx()) onSwipeWeek(if (drag < 0) 1 else -1); drag = 0f },
+                    onHorizontalDrag = { _, d -> drag += d }
+                )
+            } else Modifier)
             .padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(2.dp)
     ) {
@@ -290,7 +310,13 @@ fun DayStrip(
                     .then(if (sel) Modifier.maShadow(MaBrand.stripShadow, 16.dp) else Modifier)
                     .clip(RoundedCornerShape(16.dp))
                     .background(if (sel) MaBrand.primary else Color.Transparent)
-                    .maClick { onPick(i) },
+                    .maClick { onPick(i) }
+                    .clearAndSetSemantics {
+                        contentDescription = dayDescription(d, java.time.LocalDate.now(), null, sel) + if (hasLessons(i)) ", есть пары" else ", пар нет"
+                        this.selected = sel
+                        role = androidx.compose.ui.semantics.Role.Tab
+                        onClick { onPick(i); true }
+                    },
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically)
             ) {

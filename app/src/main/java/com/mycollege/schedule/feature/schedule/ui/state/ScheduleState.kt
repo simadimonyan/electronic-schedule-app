@@ -2,6 +2,7 @@ package com.mycollege.schedule.feature.schedule.ui.state
 
 import androidx.compose.runtime.Immutable
 import com.mycollege.schedule.feature.schedule.data.models.DataClasses
+import com.mycollege.schedule.feature.schedule.domain.calendar.ScheduleCalendar
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -21,6 +22,9 @@ data class ScheduleState(
     // schedule params
     val todayLessons: ArrayList<DataClasses.Lesson> = ArrayList(),
     val weekLessons: HashMap<Int, ArrayList<DataClasses.Lesson>> = HashMap(),
+
+    // всё расписание для календаря: шаблон обеих недель и датированные занятия
+    val calendar: ScheduleCalendar = ScheduleCalendar(),
 
     // build schedule flags
     val buildScheduleGroupModeFlag: Boolean = false,
@@ -49,6 +53,10 @@ class ScheduleStateHolder @Inject constructor() {
 
     fun showWeekLessons(week: HashMap<Int, ArrayList<DataClasses.Lesson>>) {
         _scheduleState.update { it.copy(weekLessons = week) }
+    }
+
+    fun showCalendar(calendar: ScheduleCalendar) {
+        _scheduleState.update { it.copy(calendar = calendar) }
     }
 
     fun updateBuildScheduleGroupModeFlag(toBuild: Boolean) {

@@ -16,7 +16,7 @@ import ru.ok.tracer.crash.report.TracerCrashReport
 
 @Database(
     entities = [Group::class, Schedule::class, Teacher::class],
-    version = 2, exportSchema = true
+    version = 3, exportSchema = true
 )
 abstract class Database : RoomDatabase() {
     abstract fun persistence(): PersistenceRepository
@@ -29,6 +29,18 @@ abstract class Database : RoomDatabase() {
             override fun migrate(database: SupportSQLiteDatabase) {
                 try {
                     database.execSQL("ALTER TABLE schedule ADD COLUMN eios TEXT NOT NULL DEFAULT ''")
+                } catch (e: Exception) {
+                    TracerCrashReport.report(e, issueKey = "DATABASE_MIGRATION")
+                    Log.e("Migration", "Error adding column: ${e.message}")
+                }
+            }
+        }
+
+        /** дата занятия для заочного расписания (та же схема, что в рабочей копии с полосой-календарём) */
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                try {
+                    database.execSQL("ALTER TABLE schedule ADD COLUMN pinned_date TEXT NOT NULL DEFAULT ''")
                 } catch (e: Exception) {
                     TracerCrashReport.report(e, issueKey = "DATABASE_MIGRATION")
                     Log.e("Migration", "Error adding column: ${e.message}")

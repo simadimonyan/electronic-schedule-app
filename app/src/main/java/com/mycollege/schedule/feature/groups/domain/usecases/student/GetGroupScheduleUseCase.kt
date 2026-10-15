@@ -8,6 +8,7 @@ import com.mycollege.schedule.app.activity.data.models.Teacher
 import com.mycollege.schedule.core.cache.CacheManager
 import com.mycollege.schedule.core.db.Database
 import com.mycollege.schedule.core.network.RetrofitClient
+import com.mycollege.schedule.feature.schedule.domain.calendar.LessonDateParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -28,13 +29,19 @@ class GetGroupScheduleUseCase @Inject constructor(
             val group = database.groups().getGroupByName(name).first()
 
             val newSchedules = mutableListOf<Schedule>()
+            // датированные занятия (заочка) приходят одинаковыми на обе недели — сохраняем их один раз
+            val datedKeys = HashSet<String>()
 
-            // подгрузка данных
+            // подгрузка данных; date=full — чтобы у заочных групп пришли календарные даты занятий
             for (i in 1..2) {
                 val week = RetrofitClient(scheduleServerConfiguration.serverUrl).groupsApi
-                    .schedule(scheduleServerConfiguration.accessToken, name, i).schedule
+                    .schedule(scheduleServerConfiguration.accessToken, name, i, "full").schedule
 
                 week.forEach { schedule ->
+
+                    val lessonDate = LessonDateParser.resolve(schedule.lessonDate, schedule.pinnedDate)
+                    if (lessonDate != null && !datedKeys.add("$lessonDate|${schedule.timePeriod}|${schedule.lessonName}|${schedule.lessonType}|${schedule.auditory}|${schedule.teacher?.label}"))
+                        return@forEach
 
                     Log.i("GetGroupScheduleUseCase", "$schedule")
 
@@ -64,7 +71,7 @@ class GetGroupScheduleUseCase @Inject constructor(
                         schedule.lessonType,
                         schedule.eiosLink,
                         schedule.auditory
-                    ))
+                    ).also { it.pinnedDate = lessonDate.orEmpty() })
                 }
             }
 

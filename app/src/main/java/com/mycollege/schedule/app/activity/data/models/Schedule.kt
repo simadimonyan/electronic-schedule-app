@@ -69,6 +69,11 @@ class Schedule {
     @ColumnInfo(name = "location")
     var location: String = ""
 
+    // календарная дата занятия yyyy-MM-dd (заочное обучение); пустая строка — пара из шаблона по чётности недели.
+    // Имя и тип колонки совпадают с миграцией 2 → 3 из рабочей копии (pinned_date TEXT NOT NULL DEFAULT '')
+    @ColumnInfo(name = "pinned_date", defaultValue = "''")
+    var pinnedDate: String = ""
+
     constructor(
         teacher: Long?,
         group: Long,
